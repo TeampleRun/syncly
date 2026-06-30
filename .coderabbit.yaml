@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: "ko-KR"
+
+reviews:
+  profile: "assertive"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+
+  # 리뷰 제외 대상 (노이즈 방지)
+  path_filters:
+    - "!node_modules/**"
+    - "!package-lock.json"
+    - "!.next/**"
+    - "!public/**"
+
+# 프로젝트 내 커스텀 컨벤션 파일 학습
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "README.md"
+
+chat:
+  auto_reply: true
+
+issue_enrichment:
+  auto_enrich:
+    enabled: true
