@@ -79,26 +79,34 @@ npm run dev
 
 ## 스크립트
 
-| 명령어          | 설명               |
-| --------------- | ------------------ |
-| `npm run dev`   | 개발 서버 실행     |
-| `npm run build` | 프로덕션 빌드      |
-| `npm run start` | 프로덕션 서버 실행 |
-| `npm run lint`  | ESLint 검사        |
+| 명령어                 | 설명                                      |
+| ---------------------- | ----------------------------------------- |
+| `npm run dev`          | 개발 서버 실행                            |
+| `npm run build`        | 프로덕션 빌드                             |
+| `npm run start`        | 프로덕션 서버 실행                        |
+| `npm run lint`         | ESLint 검사                               |
+| `npm run typecheck`    | TypeScript 타입 검사                      |
+| `npm run format`       | Prettier 포맷 적용                        |
+| `npm run format:check` | Prettier 포맷 검사                        |
+| `npm run check`        | lint + typecheck + format:check 일괄 검사 |
 
 ## 프로젝트 구조
 
+FSD(Feature-Sliced Design) 구조를 따릅니다. Next.js Pages Router와의 폴더명 충돌을 피하기 위해 FSD의 `pages` 레이어는 `views`로 명명합니다.
+
 ```
 src/
-├── app/              # Next.js App Router (페이지, 레이아웃)
-├── components/
-│   └── ui/           # shadcn/ui 컴포넌트
-└── lib/
-    ├── client.ts     # Supabase 브라우저 클라이언트
-    ├── server.ts     # Supabase 서버 클라이언트
-    ├── middleware.ts # Supabase 세션 미들웨어
-    └── utils.ts      # 공용 유틸 (cn 등)
+├── app/              # Next.js App Router — 라우팅·전역 스타일 (화면은 views에서 import)
+├── views/            # 페이지 단위 조합 (FSD pages 레이어)
+│   └── landing/
+├── widgets/          # 페이지를 구성하는 독립 UI 블록
+│   └── landing/      # landing-header / hero / teams / features / cta
+└── shared/           # 공통 코드
+    ├── ui/           # shadcn/ui 컴포넌트
+    └── lib/          # Supabase 클라이언트, cn, motion 상수
 ```
+
+레이어 import 방향은 `app → views → widgets → features → entities → shared` 이며, ESLint로 경계를 강제합니다.
 
 ## 향후 확장 (MVP 이후)
 
