@@ -31,7 +31,7 @@ export default function LandingHeader() {
           : 'border-transparent bg-white',
       )}
     >
-      <nav className="flex items-center justify-between px-6 pt-4 pb-[17px] sm:px-16">
+      <nav className="flex items-center justify-between px-6 pt-4 pb-4.25 sm:px-16">
         <div className="flex items-center gap-2">
           <div className="from-brand-start to-brand-end flex size-8 items-center justify-center rounded-[18px] bg-gradient-to-br">
             <Boxes className="size-4 text-white" />

@@ -15,7 +15,7 @@ export default function HeroSection() {
       variants={staggerContainer}
       initial="hidden"
       animate="visible"
-      className="mx-auto flex max-w-[896px] flex-col items-center px-6 pt-20 pb-16 text-center sm:px-16"
+      className="mx-auto flex max-w-4xl flex-col items-center px-6 pt-20 pb-16 text-center sm:px-16"
     >
       <motion.span
         variants={fadeUp}
@@ -26,7 +26,7 @@ export default function HeroSection() {
       </motion.span>
       <motion.h1
         variants={fadeUp}
-        className="text-brand-ink text-4xl leading-tight font-extrabold sm:text-5xl sm:leading-[60px]"
+        className="text-brand-ink text-4xl leading-tight font-extrabold sm:text-5xl sm:leading-15"
       >
         상황에 맞는 워크스페이스를
         <br />
@@ -44,11 +44,11 @@ export default function HeroSection() {
       </motion.p>
       <motion.div
         variants={fadeUp}
-        className="mt-8 flex flex-wrap items-center justify-center gap-3"
+        className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:justify-center"
       >
         <Link
           href="/login"
-          className="bg-brand flex items-center gap-2 rounded-[18px] px-6 py-3 text-base font-semibold text-white transition-transform hover:scale-[1.03]"
+          className="bg-brand flex w-full items-center justify-center gap-2 rounded-[18px] px-6 py-3 text-base font-semibold text-white transition-transform hover:scale-103 sm:w-auto"
           style={{ boxShadow: PRIMARY_BUTTON_SHADOW }}
         >
           지금 시작하기
@@ -56,7 +56,7 @@ export default function HeroSection() {
         </Link>
         <Link
           href="#features"
-          className="bg-brand-secondary text-brand-ink hover:bg-brand-soft rounded-[18px] px-6 py-3 text-base font-semibold transition-colors"
+          className="bg-brand-secondary text-brand-ink hover:bg-brand-soft w-full rounded-[18px] px-6 py-3 text-center text-base font-semibold transition-colors sm:w-auto"
         >
           데모 보기
         </Link>

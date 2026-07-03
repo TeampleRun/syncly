@@ -24,7 +24,7 @@ export default function TeamsSection() {
               key={team.title}
               variants={fadeUp}
               whileHover={hoverLift}
-              className="rounded-2xl border bg-white p-[25px]"
+              className="rounded-2xl border bg-white p-6.25"
               style={{ borderColor: team.borderColor }}
             >
               <div
@@ -33,7 +33,7 @@ export default function TeamsSection() {
               >
                 <team.icon className="size-5 text-white" />
               </div>
-              <h3 className="text-brand-ink mt-4 text-lg leading-[27px] font-bold">{team.title}</h3>
+              <h3 className="text-brand-ink mt-4 text-lg leading-6.75 font-bold">{team.title}</h3>
               <p className="text-brand-muted mt-1 text-xs leading-4">{team.description}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {team.tags.map((tag) => (

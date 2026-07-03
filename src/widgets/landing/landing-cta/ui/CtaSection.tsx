@@ -23,7 +23,7 @@ export default function CtaSection() {
       <motion.div variants={fadeUp} className="mt-8">
         <Link
           href="/login"
-          className="text-brand inline-block rounded-[18px] bg-white px-6 py-3 text-base font-bold shadow-lg transition-transform hover:scale-[1.03]"
+          className="text-brand inline-block rounded-[18px] bg-white px-6 py-3 text-base font-bold shadow-lg transition-transform hover:scale-103"
         >
           무료로 시작하기
         </Link>
