@@ -27,16 +27,16 @@ PR 전에는 반드시 포맷 검사를 통과해야 합니다.
 
 ## 3. 규칙 설명
 
-| 옵션 | 값 | 설명 |
-| --- | --- | --- |
-| `semi` | `true` | 문장 끝에 세미콜론을 사용합니다. |
-| `singleQuote` | `true` | 문자열은 작은따옴표를 사용합니다. |
-| `trailingComma` | `all` | 가능한 곳에는 trailing comma를 사용합니다. |
-| `printWidth` | `100` | 한 줄 최대 길이는 100자로 제한합니다. |
-| `tabWidth` | `2` | 들여쓰기는 2칸을 사용합니다. |
-| `arrowParens` | `always` | 화살표 함수 인자는 항상 괄호를 사용합니다. |
-| `endOfLine` | `lf` | 운영체제별 줄바꿈 차이를 방지하기 위해 LF로 통일합니다. |
-| `plugins` | `prettier-plugin-tailwindcss` | Tailwind class를 자동 정렬합니다. |
+| 옵션            | 값                            | 설명                                                    |
+| --------------- | ----------------------------- | ------------------------------------------------------- |
+| `semi`          | `true`                        | 문장 끝에 세미콜론을 사용합니다.                        |
+| `singleQuote`   | `true`                        | 문자열은 작은따옴표를 사용합니다.                       |
+| `trailingComma` | `all`                         | 가능한 곳에는 trailing comma를 사용합니다.              |
+| `printWidth`    | `100`                         | 한 줄 최대 길이는 100자로 제한합니다.                   |
+| `tabWidth`      | `2`                           | 들여쓰기는 2칸을 사용합니다.                            |
+| `arrowParens`   | `always`                      | 화살표 함수 인자는 항상 괄호를 사용합니다.              |
+| `endOfLine`     | `lf`                          | 운영체제별 줄바꿈 차이를 방지하기 위해 LF로 통일합니다. |
+| `plugins`       | `prettier-plugin-tailwindcss` | Tailwind class를 자동 정렬합니다.                       |
 
 ## 4. Line Ending
 

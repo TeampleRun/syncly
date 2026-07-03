@@ -5,3 +5,4 @@ build
 coverage
 public
 package-lock.json
+next-env.d.ts

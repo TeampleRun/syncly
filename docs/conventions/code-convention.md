@@ -4,22 +4,22 @@ Syncly의 코드 구조, 네이밍, 품질 기준을 통일하기 위한 문서�
 
 ## 1. Naming Convention
 
-| 대상 | 규칙 | 예시 |
-| --- | --- | --- |
-| 변수 | camelCase | `userList`, `activeIndex` |
-| 함수 | camelCase, 동사로 시작 | `fetchUser`, `createWorkspace` |
-| boolean 변수 | `is`, `has`, `can`, `should` 접두사 | `isOpen`, `hasPermission` |
-| 상수 | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT` |
-| 객체/배열 상수 | camelCase | `moduleTypeMap` |
-| 타입/인터페이스 | PascalCase | `WorkspaceModule`, `UserProfile` |
-| React 컴포넌트 | PascalCase | `WorkspaceCard` |
-| 커스텀 훅 | `use` 접두사 + camelCase | `useWorkspaceModules` |
-| 이벤트 핸들러 | `handle` 접두사 | `handleSubmit` |
-| 이벤트 핸들러 props | `on` 접두사 | `onSubmit`, `onClose` |
-| 컴포넌트 파일 | PascalCase | `WorkspaceCard.tsx` |
-| 유틸/훅/타입 파일 | kebab-case | `date-format.ts`, `use-auth.ts` |
-| 폴더명 | kebab-case | `workspace-module` |
-| URL 경로 | kebab-case | `/workspace-settings` |
+| 대상                | 규칙                                | 예시                             |
+| ------------------- | ----------------------------------- | -------------------------------- |
+| 변수                | camelCase                           | `userList`, `activeIndex`        |
+| 함수                | camelCase, 동사로 시작              | `fetchUser`, `createWorkspace`   |
+| boolean 변수        | `is`, `has`, `can`, `should` 접두사 | `isOpen`, `hasPermission`        |
+| 상수                | UPPER_SNAKE_CASE                    | `MAX_RETRY_COUNT`                |
+| 객체/배열 상수      | camelCase                           | `moduleTypeMap`                  |
+| 타입/인터페이스     | PascalCase                          | `WorkspaceModule`, `UserProfile` |
+| React 컴포넌트      | PascalCase                          | `WorkspaceCard`                  |
+| 커스텀 훅           | `use` 접두사 + camelCase            | `useWorkspaceModules`            |
+| 이벤트 핸들러       | `handle` 접두사                     | `handleSubmit`                   |
+| 이벤트 핸들러 props | `on` 접두사                         | `onSubmit`, `onClose`            |
+| 컴포넌트 파일       | PascalCase                          | `WorkspaceCard.tsx`              |
+| 유틸/훅/타입 파일   | kebab-case                          | `date-format.ts`, `use-auth.ts`  |
+| 폴더명              | kebab-case                          | `workspace-module`               |
+| URL 경로            | kebab-case                          | `/workspace-settings`            |
 
 ## 2. TypeScript Convention
 
@@ -166,14 +166,14 @@ PR 생성 전 아래 항목을 확인합니다.
 
 아래 규칙은 팀 합의 후 ESLint를 통해 자동 검사할 예정입니다.
 
-| 규칙 | 목적 |
-| --- | --- |
-| `console.log` 금지 | 디버깅 코드가 배포 코드에 포함되는 것을 방지 |
-| unused import / variable 금지 | 불필요한 코드 제거 |
-| `any` 사용 제한 | 타입 안정성 유지 |
-| React Hooks 규칙 강제 | Hooks 오사용 방지 |
-| FSD layer import 규칙 강제 | 프로젝트 구조 일관성 유지 |
-| 공통 UI 중복 구현 제한 | UI 컴포넌트 재사용성 유지 |
+| 규칙                          | 목적                                         |
+| ----------------------------- | -------------------------------------------- |
+| `console.log` 금지            | 디버깅 코드가 배포 코드에 포함되는 것을 방지 |
+| unused import / variable 금지 | 불필요한 코드 제거                           |
+| `any` 사용 제한               | 타입 안정성 유지                             |
+| React Hooks 규칙 강제         | Hooks 오사용 방지                            |
+| FSD layer import 규칙 강제    | 프로젝트 구조 일관성 유지                    |
+| 공통 UI 중복 구현 제한        | UI 컴포넌트 재사용성 유지                    |
 
 ## 9. Design Token Rule
 
