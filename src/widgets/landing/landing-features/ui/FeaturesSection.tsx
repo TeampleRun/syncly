@@ -23,7 +23,7 @@ export default function FeaturesSection() {
             <motion.article
               key={feature.title}
               variants={fadeUp}
-              className="group bg-brand-surface rounded-2xl p-5"
+              className="group bg-brand-surface flex flex-col items-center rounded-2xl p-5 text-center md:items-start md:text-left"
             >
               <div className="bg-brand-soft flex size-10 items-center justify-center rounded-[18px] transition-transform duration-300 group-hover:scale-110">
                 <feature.icon className="text-brand size-5" />
