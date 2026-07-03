@@ -6,6 +6,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --color-brand: #5b4ee8;
+  --color-brand-ink: #1a1b2e;
+  --color-brand-muted: #7b7fa8;
+  --color-brand-surface: #f7f8fc;
+  --color-brand-soft: #eef0fb;
+  --color-brand-start: #615fff;
+  --color-brand-end: #8e51ff;
+  --color-brand-deep: #7f22fe;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
