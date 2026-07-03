@@ -30,7 +30,7 @@ export default function HeroSection() {
       >
         상황에 맞는 워크스페이스를
         <br />
-        <span className="animate-gradient-x from-brand-start via-brand-end to-brand-start bg-gradient-to-r bg-[length:200%_auto] bg-clip-text text-transparent">
+        <span className="animate-gradient-x from-brand-start via-brand-end to-brand-start bg-linear-to-r bg-[length:200%_auto] bg-clip-text text-transparent">
           바로 시작하세요
         </span>
       </motion.h1>

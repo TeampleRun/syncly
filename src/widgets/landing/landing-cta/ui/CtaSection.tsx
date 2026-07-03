@@ -12,7 +12,7 @@ export default function CtaSection() {
       initial="hidden"
       whileInView="visible"
       viewport={VIEWPORT_ONCE}
-      className="animate-gradient-x from-brand-start via-brand-deep to-brand-start bg-gradient-to-br bg-[length:200%_200%] px-6 py-16 text-center [animation-duration:10s] sm:px-16"
+      className="animate-gradient-x from-brand-start via-brand-deep to-brand-start bg-linear-to-br bg-[length:200%_200%] px-6 py-16 text-center [animation-duration:10s] sm:px-16"
     >
       <motion.h2 variants={fadeUp} className="text-3xl font-extrabold text-white">
         지금 바로 무료로 시작하세요
