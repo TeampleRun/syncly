@@ -68,7 +68,7 @@ export default function WorkspaceCard({ name, onSelect }: WorkspaceCardProps) {
 ```txt
 src/
 ├── app/          # 앱 초기화, 라우팅, 전역 provider, 전역 스타일
-├── pages/        # 페이지 단위 조합
+├── views/        # 페이지 단위 조합
 ├── widgets/      # 페이지를 구성하는 독립적인 UI 블록
 ├── features/     # 사용자 행동 중심 기능
 ├── entities/     # 비즈니스 엔티티
@@ -83,7 +83,7 @@ src/
 ```txt
 app
 ↓
-pages
+views
 ↓
 widgets
 ↓
