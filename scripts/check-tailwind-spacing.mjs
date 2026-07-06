@@ -33,7 +33,8 @@ const SPACING_PREFIXES = [
 
 // 예: gap-[15px], sm:p-[21px], -mt-[8px], group-hover:gap-x-[12px]
 const PATTERN = new RegExp(
-  '(?:^|[\\s"\'\\x60])(?:[a-z][a-z-]*:)*(-?)(' +
+  // variant prefix는 유한 반복({0,10})으로 바운딩해 중첩 quantifier 백트래킹(ReDoS)을 방지한다
+  '(?:^|[\\s"\'\\x60])(?:[a-z][a-z-]*:){0,10}(-?)(' +
     SPACING_PREFIXES.join('|') +
     ')-\\[(\\d+(?:\\.\\d+)?)px\\]',
   'g',
@@ -49,9 +50,16 @@ function walk(dir) {
   return files;
 }
 
+// 주석(//, /* */) 안의 예시 클래스가 오탐되지 않도록 스캔 전 주석을 제거한다 (줄 번호는 유지)
+function stripComments(source) {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, (block) => block.replace(/[^\n]/g, ' '))
+    .replace(/\/\/[^\n]*/g, '');
+}
+
 const violations = [];
 for (const file of walk(ROOT)) {
-  const lines = readFileSync(file, 'utf8').split('\n');
+  const lines = stripComments(readFileSync(file, 'utf8')).split('\n');
   lines.forEach((line, index) => {
     for (const match of line.matchAll(PATTERN)) {
       const [, sign, prefix, px] = match;

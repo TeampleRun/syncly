@@ -11,7 +11,8 @@ interface WorkspaceCardProps {
 export default function WorkspaceCard({ workspace }: WorkspaceCardProps) {
   const { id, name, purpose, member_count, task_count, done_task_count, progress, updated_at } =
     workspace;
-  const meta = WORKSPACE_PURPOSE_META[purpose];
+  // 백엔드 연동 후 DB의 purpose가 유니언과 어긋날 수 있어 custom으로 폴백한다
+  const meta = WORKSPACE_PURPOSE_META[purpose] ?? WORKSPACE_PURPOSE_META.custom;
   const PurposeIcon = meta.icon;
 
   return (

@@ -79,16 +79,17 @@ npm run dev
 
 ## 스크립트
 
-| 명령어                 | 설명                                      |
-| ---------------------- | ----------------------------------------- |
-| `npm run dev`          | 개발 서버 실행                            |
-| `npm run build`        | 프로덕션 빌드                             |
-| `npm run start`        | 프로덕션 서버 실행                        |
-| `npm run lint`         | ESLint 검사                               |
-| `npm run typecheck`    | TypeScript 타입 검사                      |
-| `npm run format`       | Prettier 포맷 적용                        |
-| `npm run format:check` | Prettier 포맷 검사                        |
-| `npm run check`        | lint + typecheck + format:check 일괄 검사 |
+| 명령어                 | 설명                                                |
+| ---------------------- | --------------------------------------------------- |
+| `npm run dev`          | 개발 서버 실행                                      |
+| `npm run build`        | 프로덕션 빌드                                       |
+| `npm run start`        | 프로덕션 서버 실행                                  |
+| `npm run lint`         | ESLint 검사                                         |
+| `npm run lint:tw`      | Tailwind spacing 임의값 프리셋 검사                 |
+| `npm run typecheck`    | TypeScript 타입 검사                                |
+| `npm run format`       | Prettier 포맷 적용                                  |
+| `npm run format:check` | Prettier 포맷 검사                                  |
+| `npm run check`        | lint + lint:tw + typecheck + format:check 일괄 검사 |
 
 ## 프로젝트 구조
 
