@@ -1,4 +1,4 @@
-// 레이아웃 편집 토글 — 우하단 플로팅 버튼. 상태는 갖지 않고 props로만 제어되는 순수 위젯.
+// 레이아웃 편집 토글 — 우하단 플로팅 버튼. 상태는 갖지 않고 props로만 제어되는 순수 컴포넌트.
 import { Check, Pencil } from 'lucide-react';
 
 interface DashboardEditToggleProps {
