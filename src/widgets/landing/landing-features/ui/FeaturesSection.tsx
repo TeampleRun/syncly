@@ -3,6 +3,7 @@
 // 기능 소개 섹션 — 좌측 헤딩 옆에서 기능 카드 트랙이 자동 캐러셀로 순환한다
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
+import { Pause, Play } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { fadeUp, staggerContainer, VIEWPORT_ONCE } from '@/shared/lib/motion';
 import { featureCards } from '../config/features';
@@ -34,6 +35,7 @@ export default function FeaturesSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isInstantReset, setIsInstantReset] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [isManuallyPaused, setIsManuallyPaused] = useState(false);
   const [isPageVisible, setIsPageVisible] = useState(true);
 
   // 백그라운드 탭에서는 setInterval이 스로틀되며 activeIndex가 복제 카드 버퍼를 넘어가
@@ -51,7 +53,8 @@ export default function FeaturesSection() {
   }, []);
 
   useEffect(() => {
-    if (isPaused || !isPageVisible) {
+    // hover/focus 임시 정지, 사용자 수동 정지(터치 포함), 백그라운드 탭 중 하나라도 걸리면 순환 정지
+    if (isPaused || isManuallyPaused || !isPageVisible) {
       return;
     }
 
@@ -62,7 +65,7 @@ export default function FeaturesSection() {
     return () => {
       window.clearInterval(timer);
     };
-  }, [isPaused, isPageVisible]);
+  }, [isPaused, isManuallyPaused, isPageVisible]);
 
   useEffect(() => {
     if (!isInstantReset) {
@@ -107,6 +110,21 @@ export default function FeaturesSection() {
             <br />
             템플릿 하나로 필요한 협업 기능이 자동으로 구성됩니다.
           </p>
+          <button
+            type="button"
+            onClick={() => setIsManuallyPaused((paused) => !paused)}
+            aria-label={
+              isManuallyPaused ? '기능 카드 자동 넘김 재생' : '기능 카드 자동 넘김 일시정지'
+            }
+            className="border-brand/15 text-brand-muted hover:border-brand/30 hover:text-brand inline-flex w-fit items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-semibold tracking-[-0.35px] transition-colors"
+          >
+            {isManuallyPaused ? (
+              <Play className="size-4" aria-hidden />
+            ) : (
+              <Pause className="size-4" aria-hidden />
+            )}
+            {isManuallyPaused ? '재생' : '일시정지'}
+          </button>
         </motion.div>
         <motion.div
           variants={staggerContainer}
