@@ -3,9 +3,9 @@
 //  · md/lg: 회의록 리스트(제목 + 작성일)
 import { FileText } from 'lucide-react';
 
-import { mockMeetingNotes } from '@/entities/meeting-note';
-import type { WidgetSize } from '@/shared/lib/widget-size';
-import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/ui/widget-card';
+import { mockMeetingNotes } from '@/entities/side-project/meeting-note';
+import type { WidgetSize } from '@/shared/side-project/lib/widget-size';
+import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/side-project/ui/widget-card';
 
 const header = (
   <WidgetCardHeader title="최근 회의록" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />

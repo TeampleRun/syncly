@@ -1,9 +1,9 @@
 // 내 업무 위젯 — 타일 크기에 따라 밀도가 다른 변형을 렌더
 //  · sm: 진행 중 개수 헤드라인 + 대기 건수 요약
 //  · md/lg: task 리스트(상태 뱃지)
-import { mockTasks, TASK_STATUS } from '@/entities/task';
-import type { WidgetSize } from '@/shared/lib/widget-size';
-import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/ui/widget-card';
+import { mockTasks, TASK_STATUS } from '@/entities/side-project/task';
+import type { WidgetSize } from '@/shared/side-project/lib/widget-size';
+import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/side-project/ui/widget-card';
 
 const header = (
   <WidgetCardHeader title="내 업무" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />

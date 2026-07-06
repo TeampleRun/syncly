@@ -1,5 +1,5 @@
 // 스프린트 도메인 모델 + 목데이터
-import type { Stat } from '@/shared/ui/stat-card';
+import type { Stat } from '@/shared/side-project/ui/stat-card';
 
 export interface Sprint {
   name: string;

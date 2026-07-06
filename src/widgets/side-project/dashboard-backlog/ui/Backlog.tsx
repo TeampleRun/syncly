@@ -1,6 +1,6 @@
 // 백로그 위젯 — backlog-item 모델을 받아 대시보드용 compact 리스트로 렌더
-import { BACKLOG_PRIORITY_COLOR, mockBacklog } from '@/entities/backlog-item';
-import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/ui/widget-card';
+import { BACKLOG_PRIORITY_COLOR, mockBacklog } from '@/entities/side-project/backlog-item';
+import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/side-project/ui/widget-card';
 
 export default function Backlog() {
   return (

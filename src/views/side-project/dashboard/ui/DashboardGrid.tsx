@@ -10,7 +10,7 @@ import { useSyncExternalStore } from 'react';
 import ReactGridLayout, { useContainerWidth } from 'react-grid-layout';
 import type { Layout } from 'react-grid-layout';
 
-import { getWidgetSize } from '@/shared/lib/widget-size';
+import { getWidgetSize } from '@/shared/side-project/lib/widget-size';
 
 import { DASHBOARD_WIDGETS } from '../config/widgets';
 
