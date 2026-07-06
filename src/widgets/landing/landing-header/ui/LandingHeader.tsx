@@ -25,7 +25,7 @@ export default function LandingHeader() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-10 border-b transition-all duration-300',
+        'sticky top-0 z-50 border-b transition-all duration-300',
         isScrolled
           ? 'border-brand/10 bg-white/80 shadow-sm backdrop-blur-md'
           : 'border-brand/10 bg-white',

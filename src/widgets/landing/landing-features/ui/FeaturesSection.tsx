@@ -89,7 +89,7 @@ export default function FeaturesSection() {
   };
 
   return (
-    <section id="features" className="bg-brand-surface py-20 lg:py-30">
+    <section id="features" className="bg-brand-surface overflow-x-clip py-20 lg:py-30">
       <div className="mx-auto flex max-w-350 flex-col items-start gap-7.5 px-6 sm:px-16 lg:flex-row lg:items-center lg:gap-12.5 lg:pr-0">
         <motion.div
           variants={fadeUp}
@@ -113,7 +113,7 @@ export default function FeaturesSection() {
           initial="hidden"
           whileInView="visible"
           viewport={VIEWPORT_ONCE}
-          className="w-full min-w-0 overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_1rem,#000_calc(100%_-_1rem),transparent)] py-4 pl-1.25 [-webkit-mask-image:linear-gradient(to_right,transparent,#000_1rem,#000_calc(100%_-_1rem),transparent)]"
+          className="w-full min-w-0 overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_1rem,#000_calc(100%_-_1rem),transparent)] py-4 pl-1.25 [-webkit-mask-image:linear-gradient(to_right,transparent,#000_1rem,#000_calc(100%_-_1rem),transparent)] lg:mr-[calc(-1*max(0px,(100vw-87.5rem)/2))]"
           aria-live="polite"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
