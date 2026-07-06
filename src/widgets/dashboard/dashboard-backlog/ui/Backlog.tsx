@@ -1,5 +1,5 @@
-// 백로그 위젯 — backlog-item 엔티티(BacklogItemRow)를 리스트로 조립
-import { BacklogItemRow, mockBacklog } from '@/entities/backlog-item';
+// 백로그 위젯 — backlog-item 모델을 받아 대시보드용 compact 리스트로 렌더
+import { BACKLOG_PRIORITY_COLOR, mockBacklog } from '@/entities/backlog-item';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/ui/widget-card';
 
 export default function Backlog() {
@@ -8,7 +8,14 @@ export default function Backlog() {
       <WidgetCardHeader title="백로그" action={<WidgetCardAction>보드</WidgetCardAction>} />
       <ul className="flex flex-col gap-2">
         {mockBacklog.map((item) => (
-          <BacklogItemRow key={item.title} item={item} />
+          <li key={item.title} className="flex items-center gap-2">
+            <span
+              className="size-1.5 shrink-0 rounded-full"
+              style={{ backgroundColor: BACKLOG_PRIORITY_COLOR[item.priority] }}
+            />
+            <span className="text-brand-ink min-w-0 flex-1 truncate text-sm">{item.title}</span>
+            <span className="text-brand-muted text-[10px]">{item.point}pt</span>
+          </li>
         ))}
       </ul>
     </WidgetCard>

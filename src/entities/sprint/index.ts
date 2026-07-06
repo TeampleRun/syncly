@@ -1,5 +1,4 @@
-// sprint 엔티티의 Public API
-export { SprintBanner } from './ui/SprintBanner';
+// sprint 엔티티의 Public API (모델)
 export {
   currentSprint,
   sprintStats,

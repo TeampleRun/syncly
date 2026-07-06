@@ -1,5 +1,4 @@
-// backlog-item 엔티티의 Public API
-export { BacklogItemRow } from './ui/BacklogItemRow';
+// backlog-item 엔티티의 Public API (모델)
 export {
   mockBacklog,
   BACKLOG_PRIORITY_COLOR,
