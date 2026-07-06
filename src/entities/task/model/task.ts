@@ -1,4 +1,4 @@
-// 내 업무 목데이터 + 상태 뱃지 스타일
+// 업무(Task) 도메인 모델 + 상태 스타일 + 목데이터
 export type TaskStatus = 'progress' | 'todo';
 
 interface StatusStyle {
@@ -19,7 +19,7 @@ export interface Task {
   status: TaskStatus;
 }
 
-export const myTasks: Task[] = [
+export const mockTasks: Task[] = [
   { title: '운동 통계 차트', point: 8, status: 'progress' },
   { title: '푸시 알림 설정', point: 3, status: 'progress' },
   { title: '온보딩 플로우 개선', point: 5, status: 'todo' },
