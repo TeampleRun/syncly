@@ -33,7 +33,7 @@ export default function WorkspaceCard({ workspace }: WorkspaceCardProps) {
           </div>
           <ChevronRight className="text-brand-muted mt-1 size-4 shrink-0" aria-hidden />
         </div>
-        <div className="text-brand-muted flex items-center gap-4 text-xs leading-4">
+        <div className="text-brand-muted flex flex-wrap items-center gap-x-4 gap-y-1 text-xs leading-4">
           <span className="flex items-center gap-1.5">
             <Users className="size-3.5" aria-hidden />
             {member_count}명
