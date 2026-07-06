@@ -1,11 +1,33 @@
-// 내 업무 위젯 — task 모델을 받아 대시보드용 compact 리스트로 렌더
+// 내 업무 위젯 — 타일 크기에 따라 밀도가 다른 변형을 렌더
+//  · sm: 진행 중 개수 헤드라인 + 대기 건수 요약
+//  · md/lg: task 리스트(상태 뱃지)
 import { mockTasks, TASK_STATUS } from '@/entities/task';
+import type { WidgetSize } from '@/shared/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/ui/widget-card';
 
-export default function MyTasks() {
+const header = (
+  <WidgetCardHeader title="내 업무" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />
+);
+
+export default function MyTasks({ size = 'md' }: { size?: WidgetSize }) {
+  if (size === 'sm') {
+    const inProgress = mockTasks.filter((task) => task.status === 'progress').length;
+    const todo = mockTasks.filter((task) => task.status === 'todo').length;
+    return (
+      <WidgetCard>
+        {header}
+        <div className="flex flex-1 flex-col justify-center">
+          <p className="text-brand text-3xl font-extrabold">{inProgress}</p>
+          <p className="text-brand-muted mt-1 text-xs">진행 중 · 대기 {todo}건</p>
+        </div>
+      </WidgetCard>
+    );
+  }
+
+  // md / lg — 리스트
   return (
     <WidgetCard>
-      <WidgetCardHeader title="내 업무" action={<WidgetCardAction>스프린트</WidgetCardAction>} />
+      {header}
       <ul className="flex flex-col gap-2">
         {mockTasks.map((task) => {
           const status = TASK_STATUS[task.status];

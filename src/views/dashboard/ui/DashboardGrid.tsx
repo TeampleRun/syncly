@@ -1,14 +1,16 @@
 // 대시보드 그리드 — react-grid-layout(v2)로 위젯 타일을 배치/드래그/리사이즈한다.
-// 편집 모드일 때만 드래그·리사이즈가 활성화된다.
+// 편집 모드일 때만 드래그·리사이즈가 활성화된다. 각 타일의 현재 크기(w/h)로
+// sm/md/lg를 판정해 위젯에 전달하므로, 리사이즈하면 위젯 내용 밀도가 바뀐다.
 //
 // 그리드는 컨테이너 실측 width와 localStorage에 의존하므로 SSR/hydration 시점에는
 // 렌더하지 않고 클라이언트 마운트 이후에만 렌더한다(useSyncExternalStore로 SSR-안전하게 게이팅).
-// 이렇게 하면 서버/클라이언트 HTML이 어긋나는 hydration mismatch가 발생하지 않는다.
 'use client';
 
 import { useSyncExternalStore } from 'react';
 import ReactGridLayout, { useContainerWidth } from 'react-grid-layout';
 import type { Layout } from 'react-grid-layout';
+
+import { getWidgetSize } from '@/shared/lib/widget-size';
 
 import { DASHBOARD_WIDGETS } from '../config/widgets';
 
@@ -43,11 +45,16 @@ export default function DashboardGrid({ layout, editMode, onLayoutChange }: Dash
           dragConfig={{ enabled: editMode }}
           resizeConfig={{ enabled: editMode }}
         >
-          {DASHBOARD_WIDGETS.map((widget) => (
-            <div key={widget.layout.i} className={editMode ? 'cursor-move' : undefined}>
-              {widget.render()}
-            </div>
-          ))}
+          {DASHBOARD_WIDGETS.map((widget) => {
+            // 현재 레이아웃에서 이 위젯의 실제 크기를 찾아 sm/md/lg 판정
+            const item = layout.find((entry) => entry.i === widget.layout.i) ?? widget.layout;
+            const size = getWidgetSize(item.w, item.h);
+            return (
+              <div key={widget.layout.i} className={editMode ? 'cursor-move' : undefined}>
+                {widget.render(size)}
+              </div>
+            );
+          })}
         </ReactGridLayout>
       )}
     </div>
