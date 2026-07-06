@@ -31,7 +31,7 @@ export default function LandingHeader() {
           : 'border-brand/10 bg-white',
       )}
     >
-      <nav className="flex items-center justify-between px-6 pt-4 pb-[17px] sm:px-16">
+      <nav className="flex items-center justify-between px-6 pt-4 pb-4.25 sm:px-16">
         <div className="flex items-center gap-2">
           <div className="from-brand-start to-brand-end flex size-8 items-center justify-center rounded-[18px] bg-linear-to-br">
             <Boxes className="size-4 text-white" />
@@ -47,7 +47,7 @@ export default function LandingHeader() {
           </Link>
           <Link
             href="/login"
-            className="bg-brand hover:bg-brand-deep flex items-center gap-[3px] rounded-[18px] px-3.5 py-2 text-sm font-semibold whitespace-nowrap text-white transition-colors sm:px-5"
+            className="bg-brand hover:bg-brand-deep flex items-center gap-0.75 rounded-[18px] px-3.5 py-2 text-sm font-semibold whitespace-nowrap text-white transition-colors sm:px-5"
           >
             무료로 시작하기
             <ArrowRight className="size-4" />

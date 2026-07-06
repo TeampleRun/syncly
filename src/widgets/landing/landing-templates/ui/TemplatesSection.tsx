@@ -19,13 +19,10 @@ export default function TemplatesSection() {
         initial="hidden"
         whileInView="visible"
         viewport={VIEWPORT_ONCE}
-        className="mx-auto flex max-w-[1400px] flex-col items-center gap-[30px] lg:flex-row"
+        className="mx-auto flex max-w-350 flex-col items-center gap-7.5 lg:flex-row"
       >
-        <motion.div
-          variants={fadeUp}
-          className="flex w-full shrink-0 flex-col gap-[30px] lg:w-[450px]"
-        >
-          <div className="flex flex-col gap-[25px]">
+        <motion.div variants={fadeUp} className="flex w-full shrink-0 flex-col gap-7.5 lg:w-112.5">
+          <div className="flex flex-col gap-6.25">
             <h2 className="text-brand-ink text-3xl leading-[1.4] font-bold tracking-[-0.9px] sm:text-4xl">
               어떤 목적이든,
               <br />
@@ -35,7 +32,7 @@ export default function TemplatesSection() {
               복잡한 세팅 없이 우리 팀만의 협업 공간을 만들어 보세요.
             </p>
           </div>
-          <div className="flex w-full flex-col gap-[15px] lg:w-[420px]">
+          <div className="flex w-full flex-col gap-3.75 lg:w-105">
             {templateItems.map((item) => {
               const isSelected = item.id === selectedId;
               return (
@@ -44,12 +41,12 @@ export default function TemplatesSection() {
                   type="button"
                   onClick={() => setSelectedId(item.id)}
                   className={cn(
-                    'flex items-center justify-between rounded-2xl border p-[21px] text-left transition-colors',
+                    'flex items-center justify-between rounded-2xl border p-5.25 text-left transition-colors',
                     isSelected ? 'border-[#afb2ff] bg-[#f7f7ff]' : 'bg-white',
                   )}
                   style={isSelected ? undefined : { borderColor: item.borderColor }}
                 >
-                  <div className="flex items-center gap-[15px]">
+                  <div className="flex items-center gap-3.75">
                     <div
                       className="flex size-11 items-center justify-center rounded-[15px]"
                       style={{ background: item.gradient }}
@@ -65,22 +62,22 @@ export default function TemplatesSection() {
                       </span>
                     </div>
                   </div>
-                  {isSelected && <ChevronRight className="text-brand size-[22px] shrink-0" />}
+                  {isSelected && <ChevronRight className="text-brand size-5.5 shrink-0" />}
                 </button>
               );
             })}
           </div>
         </motion.div>
         <motion.div variants={fadeUp} className="w-full min-w-0">
-          <div className="flex h-[600px] w-full flex-col gap-[30px] rounded-2xl border border-[#f1f3f9] bg-[#fbfcfd] p-6 sm:p-[41px]">
-            <div className="flex items-start gap-[15px]">
+          <div className="border-brand-secondary bg-brand-surface flex h-150 w-full flex-col gap-7.5 rounded-2xl border p-6 sm:p-10.25">
+            <div className="flex items-start gap-3.75">
               <div
-                className="flex size-[60px] shrink-0 items-center justify-center rounded-[20px]"
+                className="flex size-15 shrink-0 items-center justify-center rounded-[20px]"
                 style={{ background: selected.gradient }}
               >
                 <selected.icon className="size-8 text-white" />
               </div>
-              <div className="flex flex-col gap-[5px]">
+              <div className="flex flex-col gap-1.25">
                 <div className="flex flex-wrap items-center gap-3">
                   <h3 className="text-brand-ink text-[22px] leading-[1.4] font-bold tracking-[-0.55px]">
                     {selected.title}

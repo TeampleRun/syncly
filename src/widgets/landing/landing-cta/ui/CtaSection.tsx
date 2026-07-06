@@ -12,9 +12,9 @@ export default function CtaSection() {
       initial="hidden"
       whileInView="visible"
       viewport={VIEWPORT_ONCE}
-      className="animate-gradient-x from-brand-start via-brand-deep to-brand-start flex flex-col items-center gap-[35px] bg-linear-to-br bg-[length:200%_200%] px-6 py-20 text-center [animation-duration:10s] sm:px-16 lg:py-25"
+      className="animate-gradient-x from-brand-start via-brand-deep to-brand-start flex flex-col items-center gap-8.75 bg-linear-to-br bg-[length:200%_200%] px-6 py-20 text-center [animation-duration:10s] sm:px-16 lg:py-25"
     >
-      <div className="flex flex-col gap-[30px]">
+      <div className="flex flex-col gap-7.5">
         <motion.h2
           variants={fadeUp}
           className="text-3xl leading-[1.4] font-bold tracking-[-0.9px] text-white sm:text-4xl"
@@ -34,7 +34,7 @@ export default function CtaSection() {
       <motion.div variants={fadeUp}>
         <Link
           href="/login"
-          className="text-brand inline-block rounded-[15px] bg-white px-[25px] py-3 text-base font-bold tracking-[-0.4px] shadow-lg transition-transform hover:scale-103"
+          className="text-brand inline-block rounded-[15px] bg-white px-6.25 py-3 text-base font-bold tracking-[-0.4px] shadow-lg transition-transform hover:scale-103"
         >
           무료로 시작하기
         </Link>
