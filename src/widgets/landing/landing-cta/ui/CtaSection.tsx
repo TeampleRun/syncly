@@ -12,18 +12,29 @@ export default function CtaSection() {
       initial="hidden"
       whileInView="visible"
       viewport={VIEWPORT_ONCE}
-      className="animate-gradient-x from-brand-start via-brand-deep to-brand-start bg-linear-to-br bg-[length:200%_200%] px-6 py-16 text-center [animation-duration:10s] sm:px-16"
+      className="animate-gradient-x from-brand-start via-brand-deep to-brand-start flex flex-col items-center gap-[35px] bg-linear-to-br bg-[length:200%_200%] px-6 py-20 text-center [animation-duration:10s] sm:px-16 lg:py-25"
     >
-      <motion.h2 variants={fadeUp} className="text-3xl font-extrabold text-white">
-        지금 바로 무료로 시작하세요
-      </motion.h2>
-      <motion.p variants={fadeUp} className="mt-4 text-base text-white/80">
-        신용카드 없이. 설치 없이. 복잡한 설정 없이.
-      </motion.p>
-      <motion.div variants={fadeUp} className="mt-8">
+      <div className="flex flex-col gap-[30px]">
+        <motion.h2
+          variants={fadeUp}
+          className="text-3xl leading-[1.4] font-bold tracking-[-0.9px] text-white sm:text-4xl"
+        >
+          <span className="text-white/60">팀마다 다른 </span>협업
+          <span className="text-white/60">, 시작은 더 </span>간단하게
+        </motion.h2>
+        <motion.p
+          variants={fadeUp}
+          className="text-lg leading-[1.6] tracking-[-0.45px] text-white/80"
+        >
+          설치 없이, 복잡한 설정 없이. 5분이면 우리 팀 워크 스페이스 완성!
+          <br />
+          상황에 맞는 템플릿으로 가장 쉬운 협업을 시작하세요.
+        </motion.p>
+      </div>
+      <motion.div variants={fadeUp}>
         <Link
           href="/login"
-          className="text-brand inline-block rounded-[18px] bg-white px-6 py-3 text-base font-bold shadow-lg transition-transform hover:scale-103"
+          className="text-brand inline-block rounded-[15px] bg-white px-[25px] py-3 text-base font-bold tracking-[-0.4px] shadow-lg transition-transform hover:scale-103"
         >
           무료로 시작하기
         </Link>
