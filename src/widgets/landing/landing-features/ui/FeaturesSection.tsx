@@ -6,12 +6,13 @@ import { motion } from 'motion/react';
 import { cn } from '@/shared/lib/utils';
 import { fadeUp, staggerContainer, VIEWPORT_ONCE } from '@/shared/lib/motion';
 import { featureCards } from '../config/features';
-import type { FeatureCard } from '../config/features';
 
-const CARD_STYLES: Record<FeatureCard['variant'], string> = {
+// 캐러셀은 카드를 인덱스 순서대로 light/accent 두 스타일로 번갈아 표시한다
+type CardVariant = 'light' | 'accent';
+
+const CARD_STYLES: Record<CardVariant, string> = {
   light: 'items-start bg-white px-10 py-7.5 drop-shadow-[0px_0px_7.5px_rgba(91,78,232,0.1)]',
   accent: 'bg-brand items-start px-10 py-7.5 drop-shadow-[0px_0px_7.5px_rgba(91,78,232,0.1)]',
-  soft: 'bg-brand-surface items-center justify-center p-7.5 text-center',
 };
 
 const AUTO_ROTATE_MS = 2400;
@@ -25,15 +26,35 @@ const carouselCards = [
   ...featureCards.slice(0, VISIBLE_CARD_COUNT),
 ];
 
-function getDisplayVariant(index: number): FeatureCard['variant'] {
+function getDisplayVariant(index: number): CardVariant {
   return index % 2 === 0 ? 'light' : 'accent';
 }
 
 export default function FeaturesSection() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isInstantReset, setIsInstantReset] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isPageVisible, setIsPageVisible] = useState(true);
+
+  // 백그라운드 탭에서는 setInterval이 스로틀되며 activeIndex가 복제 카드 버퍼를 넘어가
+  // 트랙이 빈 영역으로 밀려 카드가 사라진다. 탭이 숨겨지면 자동 순환을 멈춘다.
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsPageVisible(!document.hidden);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   useEffect(() => {
+    if (isPaused || !isPageVisible) {
+      return;
+    }
+
     const timer = window.setInterval(() => {
       setActiveIndex((currentIndex) => currentIndex + 1);
     }, AUTO_ROTATE_MS);
@@ -41,7 +62,7 @@ export default function FeaturesSection() {
     return () => {
       window.clearInterval(timer);
     };
-  }, []);
+  }, [isPaused, isPageVisible]);
 
   useEffect(() => {
     if (!isInstantReset) {
@@ -58,7 +79,8 @@ export default function FeaturesSection() {
   }, [isInstantReset]);
 
   const handleAnimationComplete = () => {
-    if (activeIndex !== RESET_INDEX) {
+    // 정확히 일치가 아니라 이상(>=)으로 판정해 혹시 인덱스가 버퍼를 넘어가도 복구한다
+    if (activeIndex < RESET_INDEX) {
       return;
     }
 
@@ -91,8 +113,12 @@ export default function FeaturesSection() {
           initial="hidden"
           whileInView="visible"
           viewport={VIEWPORT_ONCE}
-          className="w-full min-w-0 overflow-hidden py-4 pl-1.25"
+          className="w-full min-w-0 overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_1rem,#000_calc(100%_-_1rem),transparent)] py-4 pl-1.25 [-webkit-mask-image:linear-gradient(to_right,transparent,#000_1rem,#000_calc(100%_-_1rem),transparent)]"
           aria-live="polite"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onFocusCapture={() => setIsPaused(true)}
+          onBlurCapture={() => setIsPaused(false)}
         >
           <motion.div
             animate={{ x: -activeIndex * (CARD_WIDTH + CARD_GAP) }}

@@ -40,6 +40,7 @@ export default function TemplatesSection() {
                   key={item.id}
                   type="button"
                   onClick={() => setSelectedId(item.id)}
+                  aria-pressed={isSelected}
                   className={cn(
                     'flex items-center justify-between rounded-2xl border p-5.25 text-left transition-colors',
                     isSelected ? 'border-[#afb2ff] bg-[#f7f7ff]' : 'bg-white',
