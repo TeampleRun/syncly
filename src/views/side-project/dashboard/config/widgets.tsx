@@ -14,6 +14,8 @@ import { Velocity } from '@/widgets/side-project/dashboard-velocity';
 interface DashboardWidget {
   /** 그리드 기본 배치 (i는 위젯 식별자) */
   layout: LayoutItem;
+  /** 위젯 추가 목록에 표시할 이름 */
+  title: string;
   render: (size: WidgetSize) => ReactNode;
 }
 
@@ -21,26 +23,32 @@ interface DashboardWidget {
 export const DASHBOARD_WIDGETS: DashboardWidget[] = [
   {
     layout: { i: 'sprint-summary', x: 0, y: 0, w: 12, h: 4, minW: 6, minH: 4 },
+    title: '스프린트 요약',
     render: () => <SprintSummary />,
   },
   {
     layout: { i: 'my-tasks', x: 0, y: 4, w: 6, h: 5, minW: 2, minH: 3 },
+    title: '내 업무',
     render: (size) => <MyTasks size={size} />,
   },
   {
     layout: { i: 'velocity', x: 6, y: 4, w: 6, h: 5, minW: 4, minH: 4 },
+    title: '벨로시티',
     render: () => <Velocity />,
   },
   {
     layout: { i: 'backlog', x: 0, y: 9, w: 6, h: 5, minW: 2, minH: 3 },
+    title: '백로그',
     render: (size) => <Backlog size={size} />,
   },
   {
     layout: { i: 'recent-notes', x: 6, y: 9, w: 6, h: 5, minW: 2, minH: 3 },
+    title: '최근 회의록',
     render: (size) => <RecentNotes size={size} />,
   },
   {
     layout: { i: 'today-schedule', x: 0, y: 14, w: 3, h: 4, minW: 2, minH: 3 },
+    title: '오늘 일정',
     render: (size) => <TodaySchedule size={size} />,
   },
 ];
