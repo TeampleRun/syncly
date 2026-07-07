@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { WorkspaceHeader } from './WorkspaceHeader';
 import { WorkspaceSidebar } from './WorkspaceSidebar';
-import { mockWorkspace } from '@/entities/workspace';
+import { getMockWorkspaceById } from '@/entities/workspace';
 import { getWorkspaceNavigation } from '@/widgets/workspace-shell/lib/get-workspace-navigation';
 
 interface WorkspaceShellProps {
@@ -14,7 +14,7 @@ interface WorkspaceShellProps {
 
 export function WorkspaceShell({ workspaceId, children }: WorkspaceShellProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const workspace = mockWorkspace; // 나중에는 workspaceId로 Supabase 조회
+  const workspace = getMockWorkspaceById(workspaceId); // 나중에는 workspaceId로 Supabase 조회
   const navigationItems = getWorkspaceNavigation(workspace.purpose);
 
   return (

@@ -1,6 +1,6 @@
 'use client';
 
-// 매장 운영 워크스페이스 페이지에서 공통으로 사용하는 좌측 사이드바입니다.
+// 워크스페이스 페이지에서 공통으로 사용하는 좌측 사이드바입니다.
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight, LogOut, Menu, Store } from 'lucide-react';
