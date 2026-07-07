@@ -26,7 +26,7 @@ export default function MyTasks({ size = 'md' }: { size?: WidgetSize }) {
   }
 
   const list = (
-    <ul className="flex flex-col gap-2">
+    <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
       {mockTasks.map((task) => {
         const status = TASK_STATUS[task.status];
         return (
