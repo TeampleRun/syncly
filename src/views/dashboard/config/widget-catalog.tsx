@@ -13,6 +13,7 @@ import { Velocity } from '@/widgets/side-project/dashboard-velocity';
 
 // layout의 x/y는 "추가될 때의 기본 위치"이며, 그리드가 충돌 시 자동 정렬한다.
 // key는 layout.i(위젯 id)와 일치해야 한다.
+// TODO: 모든 템플릿에 들어가는 위젯을 넣어두는 레지스트리파일
 export const WIDGET_CATALOG = {
   'sprint-summary': {
     layout: { i: 'sprint-summary', x: 0, y: 0, w: 12, h: 4, minW: 6, minH: 4 },
