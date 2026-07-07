@@ -1,7 +1,7 @@
 'use client';
 
 // 워크스페이스 공지사항 게시판의 목록 정렬, 선택, 작성/수정, 삭제, 고정 상태를 관리합니다.
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { Notice, NoticeFormValues } from '@/entities/notice';
 
 interface UseNoticeBoardStateParams {
@@ -21,7 +21,11 @@ function sortNotices(notices: Notice[]) {
 }
 
 function createNoticeId() {
-  return `notice-${Date.now()}`;
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `notice-${crypto.randomUUID()}`;
+  }
+
+  return `notice-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 function createTodayLabel() {
@@ -34,13 +38,14 @@ export function useNoticeBoardState({
   authorName,
 }: UseNoticeBoardStateParams) {
   const [notices, setNotices] = useState(() => sortNotices(initialNotices));
-  const [selectedNoticeId, setSelectedNoticeId] = useState(initialNotices[0]?.id ?? null);
+  const [selectedNoticeId, setSelectedNoticeId] = useState(
+    () => sortNotices(initialNotices)[0]?.id ?? null,
+  );
   const [editingNoticeId, setEditingNoticeId] = useState<string | null>(null);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
 
-  const sortedNotices = useMemo(() => sortNotices(notices), [notices]);
-  const selectedNotice = sortedNotices.find((notice) => notice.id === selectedNoticeId) ?? null;
-  const editingNotice = sortedNotices.find((notice) => notice.id === editingNoticeId) ?? null;
+  const selectedNotice = notices.find((notice) => notice.id === selectedNoticeId) ?? null;
+  const editingNotice = notices.find((notice) => notice.id === editingNoticeId) ?? null;
 
   const openCreateComposer = () => {
     setEditingNoticeId(null);
@@ -95,15 +100,13 @@ export function useNoticeBoardState({
   };
 
   const deleteNotice = (noticeId: string) => {
-    setNotices((currentNotices) => {
-      const nextNotices = currentNotices.filter((notice) => notice.id !== noticeId);
+    const nextNotices = sortNotices(notices.filter((notice) => notice.id !== noticeId));
 
-      if (selectedNoticeId === noticeId) {
-        setSelectedNoticeId(sortNotices(nextNotices)[0]?.id ?? null);
-      }
+    setNotices(nextNotices);
 
-      return nextNotices;
-    });
+    if (selectedNoticeId === noticeId) {
+      setSelectedNoticeId(nextNotices[0]?.id ?? null);
+    }
 
     if (editingNoticeId === noticeId) {
       closeComposer();
@@ -122,7 +125,7 @@ export function useNoticeBoardState({
   };
 
   return {
-    notices: sortedNotices,
+    notices,
     selectedNotice,
     editingNotice,
     isComposerOpen,
