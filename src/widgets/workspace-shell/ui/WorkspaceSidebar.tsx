@@ -8,10 +8,7 @@ import { usePathname } from 'next/navigation';
 import { mockWorkspace } from '@/entities/workspace';
 import { mockCurrentWorkspaceMember } from '@/entities/workspace-member';
 import { cn } from '@/shared/lib/utils';
-import {
-  sideProjectNavigationItems,
-  storeOperationNavigationItems,
-} from '../model/workspace-navigation';
+import { storeOperationNavigationItems } from '../model/workspace-navigation';
 
 interface WorkspaceSidebarProps {
   workspaceId: string;
@@ -83,7 +80,7 @@ export function WorkspaceSidebar({
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {sideProjectNavigationItems.map((item) => {
+        {storeOperationNavigationItems.map((item) => {
           const Icon = item.icon;
           const href = `/workspaces/${workspaceId}/${item.href}`;
           const isActive = pathname === href;
