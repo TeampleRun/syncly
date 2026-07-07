@@ -3,7 +3,7 @@
 //  · md/lg: 월간 그리드(요일 헤더 + 날짜 셀)
 import { mockCalendar } from '@/entities/side-project/schedule-event';
 import { cn } from '@/shared/lib/utils';
-import type { WidgetSize } from '@/shared/side-project/lib/widget-size';
+import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import {
   WidgetCard,
   WidgetCardAction,

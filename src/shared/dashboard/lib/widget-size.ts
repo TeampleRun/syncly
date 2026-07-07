@@ -1,5 +1,6 @@
 // 대시보드 위젯 크기 토큰 — 그리드 타일의 폭(w)·높이(h)로 sm/md/lg를 판정한다.
 // 타일을 리사이즈하면 이 값이 바뀌어 위젯이 밀도가 다른 변형을 렌더한다.
+// 템플릿(side-project/store-operation/team-project)에 무관한 대시보드 공용 유틸.
 export type WidgetSize = 'sm' | 'md' | 'lg';
 
 // 폭·높이 각각의 레벨을 구해 "더 작은 쪽"으로 변형을 정한다.

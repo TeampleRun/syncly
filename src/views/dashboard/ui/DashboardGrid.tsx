@@ -1,9 +1,10 @@
 // 대시보드 그리드 — react-grid-layout(v2)로 위젯 타일을 배치/드래그/리사이즈한다.
+// 카탈로그(widgets)와 배치(layout)를 위젯 id로 조인해 그린다. 카탈로그에 없는 id는 렌더에서 제외된다.
 // 편집 모드에서는 카드별 편집 chrome(이동 핸들·크기 뱃지·삭제)과 인디고 테두리가 노출되고,
-// 드래그는 좌상단 핸들(.rgl-drag-handle)로만 시작된다. 숨긴 위젯은 렌더에서 제외된다.
+// 드래그는 좌상단 핸들(.rgl-drag-handle)로만 시작된다.
 //
-// 그리드는 컨테이너 실측 width와 localStorage에 의존하므로 SSR/hydration 시점에는
-// 렌더하지 않고 클라이언트 마운트 이후에만 렌더한다(useSyncExternalStore로 SSR-안전하게 게이팅).
+// 그리드는 컨테이너 실측 width에 의존하므로 SSR/hydration 시점에는 렌더하지 않고
+// 클라이언트 마운트 이후에만 렌더한다(useSyncExternalStore로 SSR-안전하게 게이팅).
 'use client';
 
 import { useSyncExternalStore, type Ref } from 'react';
@@ -11,9 +12,8 @@ import ReactGridLayout, { useContainerWidth } from 'react-grid-layout';
 import type { Layout, ResizeHandleAxis } from 'react-grid-layout';
 import { Maximize2, GripVertical, Trash2 } from 'lucide-react';
 
-import { getWidgetSize } from '@/shared/side-project/lib/widget-size';
-
-import { DASHBOARD_WIDGETS } from '../config/widgets';
+import { getWidgetSize } from '@/shared/dashboard/lib/widget-size';
+import type { WidgetDefinition } from '@/shared/dashboard/model/widget';
 
 const emptySubscribe = () => () => {};
 // 서버: false, 클라이언트 마운트 이후: true (hydration 렌더는 서버 스냅샷을 사용해 일치 보장)
@@ -36,29 +36,31 @@ const renderResizeHandle = (axis: ResizeHandleAxis, ref: Ref<HTMLElement>) => (
 );
 
 interface DashboardGridProps {
+  /** 위젯 카탈로그 (id → 렌더러) */
+  widgets: WidgetDefinition[];
   layout: Layout;
   editMode: boolean;
-  hiddenIds: string[];
   onLayoutChange: (layout: Layout) => void;
   onRemove: (id: string) => void;
 }
 
 export default function DashboardGrid({
+  widgets,
   layout,
   editMode,
-  hiddenIds,
   onLayoutChange,
   onRemove,
 }: DashboardGridProps) {
   const { width, containerRef } = useContainerWidth();
   const isClient = useIsClient();
 
-  const activeWidgets = DASHBOARD_WIDGETS.filter((widget) => !hiddenIds.includes(widget.layout.i));
-  const activeLayout = layout.filter((item) => !hiddenIds.includes(item.i));
+  const byId = new Map(widgets.map((widget) => [widget.layout.i, widget] as const));
+  // 카탈로그에 렌더러가 있는 항목만 — layout prop과 children이 항상 일치하도록 이 목록만 사용한다.
+  const visibleLayout = layout.filter((item) => byId.has(item.i));
 
   return (
     <div ref={containerRef} className="w-full">
-      {activeWidgets.length === 0 ? (
+      {visibleLayout.length === 0 ? (
         <div className="text-brand-muted flex min-h-[60vh] flex-col items-center justify-center gap-1 text-center">
           <p className="text-lg">아직 추가된 위젯이 없습니다.</p>
           <p>필요한 위젯을 추가해 워크스페이스를 구성해보세요.</p>
@@ -69,16 +71,16 @@ export default function DashboardGrid({
           <ReactGridLayout
             // 보기 모드에서는 RGL이 남겨두는 리사이즈 핸들이 hover 시 노출되지 않도록 숨긴다.
             className={editMode ? undefined : '[&_.react-resizable-handle]:hidden!'}
-            layout={activeLayout}
+            layout={visibleLayout}
             width={width}
             onLayoutChange={onLayoutChange}
             gridConfig={{ cols: 12, rowHeight: 40, margin: [16, 16], containerPadding: [0, 0] }}
             dragConfig={{ enabled: editMode, handle: '.rgl-drag-handle' }}
             resizeConfig={{ enabled: editMode, handleComponent: renderResizeHandle }}
           >
-            {activeWidgets.map((widget) => {
-              const id = widget.layout.i;
-              const item = activeLayout.find((entry) => entry.i === id) ?? widget.layout;
+            {visibleLayout.map((item) => {
+              const id = item.i;
+              const widget = byId.get(id)!;
               const size = getWidgetSize(item.w, item.h);
               return (
                 <div

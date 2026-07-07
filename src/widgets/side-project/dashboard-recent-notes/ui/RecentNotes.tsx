@@ -5,7 +5,7 @@
 import { FileText } from 'lucide-react';
 
 import { mockMeetingNotes } from '@/entities/side-project/meeting-note';
-import type { WidgetSize } from '@/shared/side-project/lib/widget-size';
+import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/side-project/ui/widget-card';
 
 const header = (

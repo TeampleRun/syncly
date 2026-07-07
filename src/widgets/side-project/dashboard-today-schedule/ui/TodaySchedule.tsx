@@ -6,7 +6,7 @@ import {
   mockTodaySchedule,
   SCHEDULE_TYPE_COLOR,
 } from '@/entities/side-project/schedule-event';
-import type { WidgetSize } from '@/shared/side-project/lib/widget-size';
+import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import {
   WidgetCard,
   WidgetCardAction,

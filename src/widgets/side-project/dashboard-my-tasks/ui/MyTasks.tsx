@@ -3,7 +3,7 @@
 //  · md: task 리스트(상태 뱃지)
 //  · lg: 상태별 카운트 요약 + task 리스트
 import { mockTasks, TASK_STATUS, type TaskStatus } from '@/entities/side-project/task';
-import type { WidgetSize } from '@/shared/side-project/lib/widget-size';
+import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/side-project/ui/widget-card';
 
 const header = (

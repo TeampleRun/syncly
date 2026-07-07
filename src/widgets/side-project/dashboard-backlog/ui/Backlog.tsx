@@ -2,7 +2,7 @@
 //  · sm: 최상위 항목 1건 + 외 N건
 //  · md/lg: 우선순위 점 + 항목 + 포인트 리스트(넘치면 스크롤)
 import { BACKLOG_PRIORITY_COLOR, mockBacklog } from '@/entities/side-project/backlog-item';
-import type { WidgetSize } from '@/shared/side-project/lib/widget-size';
+import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/side-project/ui/widget-card';
 
 const header = <WidgetCardHeader title="백로그" action={<WidgetCardAction>보드</WidgetCardAction>} />;
