@@ -1,6 +1,7 @@
 // 최근 회의록 위젯 — 타일 크기에 따라 밀도가 다른 변형을 렌더
 //  · sm: 가장 최근 회의록 1건(제목만)
-//  · md/lg: 회의록 리스트(제목 + 작성일)
+//  · md: 리스트(제목 + 작성일)
+//  · lg: 총 개수 + 리스트(제목 + 본문 미리보기 + 작성일)
 import { FileText } from 'lucide-react';
 
 import { mockMeetingNotes } from '@/entities/side-project/meeting-note';
@@ -25,7 +26,28 @@ export default function RecentNotes({ size = 'md' }: { size?: WidgetSize }) {
     );
   }
 
-  // md / lg — 리스트
+  if (size === 'lg') {
+    return (
+      <WidgetCard>
+        {header}
+        <p className="text-brand-muted mb-2 text-xs">총 {mockMeetingNotes.length}개의 회의록</p>
+        <ul className="flex flex-col gap-2">
+          {mockMeetingNotes.map((note) => (
+            <li key={note.title} className="bg-brand-surface flex items-start gap-2 rounded-xl p-3">
+              <FileText className="text-brand-muted mt-0.5 size-4 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-brand-ink truncate text-sm font-semibold">{note.title}</p>
+                <p className="text-brand-muted truncate text-xs">{note.summary}</p>
+                <p className="text-brand-muted mt-0.5 text-[11px]">{note.date}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </WidgetCard>
+    );
+  }
+
+  // md — 리스트(제목 + 작성일)
   return (
     <WidgetCard>
       {header}
