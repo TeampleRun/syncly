@@ -56,18 +56,13 @@ export function WorkScheduleBoard({ members, config, initialSchedule }: WorkSche
   };
 
   const handleDeleteShift = (shiftId: string): void => {
-    setScheduleConfig((current) => {
-      if (current.shifts.length <= 1) return current;
+    if (scheduleConfig.shifts.length <= 1) return;
 
-      const nextShifts = current.shifts.filter((shift) => shift.id !== shiftId);
-      const fallbackShift = nextShifts.find((shift) => !shift.isOff) ?? nextShifts[0];
+    const nextShifts = scheduleConfig.shifts.filter((shift) => shift.id !== shiftId);
+    const fallbackShift = nextShifts.find((shift) => !shift.isOff) ?? nextShifts[0];
 
-      replaceShiftOption(shiftId, fallbackShift.id);
-
-      return {
-        shifts: nextShifts,
-      };
-    });
+    replaceShiftOption(shiftId, fallbackShift.id);
+    setScheduleConfig({ shifts: nextShifts });
   };
 
   const handleMoveShift = (shiftId: string, direction: 'up' | 'down'): void => {
@@ -133,7 +128,7 @@ export function WorkScheduleBoard({ members, config, initialSchedule }: WorkSche
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-400 text-sm font-bold text-white">
                   {member.avatarLabel}
                 </span>
-                <span className="whitespace-nowrap break-keep font-semibold text-slate-900">
+                <span className="font-semibold break-keep whitespace-nowrap text-slate-900">
                   {member.workspaceNickname}
                 </span>
               </div>
@@ -142,7 +137,9 @@ export function WorkScheduleBoard({ members, config, initialSchedule }: WorkSche
                 const entry = schedule.find(
                   (item) => item.userId === member.userId && item.weekday === weekday.key,
                 );
-                const shift = scheduleConfig.shifts.find((item) => item.id === entry?.shiftOptionId);
+                const shift = scheduleConfig.shifts.find(
+                  (item) => item.id === entry?.shiftOptionId,
+                );
 
                 if (!entry || !shift) return null;
 
