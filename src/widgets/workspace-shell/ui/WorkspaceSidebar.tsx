@@ -5,20 +5,24 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight, LogOut, Menu, Store } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { mockWorkspace } from '@/entities/workspace';
+import type { Workspace } from '@/entities/workspace';
 import { mockCurrentWorkspaceMember } from '@/entities/workspace-member';
 import { cn } from '@/shared/lib/utils';
-import { storeOperationNavigationItems } from '../model/workspace-navigation';
+import type { WorkspaceNavigationItem } from '../model/workspace-navigation';
 
 interface WorkspaceSidebarProps {
+  workspace: Workspace;
   workspaceId: string;
   isCollapsed: boolean;
+  navigationItems: WorkspaceNavigationItem[];
   onToggleCollapsed: () => void;
 }
 
 export function WorkspaceSidebar({
+  workspace,
   workspaceId,
   isCollapsed,
+  navigationItems,
   onToggleCollapsed,
 }: WorkspaceSidebarProps) {
   const pathname = usePathname();
@@ -50,7 +54,7 @@ export function WorkspaceSidebar({
           onClick={onToggleCollapsed}
           className={cn(
             'flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100',
-            isCollapsed && 'absolute left-1/2 top-[84px] -translate-x-1/2',
+            isCollapsed && 'absolute top-[84px] left-1/2 -translate-x-1/2',
           )}
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
@@ -69,8 +73,10 @@ export function WorkspaceSidebar({
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-400 text-white">
               <Store className="h-4 w-4" aria-hidden="true" />
             </span>
-            <span className={cn('truncate text-sm font-bold text-slate-950', isCollapsed && 'sr-only')}>
-              {mockWorkspace.name}
+            <span
+              className={cn('truncate text-sm font-bold text-slate-950', isCollapsed && 'sr-only')}
+            >
+              {workspace.name}
             </span>
           </span>
           {!isCollapsed ? (
@@ -80,7 +86,7 @@ export function WorkspaceSidebar({
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {storeOperationNavigationItems.map((item) => {
+        {navigationItems.map((item) => {
           const Icon = item.icon;
           const href = `/workspaces/${workspaceId}/${item.href}`;
           const isActive = pathname === href;
