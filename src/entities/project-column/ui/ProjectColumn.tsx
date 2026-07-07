@@ -1,18 +1,19 @@
 import type { DragEvent } from 'react';
 import { TaskCard } from '@/entities/task';
+import type { TaskStatus } from '@/entities/task';
 import { cn } from '@/shared/lib/utils';
 import type { ProjectBoardColumn } from '../model/types';
 
 type ProjectColumnProps = {
   column: ProjectBoardColumn;
   onDeleteTask: (taskId: string) => void;
-  onDropTask: (columnId: string, targetIndex: number, taskId?: string) => void;
+  onDropTask: (columnId: TaskStatus, targetIndex: number, taskId?: string) => void;
   onDragStartTask: (event: DragEvent<HTMLElement>, taskId: string) => void;
   onDragEndTask: () => void;
   draggingTaskId: string | null;
   dragOverIndex: number | null;
-  onDragOverTask: (columnId: string, targetIndex: number) => void;
-  onDragLeaveColumn: (columnId: string) => void;
+  onDragOverTask: (columnId: TaskStatus, targetIndex: number) => void;
+  onDragLeaveColumn: (columnId: TaskStatus) => void;
 };
 
 const toneStyles = {
