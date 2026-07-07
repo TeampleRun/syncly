@@ -1,18 +1,13 @@
-// 대시보드 레이아웃 편집 상태 훅 — 배치 + 편집 모드 + 숨긴 위젯(삭제/추가)을 관리하고
-// localStorage에 저장해 새로고침에도 유지한다.
+// 대시보드 레이아웃 편집 상태 훅 — 배치 + 편집 모드 + 숨긴 위젯(삭제/추가)을 관리한다.
+// 영속화는 api 서버액션(DB 연동, 현재 TODO)에 위임한다. editMode는 순수 UI 상태라 저장하지 않는다.
 //
 // 기본 레이아웃은 뷰가 소유(위젯 레지스트리에서 파생)하므로 인자로 주입받는다.
 // → feature가 뷰에 의존하지 않아 레이어 방향(shared ← entities ← features ← widgets ← views)을 지킨다.
-// DB 연동 시 localStorage 부분만 api 서버액션(React Query)으로 교체하면 된다.
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Layout } from 'react-grid-layout';
 
-const STORAGE_KEY = 'syncly-dashboard-layout';
-
-interface DashboardState {
-  layout: Layout;
-  hiddenIds: string[];
-}
+import { getDashboardLayout, saveDashboardLayout } from '../api/layout';
+import type { DashboardLayoutState } from './dashboard-layout';
 
 // 저장본에 없는 신규 위젯은 기본 배치로 채워 넣어, 위젯을 추가해도 유실되지 않게 한다.
 function mergeMissing(layout: Layout, defaultLayout: Layout): Layout {
@@ -21,37 +16,34 @@ function mergeMissing(layout: Layout, defaultLayout: Layout): Layout {
   return added.length ? [...layout, ...added] : layout;
 }
 
-function loadState(defaultLayout: Layout): DashboardState {
-  if (typeof window === 'undefined') return { layout: defaultLayout, hiddenIds: [] };
-  try {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (!saved) return { layout: defaultLayout, hiddenIds: [] };
-    const parsed = JSON.parse(saved);
-    // 구 포맷(레이아웃 배열) 호환
-    if (Array.isArray(parsed)) {
-      return { layout: mergeMissing(parsed as Layout, defaultLayout), hiddenIds: [] };
-    }
-    return {
-      layout: mergeMissing((parsed.layout ?? defaultLayout) as Layout, defaultLayout),
-      hiddenIds: (parsed.hiddenIds ?? []) as string[],
-    };
-  } catch {
-    return { layout: defaultLayout, hiddenIds: [] };
-  }
-}
-
 export function useDashboardLayout(defaultLayout: Layout) {
-  const [state, setState] = useState<DashboardState>(() => loadState(defaultLayout));
+  const [state, setState] = useState<DashboardLayoutState>(() => ({
+    layout: defaultLayout,
+    hiddenIds: [],
+  }));
   const [editMode, setEditMode] = useState(false);
 
-  const update = useCallback((updater: (prev: DashboardState) => DashboardState) => {
+  // TODO: DB 연동 — 마운트 시 저장된 레이아웃을 조회해 복원 (React Query로 대체 가능)
+  useEffect(() => {
+    let active = true;
+    getDashboardLayout().then((saved) => {
+      if (active && saved) {
+        setState({
+          layout: mergeMissing(saved.layout, defaultLayout),
+          hiddenIds: saved.hiddenIds,
+        });
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [defaultLayout]);
+
+  const update = useCallback((updater: (prev: DashboardLayoutState) => DashboardLayoutState) => {
     setState((prev) => {
       const next = updater(prev);
-      try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // 저장 실패 무시 (프라이빗 모드 등)
-      }
+      // TODO: DB 연동 — 변경 저장 (드래그 중 잦은 호출은 debounce 예정)
+      void saveDashboardLayout(next);
       return next;
     });
   }, []);
