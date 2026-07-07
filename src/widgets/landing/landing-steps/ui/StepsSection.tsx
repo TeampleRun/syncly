@@ -133,21 +133,21 @@ export default function StepsSection() {
                   </div>
                 </div>
                 <Image
-                  src="/landing/avatar-1.png"
+                  src="/images/landing/avatar-1.png"
                   alt="팀원 아바타"
                   width={65}
                   height={65}
                   className="absolute top-0 left-31.5 rounded-full"
                 />
                 <Image
-                  src="/landing/avatar-2.png"
+                  src="/images/landing/avatar-2.png"
                   alt="팀원 아바타"
                   width={65}
                   height={65}
                   className="absolute top-46.75 left-64.25 rounded-full"
                 />
                 <Image
-                  src="/landing/avatar-3.png"
+                  src="/images/landing/avatar-3.png"
                   alt="팀원 아바타"
                   width={65}
                   height={65}
