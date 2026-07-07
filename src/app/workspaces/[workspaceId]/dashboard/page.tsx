@@ -3,6 +3,7 @@
 // purpose는 추가 가능한 위젯을 템플릿별로 거르는 데만 쓰인다.
 import { getDashboardLayout } from '@/entities/dashboard-layout';
 import { DashboardView } from '@/views/dashboard';
+import { getWorkspace } from '@/entities/workspace';
 
 interface DashboardPageProps {
   params: Promise<{ workspaceId: string }>;
@@ -10,14 +11,17 @@ interface DashboardPageProps {
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { workspaceId } = await params;
-  const initialLayout = await getDashboardLayout(workspaceId, 'dashboard');
 
+    const [workspace, initialLayout] = await Promise.all([
+        getWorkspace(workspaceId),
+        getDashboardLayout(workspaceId, 'dashboard'),
+      ]);
   // TODO: purpose는 getWorkspace(workspaceId).purpose로 결정 (DB 연동 시). 현재는 테스트로 side-project 하드코딩.
   return (
     <DashboardView
       key={workspaceId}
       workspaceId={workspaceId}
-      purpose="side-project"
+      purpose={workspace.purpose}
       initialLayout={initialLayout}
     />
   );
