@@ -4,19 +4,21 @@
 import { Bell, Search, UserRoundPlus } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { mockCurrentWorkspaceMember } from '@/entities/workspace-member';
-import { storeOperationNavigationItems } from '../model/workspace-navigation';
+import type { WorkspaceNavigationItem } from '../model/workspace-navigation';
 
-function getCurrentPageTitle(pathname: string): string {
-  const currentNavigationItem = storeOperationNavigationItems.find((item) =>
-    pathname.endsWith(`/${item.href}`),
-  );
+interface WorkspaceHeaderProps {
+  navigationItems: WorkspaceNavigationItem[];
+}
+
+function getCurrentPageTitle(pathname: string, navigationItems: WorkspaceNavigationItem[]): string {
+  const currentNavigationItem = navigationItems.find((item) => pathname.endsWith(`/${item.href}`));
 
   return currentNavigationItem?.label ?? '대시보드';
 }
 
-export function WorkspaceHeader() {
+export function WorkspaceHeader({ navigationItems }: WorkspaceHeaderProps) {
   const pathname = usePathname();
-  const title = getCurrentPageTitle(pathname);
+  const title = getCurrentPageTitle(pathname, navigationItems);
 
   return (
     <header className="flex h-[72px] items-center justify-between border-b border-slate-200 bg-white px-8">
@@ -46,7 +48,7 @@ export function WorkspaceHeader() {
           className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100"
         >
           <Bell className="h-5 w-5" aria-hidden="true" />
-          <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-rose-500" />
+          <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-rose-500" />
         </button>
 
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-400 text-sm font-bold text-white">
