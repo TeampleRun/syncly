@@ -1,4 +1,5 @@
 // 워크스페이스 API 연결 전 사이드바에 표시하는 현재 워크스페이스 목업입니다.
+import { cache } from 'react';
 import type { Workspace } from './workspace.types';
 
 const mockWorkspacesById: Record<string, Workspace> = {
@@ -16,6 +17,6 @@ const mockWorkspacesById: Record<string, Workspace> = {
 
 export const mockWorkspace: Workspace = mockWorkspacesById['store-test'];
 
-export function getMockWorkspaceById(workspaceId: string): Workspace | null {
-  return mockWorkspacesById[workspaceId] ?? null;
-}
+export const getMockWorkspaceById = cache(
+  (workspaceId: string): Workspace | null => mockWorkspacesById[workspaceId] ?? null,
+);
