@@ -4,6 +4,7 @@
 import { Plus_Jakarta_Sans } from 'next/font/google';
 
 import { WorkspaceShell } from '@/widgets/workspace-shell';
+import { cn } from '@/shared/lib/utils';
 
 // Figma 지정 폰트 (랜딩과 동일) — 한글은 시스템 폰트로 fallback
 const jakarta = Plus_Jakarta_Sans({
@@ -20,9 +21,5 @@ interface WorkspaceLayoutProps {
 export default async function WorkspaceLayout({ children, params }: WorkspaceLayoutProps) {
   const { workspaceId } = await params;
 
-  return (
-    <div className={jakarta.className}>
-      <WorkspaceShell workspaceId={workspaceId}>{children}</WorkspaceShell>;
-    </div>
-  );
+  return <WorkspaceShell workspaceId={workspaceId}>{children}</WorkspaceShell>;
 }

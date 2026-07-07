@@ -13,7 +13,7 @@ import { DASHBOARD_WIDGETS, DEFAULT_LAYOUT } from '../config/widgets';
 import AddWidgetBar from './AddWidgetBar';
 import DashboardGrid from './DashboardGrid';
 
-export default function DashboardPage() {
+export default function DashboardPageView() {
   const { layout, hiddenIds, editMode, handleLayoutChange, removeWidget, addWidget, toggleEdit } =
     useDashboardLayout(DEFAULT_LAYOUT);
 
