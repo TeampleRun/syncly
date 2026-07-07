@@ -58,55 +58,63 @@ export default function DashboardGrid({
 
   return (
     <div ref={containerRef} className="w-full">
-      {isClient && width > 0 && (
-        <ReactGridLayout
-          // 보기 모드에서는 RGL이 남겨두는 리사이즈 핸들이 hover 시 노출되지 않도록 숨긴다.
-          className={editMode ? undefined : '[&_.react-resizable-handle]:hidden!'}
-          layout={activeLayout}
-          width={width}
-          onLayoutChange={onLayoutChange}
-          gridConfig={{ cols: 12, rowHeight: 40, margin: [16, 16], containerPadding: [0, 0] }}
-          dragConfig={{ enabled: editMode, handle: '.rgl-drag-handle' }}
-          resizeConfig={{ enabled: editMode, handleComponent: renderResizeHandle }}
-        >
-          {activeWidgets.map((widget) => {
-            const id = widget.layout.i;
-            const item = activeLayout.find((entry) => entry.i === id) ?? widget.layout;
-            const size = getWidgetSize(item.w, item.h);
-            return (
-              <div
-                key={id}
-                className={editMode ? 'group rounded-2xl ring-2 ring-[#a3b3ff]' : undefined}
-              >
-                {editMode && (
-                  <>
-                    {/* 좌상단 이동 핸들 */}
-                    <div
-                      className="rgl-drag-handle border-brand/10 text-brand-muted pointer-events-none absolute -top-2 -left-2 z-10 flex size-7 cursor-move items-center justify-center rounded-full border bg-white opacity-0 shadow-md transition-opacity group-hover:pointer-events-auto group-hover:opacity-100"
-                      aria-label="이동"
-                    >
-                      <GripVertical className="size-4" />
-                    </div>
-                    {/* 상단 크기 뱃지 */}
-                    <span className="bg-brand absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100">
-                      {item.w}열×{item.h}행
-                    </span>
-                    {/* 우상단 삭제 */}
-                    <button
-                      type="button"
-                      onClick={() => onRemove(id)}
-                      className="pointer-events-none absolute -top-2 -right-2 z-10 flex size-7 items-center justify-center rounded-full border border-[#fecaca] bg-white text-[#fb2c36] opacity-0 shadow-md transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-[#fff1f2]"
-                      aria-label="삭제"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  </>
-                )}
-                {widget.render(size)}
-              </div>
-            );
-          })}
-        </ReactGridLayout>
+      {activeWidgets.length === 0 ? (
+        <div className="text-brand-muted flex min-h-[60vh] flex-col items-center justify-center gap-1 text-center">
+          <p className="text-lg">아직 추가된 위젯이 없습니다.</p>
+          <p>필요한 위젯을 추가해 워크스페이스를 구성해보세요.</p>
+        </div>
+      ) : (
+        isClient &&
+        width > 0 && (
+          <ReactGridLayout
+            // 보기 모드에서는 RGL이 남겨두는 리사이즈 핸들이 hover 시 노출되지 않도록 숨긴다.
+            className={editMode ? undefined : '[&_.react-resizable-handle]:hidden!'}
+            layout={activeLayout}
+            width={width}
+            onLayoutChange={onLayoutChange}
+            gridConfig={{ cols: 12, rowHeight: 40, margin: [16, 16], containerPadding: [0, 0] }}
+            dragConfig={{ enabled: editMode, handle: '.rgl-drag-handle' }}
+            resizeConfig={{ enabled: editMode, handleComponent: renderResizeHandle }}
+          >
+            {activeWidgets.map((widget) => {
+              const id = widget.layout.i;
+              const item = activeLayout.find((entry) => entry.i === id) ?? widget.layout;
+              const size = getWidgetSize(item.w, item.h);
+              return (
+                <div
+                  key={id}
+                  className={editMode ? 'group rounded-2xl ring-2 ring-[#a3b3ff]' : undefined}
+                >
+                  {editMode && (
+                    <>
+                      {/* 좌상단 이동 핸들 */}
+                      <div
+                        className="rgl-drag-handle border-brand/10 text-brand-muted pointer-events-none absolute -top-2 -left-2 z-10 flex size-7 cursor-move items-center justify-center rounded-full border bg-white opacity-0 shadow-md transition-opacity group-hover:pointer-events-auto group-hover:opacity-100"
+                        aria-label="이동"
+                      >
+                        <GripVertical className="size-4" />
+                      </div>
+                      {/* 상단 크기 뱃지 */}
+                      <span className="bg-brand absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        {item.w}열×{item.h}행
+                      </span>
+                      {/* 우상단 삭제 */}
+                      <button
+                        type="button"
+                        onClick={() => onRemove(id)}
+                        className="pointer-events-none absolute -top-2 -right-2 z-10 flex size-7 items-center justify-center rounded-full border border-[#fecaca] bg-white text-[#fb2c36] opacity-0 shadow-md transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 hover:bg-[#fff1f2]"
+                        aria-label="삭제"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </>
+                  )}
+                  {widget.render(size)}
+                </div>
+              );
+            })}
+          </ReactGridLayout>
+        )
       )}
     </div>
   );
