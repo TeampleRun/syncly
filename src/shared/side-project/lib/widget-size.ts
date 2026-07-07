@@ -4,7 +4,7 @@ export type WidgetSize = 'sm' | 'md' | 'lg';
 
 export function getWidgetSize(w: number, h: number): WidgetSize {
   // 폭이 좁거나 높이가 낮으면 리스트를 담을 수 없으므로 sm(요약)
-  if (w <= 3 || h <= 2) return 'sm';
-  if (w <= 5) return 'md';
+  if (w <= 2 || h <= 2) return 'sm';
+  if (w <= 3) return 'md';
   return 'lg';
 }

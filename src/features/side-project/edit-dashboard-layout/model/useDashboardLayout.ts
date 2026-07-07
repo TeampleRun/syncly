@@ -10,11 +10,16 @@ import type { Layout } from 'react-grid-layout';
 const STORAGE_KEY = 'syncly-dashboard-layout';
 
 // 저장된 레이아웃을 읽어온다. SSR(window 없음)이나 파싱 실패 시 기본 레이아웃 사용.
+// 저장본에 없는 신규 위젯은 기본 배치로 채워 넣어, 위젯을 추가해도 유실되지 않게 한다.
 function loadLayout(defaultLayout: Layout): Layout {
   if (typeof window === 'undefined') return defaultLayout;
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved ? (JSON.parse(saved) as Layout) : defaultLayout;
+    if (!saved) return defaultLayout;
+    const savedLayout = JSON.parse(saved) as Layout;
+    const savedIds = new Set(savedLayout.map((item) => item.i));
+    const added = defaultLayout.filter((item) => !savedIds.has(item.i));
+    return added.length ? [...savedLayout, ...added] : savedLayout;
   } catch {
     return defaultLayout;
   }

@@ -8,6 +8,7 @@ import { Backlog } from '@/widgets/side-project/dashboard-backlog';
 import { MyTasks } from '@/widgets/side-project/dashboard-my-tasks';
 import { RecentNotes } from '@/widgets/side-project/dashboard-recent-notes';
 import { SprintSummary } from '@/widgets/side-project/dashboard-sprint-summary';
+import { TodaySchedule } from '@/widgets/side-project/dashboard-today-schedule';
 import { Velocity } from '@/widgets/side-project/dashboard-velocity';
 
 interface DashboardWidget {
@@ -19,18 +20,28 @@ interface DashboardWidget {
 // 12컬럼 기준 — 상단 요약(전체 폭), 하단 위젯 2×2
 export const DASHBOARD_WIDGETS: DashboardWidget[] = [
   {
-    layout: { i: 'sprint-summary', x: 0, y: 0, w: 12, h: 4, minW: 2, minH: 2 },
+    layout: { i: 'sprint-summary', x: 0, y: 0, w: 12, h: 4, minW: 6, minH: 4 },
     render: () => <SprintSummary />,
   },
   {
-    layout: { i: 'my-tasks', x: 0, y: 4, w: 6, h: 5, minW: 2, minH: 2 },
+    layout: { i: 'my-tasks', x: 0, y: 4, w: 6, h: 5, minW: 2, minH: 3 },
     render: (size) => <MyTasks size={size} />,
   },
-  { layout: { i: 'velocity', x: 6, y: 4, w: 6, h: 5, minW: 2, minH: 2 }, render: () => <Velocity /> },
-  { layout: { i: 'backlog', x: 0, y: 9, w: 6, h: 5, minW: 2, minH: 2 }, render: () => <Backlog /> },
   {
-    layout: { i: 'recent-notes', x: 6, y: 9, w: 6, h: 5, minW: 2, minH: 2 },
+    layout: { i: 'velocity', x: 6, y: 4, w: 6, h: 5, minW: 4, minH: 4 },
+    render: () => <Velocity />,
+  },
+  {
+    layout: { i: 'backlog', x: 0, y: 9, w: 6, h: 5, minW: 2, minH: 3 },
+    render: (size) => <Backlog size={size} />,
+  },
+  {
+    layout: { i: 'recent-notes', x: 6, y: 9, w: 6, h: 5, minW: 2, minH: 3 },
     render: (size) => <RecentNotes size={size} />,
+  },
+  {
+    layout: { i: 'today-schedule', x: 0, y: 14, w: 3, h: 4, minW: 2, minH: 3 },
+    render: (size) => <TodaySchedule size={size} />,
   },
 ];
 
