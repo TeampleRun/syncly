@@ -5,6 +5,7 @@ import type { Layout, LayoutItem } from 'react-grid-layout';
 
 import type { WidgetSize } from '@/shared/side-project/lib/widget-size';
 import { Backlog } from '@/widgets/side-project/dashboard-backlog';
+import { Calendar } from '@/widgets/side-project/dashboard-calendar';
 import { MyTasks } from '@/widgets/side-project/dashboard-my-tasks';
 import { RecentNotes } from '@/widgets/side-project/dashboard-recent-notes';
 import { SprintSummary } from '@/widgets/side-project/dashboard-sprint-summary';
@@ -50,6 +51,11 @@ export const DASHBOARD_WIDGETS: DashboardWidget[] = [
     layout: { i: 'today-schedule', x: 0, y: 14, w: 3, h: 4, minW: 2, minH: 3 },
     title: '오늘 일정',
     render: (size) => <TodaySchedule size={size} />,
+  },
+  {
+    layout: { i: 'calendar', x: 0, y: 18, w: 6, h: 8, minW: 4, minH: 6 },
+    title: '캘린더',
+    render: (size) => <Calendar size={size} />,
   },
 ];
 

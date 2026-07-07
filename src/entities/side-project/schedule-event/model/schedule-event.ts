@@ -21,3 +21,21 @@ export const mockTodaySchedule: ScheduleEvent[] = [
   { title: 'API 명세 마감', time: '16:00', type: 'deadline' },
   { title: '회고 준비', time: '17:00', type: 'meeting' },
 ];
+
+/** 월간 캘린더 데이터 */
+export interface CalendarMonth {
+  year: number;
+  /** 1-12 */
+  month: number;
+  /** 오늘 날짜(일). 해당 월이 아니면 null */
+  today: number | null;
+  /** 이벤트 점이 표시될 날짜(일) */
+  eventDays: number[];
+}
+
+export const mockCalendar: CalendarMonth = {
+  year: 2025,
+  month: 7,
+  today: 30,
+  eventDays: [2, 5, 8, 10, 14, 22, 28],
+};
