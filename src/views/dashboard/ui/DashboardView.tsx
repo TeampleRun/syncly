@@ -11,6 +11,7 @@ import {
   EditModeBanner,
   useDashboardLayout,
 } from '@/features/dashboard/edit-layout';
+import type { DashboardLayoutState } from '@/entities/dashboard-layout';
 import type { WorkspacePurpose } from '@/shared/dashboard/model/template';
 
 import { TEMPLATE_WIDGETS } from '../config/template-widgets';
@@ -25,6 +26,8 @@ interface DashboardViewProps {
   workspaceId: string;
   /** 워크스페이스 용도 — 추가 가능한 위젯을 템플릿별로 거른다(레이아웃 조회와는 무관) */
   purpose: WorkspacePurpose;
+  /** 서버(RSC)에서 조회한 초기 레이아웃 */
+  initialLayout: DashboardLayoutState;
   /** WORKSPACE_LAYOUTS.page_type — 한 워크스페이스의 여러 페이지를 구분 */
   pageType?: string;
 }
@@ -32,10 +35,11 @@ interface DashboardViewProps {
 export default function DashboardView({
   workspaceId,
   purpose,
+  initialLayout,
   pageType = 'dashboard',
 }: DashboardViewProps) {
   const { layout, editMode, handleLayoutChange, addWidget, removeWidget, toggleEdit } =
-    useDashboardLayout({ workspaceId, pageType });
+    useDashboardLayout({ workspaceId, pageType, initialLayout });
 
   // 이 템플릿이 허용하는 위젯 중, 아직 배치되지 않은 것 = 추가 가능 목록
   // TEMPLATE_WIDGETS[purpose]는 WidgetId[]라 카탈로그에 항상 존재한다.
