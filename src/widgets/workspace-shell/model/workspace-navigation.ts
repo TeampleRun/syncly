@@ -12,9 +12,6 @@ import {
   FileText,
   BarChart3,
   type LucideIcon,
-  BarChart3,
-  FileText,
-  Rocket,
 } from 'lucide-react';
 
 export interface WorkspaceNavigationItem {
