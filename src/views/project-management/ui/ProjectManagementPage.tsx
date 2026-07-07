@@ -6,10 +6,16 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ['400', '500', '600', '700', '800'],
 });
 
-export default function ProjectManagementPage() {
+type ProjectManagementPageProps = {
+  workspaceId: string;
+};
+
+export default function ProjectManagementPage({
+  workspaceId,
+}: ProjectManagementPageProps) {
   return (
-    <div className={`${jakarta.className} min-h-full bg-[#f7f8fc]`}>
-      <ProjectBoard />
+    <div className={`${jakarta.className} bg-brand-surface min-h-full`}>
+      <ProjectBoard workspaceId={workspaceId} />
     </div>
   );
 }

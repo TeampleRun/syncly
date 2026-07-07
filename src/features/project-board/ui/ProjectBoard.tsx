@@ -5,8 +5,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { ProjectColumn } from '@/entities/project-column';
 import type { ProjectBoardColumn } from '@/entities/project-column';
-import type { ProjectTask } from '@/entities/project-task';
-import { initialProjectBoard } from '../model/mockProjectBoard';
+import { getMockTasksByWorkspaceId } from '@/entities/task';
+import type { Task, TaskStatus } from '@/entities/task';
+import {
+  createProjectBoardColumns,
+  flattenProjectBoardColumns,
+} from '../model/project-board-columns';
 
 const DEFAULT_ASSIGNEE = {
   name: '김지은',
@@ -14,11 +18,19 @@ const DEFAULT_ASSIGNEE = {
   color: '#1BB6DB',
 };
 
-export function ProjectBoard() {
+type ProjectBoardProps = {
+  workspaceId: string;
+};
+
+export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [taskTitle, setTaskTitle] = useState('');
-  const [columns, setColumns] = useState(initialProjectBoard);
+  const [tasks, setTasks] = useState(() => getMockTasksByWorkspaceId(workspaceId));
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
+  const [dragOverState, setDragOverState] = useState<{
+    columnId: TaskStatus;
+    index: number;
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -30,9 +42,10 @@ export function ProjectBoard() {
   }, [isComposerOpen]);
 
   const taskCount = useMemo(
-    () => columns.reduce((count, column) => count + column.tasks.length, 0),
-    [columns],
+    () => tasks.length,
+    [tasks],
   );
+  const columns = useMemo(() => createProjectBoardColumns(tasks), [tasks]);
 
   const createTask = () => {
     const trimmedTitle = taskTitle.trim();
@@ -44,23 +57,18 @@ export function ProjectBoard() {
     const today = new Date();
     const formattedDate = `${today.getMonth() + 1}/${today.getDate()}`;
 
-    const newTask: ProjectTask = {
+    const newTask: Task = {
       id: `task-${taskCount + 1}-${Date.now()}`,
+      workspaceId,
       title: trimmedTitle,
       assignee: DEFAULT_ASSIGNEE.name,
       assigneeInitial: DEFAULT_ASSIGNEE.initial,
       assigneeColor: DEFAULT_ASSIGNEE.color,
       dueDate: formattedDate,
-      columnId: 'todo',
+      status: 'todo',
     };
 
-    setColumns((currentColumns) =>
-      currentColumns.map((column) =>
-        column.id === 'todo'
-          ? { ...column, tasks: [...column.tasks, newTask] }
-          : column,
-      ),
-    );
+    setTasks((currentTasks) => [...currentTasks, newTask]);
     setTaskTitle('');
     setIsComposerOpen(false);
   };
@@ -75,56 +83,81 @@ export function ProjectBoard() {
   };
 
   const handleDeleteTask = (taskId: string) => {
-    setColumns((currentColumns) =>
-      currentColumns.map((column) => ({
-        ...column,
-        tasks: column.tasks.filter((task) => task.id !== taskId),
-      })),
-    );
+    setTasks((currentTasks) => currentTasks.filter((task) => task.id !== taskId));
   };
 
-  const handleDropTask = (targetColumnId: string, droppedTaskId?: string) => {
+  const handleDropTask = (
+    targetColumnId: TaskStatus,
+    targetIndex: number,
+    droppedTaskId?: string,
+  ) => {
     const activeTaskId = droppedTaskId ?? draggingTaskId;
 
     if (!activeTaskId) {
       return;
     }
 
-    let movedTask: ProjectTask | null = null;
+    let movedTask: Task | null = null;
+    let sourceColumnId: TaskStatus | null = null;
 
     const nextColumns = columns.map((column) => {
-      const remainingTasks = column.tasks.filter((task) => {
-        const isDraggingTask = task.id === activeTaskId;
+      const taskIndex = column.tasks.findIndex((task) => task.id === activeTaskId);
 
-        if (isDraggingTask) {
-          movedTask = { ...task, columnId: targetColumnId };
-        }
+      if (taskIndex === -1) {
+        return column;
+      }
 
-        return !isDraggingTask;
-      });
+      sourceColumnId = column.id;
+      movedTask = { ...column.tasks[taskIndex], status: targetColumnId };
 
-      return { ...column, tasks: remainingTasks };
+      return {
+        ...column,
+        tasks: column.tasks.filter((task) => task.id !== activeTaskId),
+      };
     });
 
     if (!movedTask) {
       setDraggingTaskId(null);
+      setDragOverState(null);
       return;
     }
 
-    setColumns(
-      nextColumns.map((column) =>
-        column.id === targetColumnId
-          ? { ...column, tasks: [...column.tasks, movedTask] }
-          : column,
-      ),
-    );
+    const nextTask = movedTask;
+
+    const reorderedColumns = nextColumns.map((column) => {
+      if (column.id !== targetColumnId) {
+        return column;
+      }
+
+      const insertionIndex =
+        sourceColumnId === targetColumnId
+          ? Math.min(targetIndex, column.tasks.length)
+          : Math.min(targetIndex, column.tasks.length);
+
+      return {
+        ...column,
+        tasks: [
+          ...column.tasks.slice(0, insertionIndex),
+          nextTask,
+          ...column.tasks.slice(insertionIndex),
+        ],
+      };
+    });
+
+    setTasks(flattenProjectBoardColumns(reorderedColumns));
     setDraggingTaskId(null);
+    setDragOverState(null);
   };
 
   const handleDragStartTask = (event: DragEvent<HTMLElement>, taskId: string) => {
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/plain', taskId);
     setDraggingTaskId(taskId);
+  };
+
+  const handleDragEndTask = () => {
+    setDraggingTaskId(null);
+    setDragOverState(null);
   };
 
   return (
@@ -178,8 +211,19 @@ export function ProjectBoard() {
             onDeleteTask={handleDeleteTask}
             onDropTask={handleDropTask}
             onDragStartTask={handleDragStartTask}
-            onDragEndTask={() => setDraggingTaskId(null)}
+            onDragEndTask={handleDragEndTask}
             draggingTaskId={draggingTaskId}
+            dragOverIndex={
+              dragOverState?.columnId === column.id ? dragOverState.index : null
+            }
+            onDragOverTask={(columnId, index) =>
+              setDragOverState({ columnId, index })
+            }
+            onDragLeaveColumn={(columnId) => {
+              setDragOverState((current) =>
+                current?.columnId === columnId ? null : current,
+              );
+            }}
           />
         ))}
       </div>

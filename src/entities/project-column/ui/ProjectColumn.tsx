@@ -1,15 +1,18 @@
 import type { DragEvent } from 'react';
-import { ProjectTaskCard } from '@/entities/project-task';
+import { TaskCard } from '@/entities/task';
 import { cn } from '@/shared/lib/utils';
 import type { ProjectBoardColumn } from '../model/types';
 
 type ProjectColumnProps = {
   column: ProjectBoardColumn;
   onDeleteTask: (taskId: string) => void;
-  onDropTask: (columnId: string, taskId?: string) => void;
+  onDropTask: (columnId: string, targetIndex: number, taskId?: string) => void;
   onDragStartTask: (event: DragEvent<HTMLElement>, taskId: string) => void;
   onDragEndTask: () => void;
   draggingTaskId: string | null;
+  dragOverIndex: number | null;
+  onDragOverTask: (columnId: string, targetIndex: number) => void;
+  onDragLeaveColumn: (columnId: string) => void;
 };
 
 const toneStyles = {
@@ -25,20 +28,25 @@ export function ProjectColumn({
   onDragStartTask,
   onDragEndTask,
   draggingTaskId,
+  dragOverIndex,
+  onDragOverTask,
+  onDragLeaveColumn,
 }: ProjectColumnProps) {
-  const handleDrop = (event: DragEvent<HTMLElement>) => {
+  const handleDrop = (event: DragEvent<HTMLElement>, targetIndex: number) => {
     event.preventDefault();
     event.stopPropagation();
     const taskId = event.dataTransfer.getData('text/plain') || undefined;
-    onDropTask(column.id, taskId);
+    onDropTask(column.id, targetIndex, taskId);
   };
 
   return (
     <section
       className="rounded-[20px] bg-[#f1f3f999] p-5"
-      onDragOver={(event) => event.preventDefault()}
-      onDragEnter={(event) => event.preventDefault()}
-      onDrop={handleDrop}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          onDragLeaveColumn(column.id);
+        }
+      }}
     >
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
@@ -50,20 +58,39 @@ export function ProjectColumn({
 
       <div
         className="mt-4 min-h-[220px] space-y-3.5 rounded-[16px]"
-        onDragOver={(event) => event.preventDefault()}
-        onDragEnter={(event) => event.preventDefault()}
-        onDrop={handleDrop}
+        onDragOver={(event) => {
+          event.preventDefault();
+          onDragOverTask(column.id, column.tasks.length);
+        }}
+        onDrop={(event) => handleDrop(event, column.tasks.length)}
       >
-        {column.tasks.map((task) => (
-          <ProjectTaskCard
+        {column.tasks.map((task, index) => (
+          <div
             key={task.id}
-            task={task}
-            onDelete={onDeleteTask}
-            onDragStart={onDragStartTask}
-            onDragEnd={onDragEndTask}
-            isDragging={draggingTaskId === task.id}
-          />
+            className={cn(
+              'rounded-[18px] transition-all',
+              dragOverIndex === index && 'relative before:absolute before:-top-2 before:left-0 before:h-1 before:w-full before:rounded-full before:bg-brand',
+            )}
+            onDragOver={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onDragOverTask(column.id, index);
+            }}
+            onDrop={(event) => handleDrop(event, index)}
+          >
+            <TaskCard
+              task={task}
+              onDelete={onDeleteTask}
+              onDragStart={onDragStartTask}
+              onDragEnd={onDragEndTask}
+              isDragging={draggingTaskId === task.id}
+            />
+          </div>
         ))}
+
+        {dragOverIndex === column.tasks.length ? (
+          <div className="h-1 w-full rounded-full bg-brand" />
+        ) : null}
       </div>
     </section>
   );

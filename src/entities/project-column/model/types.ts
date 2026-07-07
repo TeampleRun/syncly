@@ -1,10 +1,10 @@
-import type { ProjectTask } from '@/entities/project-task';
+import type { Task, TaskStatus } from '@/entities/task';
 
 export type ProjectColumnTone = 'slate' | 'brand' | 'green';
 
 export type ProjectBoardColumn = {
-  id: string;
+  id: TaskStatus;
   title: string;
   tone: ProjectColumnTone;
-  tasks: ProjectTask[];
+  tasks: Task[];
 };

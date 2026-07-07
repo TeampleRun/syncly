@@ -1,5 +1,15 @@
 import { ProjectManagementPage } from '@/views/project-management';
 
-export default function WorkspaceProjectManagementPage() {
-  return <ProjectManagementPage />;
+interface WorkspaceProjectManagementPageProps {
+  params: Promise<{
+    workspaceId: string;
+  }>;
+}
+
+export default async function WorkspaceProjectManagementPage({
+  params,
+}: WorkspaceProjectManagementPageProps) {
+  const { workspaceId } = await params;
+
+  return <ProjectManagementPage workspaceId={workspaceId} />;
 }
