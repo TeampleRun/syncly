@@ -2,19 +2,19 @@
 
 // 공통 워크스페이스 사이드바, 헤더, 페이지 콘텐츠 프레임을 조합합니다.
 import { useState } from 'react';
+import type { Workspace } from '@/entities/workspace';
 import { WorkspaceHeader } from './WorkspaceHeader';
 import { WorkspaceSidebar } from './WorkspaceSidebar';
-import { getMockWorkspaceById } from '@/entities/workspace';
 import { getWorkspaceNavigation } from '@/widgets/workspace-shell/lib/get-workspace-navigation';
 
 interface WorkspaceShellProps {
+  workspace: Workspace;
   workspaceId: string;
   children: React.ReactNode;
 }
 
-export function WorkspaceShell({ workspaceId, children }: WorkspaceShellProps) {
+export function WorkspaceShell({ workspace, workspaceId, children }: WorkspaceShellProps) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const workspace = getMockWorkspaceById(workspaceId); // 나중에는 workspaceId로 Supabase 조회
   const navigationItems = getWorkspaceNavigation(workspace.purpose);
 
   return (

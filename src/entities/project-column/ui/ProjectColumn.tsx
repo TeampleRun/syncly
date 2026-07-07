@@ -17,9 +17,9 @@ type ProjectColumnProps = {
 };
 
 const toneStyles = {
-  slate: 'bg-[#f1f3f999] text-[#9aa3b2]',
-  brand: 'bg-[#f1f3f999] text-brand-start',
-  green: 'bg-[#f1f3f999] text-[#00c950]',
+  slate: 'bg-brand-panel-soft text-[#9aa3b2]',
+  brand: 'bg-brand-panel-soft text-brand-start',
+  green: 'bg-brand-panel-soft text-[#00c950]',
 } as const;
 
 export function ProjectColumn({
@@ -42,7 +42,7 @@ export function ProjectColumn({
 
   return (
     <section
-      className="rounded-[20px] bg-[#f1f3f999] p-5"
+      className="bg-brand-panel-soft rounded-[20px] p-5"
       onDragLeave={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
           onDragLeaveColumn(column.id);

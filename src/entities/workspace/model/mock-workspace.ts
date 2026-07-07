@@ -16,6 +16,6 @@ const mockWorkspacesById: Record<string, Workspace> = {
 
 export const mockWorkspace: Workspace = mockWorkspacesById['store-test'];
 
-export function getMockWorkspaceById(workspaceId: string): Workspace {
-  return mockWorkspacesById[workspaceId] ?? mockWorkspace;
+export function getMockWorkspaceById(workspaceId: string): Workspace | null {
+  return mockWorkspacesById[workspaceId] ?? null;
 }

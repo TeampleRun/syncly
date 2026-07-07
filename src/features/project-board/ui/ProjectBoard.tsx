@@ -99,6 +99,7 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
 
     let movedTask: Task | null = null;
     let sourceColumnId: TaskStatus | null = null;
+    let sourceTaskIndex: number | null = null;
 
     const nextColumns = columns.map((column) => {
       const taskIndex = column.tasks.findIndex((task) => task.id === activeTaskId);
@@ -108,6 +109,7 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
       }
 
       sourceColumnId = column.id;
+      sourceTaskIndex = taskIndex;
       movedTask = { ...column.tasks[taskIndex], status: targetColumnId };
 
       return {
@@ -131,7 +133,12 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
 
       const insertionIndex =
         sourceColumnId === targetColumnId
-          ? Math.min(targetIndex, column.tasks.length)
+          ? Math.min(
+              sourceTaskIndex !== null && sourceTaskIndex < targetIndex
+                ? targetIndex - 1
+                : targetIndex,
+              column.tasks.length,
+            )
           : Math.min(targetIndex, column.tasks.length);
 
       return {
