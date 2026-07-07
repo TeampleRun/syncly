@@ -6,6 +6,10 @@ import type { Layout, LayoutItem } from 'react-grid-layout';
 
 import { getDashboardLayout, saveDashboardLayout } from '@/entities/dashboard-layout';
 
+// 저장·상태로 남기는 값은 위치(i,x,y,w,h)만 — minW/minH 등 위젯 제약은 카탈로그가 소유하며
+// 렌더 시점에 머지한다(DB에 위젯 설정이 중복 저장되지 않도록).
+const toPosition = ({ i, x, y, w, h }: LayoutItem): LayoutItem => ({ i, x, y, w, h });
+
 interface UseDashboardLayoutParams {
   /** 영속화 키 — 어떤 워크스페이스의 어떤 페이지 레이아웃인지 */
   workspaceId: string;
@@ -38,8 +42,9 @@ export function useDashboardLayout({ workspaceId, pageType }: UseDashboardLayout
 
   const handleLayoutChange = useCallback(
     (next: Layout) => {
-      setLayout(next);
-      commit(next);
+      const positions = next.map(toPosition);
+      setLayout(positions);
+      commit(positions);
     },
     [commit],
   );
@@ -48,7 +53,7 @@ export function useDashboardLayout({ workspaceId, pageType }: UseDashboardLayout
     (item: LayoutItem) =>
       setLayout((prev) => {
         if (prev.some((entry) => entry.i === item.i)) return prev;
-        const next = [...prev, item];
+        const next = [...prev, toPosition(item)];
         commit(next);
         return next;
       }),

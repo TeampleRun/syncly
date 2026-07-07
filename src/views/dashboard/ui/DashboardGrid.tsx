@@ -56,7 +56,10 @@ export default function DashboardGrid({
 
   const byId = new Map(widgets.map((widget) => [widget.layout.i, widget] as const));
   // 카탈로그에 렌더러가 있는 항목만 — layout prop과 children이 항상 일치하도록 이 목록만 사용한다.
-  const visibleLayout = layout.filter((item) => byId.has(item.i));
+  // 저장된 값은 위치(i,x,y,w,h)뿐이므로, 위젯 제약(minW/minH 등)은 카탈로그에서 머지한다.
+  const visibleLayout = layout
+    .filter((item) => byId.has(item.i))
+    .map((item) => ({ ...byId.get(item.i)!.layout, ...item }));
 
   return (
     <div ref={containerRef} className="w-full">
