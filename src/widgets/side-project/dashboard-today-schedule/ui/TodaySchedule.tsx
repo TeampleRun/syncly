@@ -2,16 +2,9 @@
 //  · sm: 다음 일정 1건(액센트 바 + 제목 + 시간 + 외 N건)
 //  · md: 3건 리스트
 //  · lg: 전체 리스트 (일정 유형별 액센트 바 색상 — 마감=빨강)
-import {
-  mockTodaySchedule,
-  SCHEDULE_TYPE_COLOR,
-} from '@/entities/side-project/schedule-event';
+import { mockTodaySchedule, SCHEDULE_TYPE_COLOR } from '@/entities/side-project/schedule-event';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
-import {
-  WidgetCard,
-  WidgetCardAction,
-  WidgetCardHeader,
-} from '@/shared/dashboard/ui/widget-card';
+import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
 const header = (
   <WidgetCardHeader title="오늘 일정" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />

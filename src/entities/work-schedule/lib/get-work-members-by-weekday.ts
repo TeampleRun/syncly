@@ -16,7 +16,9 @@ export function getWorkMembersByWeekday({
   config,
   weekday,
 }: GetWorkMembersByWeekdayParams): WorkspaceMember[] {
-  const offShiftIds = new Set(config.shifts.filter((shift) => shift.isOff).map((shift) => shift.id));
+  const offShiftIds = new Set(
+    config.shifts.filter((shift) => shift.isOff).map((shift) => shift.id),
+  );
 
   const workingUserIds = new Set(
     schedule

@@ -20,7 +20,7 @@ export default function DashboardEditToggle({ editing, onToggle }: DashboardEdit
         'fixed right-6 bottom-6 z-20 flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold shadow-lg transition-colors',
         editing
           ? 'bg-[#4f39f6] text-white hover:bg-[#4530d9]'
-          : 'text-brand-ink hover:bg-brand-surface border border-brand/10 bg-white',
+          : 'text-brand-ink hover:bg-brand-surface border-brand/10 border bg-white',
       )}
     >
       {editing ? <Check className="size-4" /> : <Pencil className="size-4" />}

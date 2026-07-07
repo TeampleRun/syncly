@@ -7,7 +7,7 @@ function WidgetCard({ className, children, ...props }: React.ComponentProps<'div
   return (
     <div
       className={cn(
-        'flex h-full flex-col overflow-hidden rounded-2xl border border-brand/10 bg-white p-5',
+        'border-brand/10 flex h-full flex-col overflow-hidden rounded-2xl border bg-white p-5',
         className,
       )}
       {...props}

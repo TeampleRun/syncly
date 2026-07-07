@@ -53,9 +53,10 @@ export default function MyTasks({ size = 'md' }: { size?: WidgetSize }) {
     return (
       <WidgetCard>
         {header}
-        <div className="text-brand-muted mb-3 flex gap-4 border-b border-brand/10 pb-2 text-xs">
+        <div className="text-brand-muted border-brand/10 mb-3 flex gap-4 border-b pb-2 text-xs">
           <span>
-            진행 중 <strong style={{ color: TASK_STATUS.progress.text }}>{countBy('progress')}</strong>
+            진행 중{' '}
+            <strong style={{ color: TASK_STATUS.progress.text }}>{countBy('progress')}</strong>
           </span>
           <span>
             대기 <strong style={{ color: TASK_STATUS.todo.text }}>{countBy('todo')}</strong>

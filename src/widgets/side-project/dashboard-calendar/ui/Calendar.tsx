@@ -4,11 +4,7 @@
 import { mockCalendar } from '@/entities/side-project/schedule-event';
 import { cn } from '@/shared/lib/utils';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
-import {
-  WidgetCard,
-  WidgetCardAction,
-  WidgetCardHeader,
-} from '@/shared/dashboard/ui/widget-card';
+import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -26,7 +22,10 @@ export default function Calendar({ size = 'md' }: { size?: WidgetSize }) {
   const { year, month, today, eventDays } = mockCalendar;
 
   const header = (
-    <WidgetCardHeader title={`${month}월 캘린더`} action={<WidgetCardAction>전체 보기</WidgetCardAction>} />
+    <WidgetCardHeader
+      title={`${month}월 캘린더`}
+      action={<WidgetCardAction>전체 보기</WidgetCardAction>}
+    />
   );
 
   if (size === 'sm') {

@@ -16,7 +16,7 @@ export default function Velocity() {
         </div>
 
         <div className="flex flex-1 flex-col">
-          <div className="flex flex-1 items-end justify-around gap-6 border-b border-brand/10">
+          <div className="border-brand/10 flex flex-1 items-end justify-around gap-6 border-b">
             {sprintVelocity.map((point) => (
               <div key={point.sprint} className="flex h-full items-end gap-1.5">
                 <div

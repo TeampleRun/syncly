@@ -25,12 +25,12 @@ export const WIDGET_CATALOG = {
     title: '내 업무',
     render: (size) => <MyTasks size={size} />,
   },
-  'velocity': {
+  velocity: {
     layout: { i: 'velocity', x: 6, y: 0, w: 6, h: 5, minW: 4, minH: 4 },
     title: '벨로시티',
     render: () => <Velocity />,
   },
-  'backlog': {
+  backlog: {
     layout: { i: 'backlog', x: 0, y: 5, w: 6, h: 5, minW: 2, minH: 3 },
     title: '백로그',
     render: (size) => <Backlog size={size} />,
@@ -45,7 +45,7 @@ export const WIDGET_CATALOG = {
     title: '오늘 일정',
     render: (size) => <TodaySchedule size={size} />,
   },
-  'calendar': {
+  calendar: {
     layout: { i: 'calendar', x: 0, y: 14, w: 6, h: 8, minW: 4, minH: 6 },
     title: '캘린더',
     render: (size) => <Calendar size={size} />,

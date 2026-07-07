@@ -5,7 +5,9 @@ import { BACKLOG_PRIORITY_COLOR, mockBacklog } from '@/entities/side-project/bac
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
-const header = <WidgetCardHeader title="백로그" action={<WidgetCardAction>보드</WidgetCardAction>} />;
+const header = (
+  <WidgetCardHeader title="백로그" action={<WidgetCardAction>보드</WidgetCardAction>} />
+);
 
 export default function Backlog({ size = 'md' }: { size?: WidgetSize }) {
   if (size === 'sm') {
