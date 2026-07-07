@@ -2,7 +2,7 @@
 // WIDGET_CATALOG(전역)의 부분집합이며, 렌더·기본배치는 카탈로그가 담당한다.
 // 값 타입이 WidgetId라 카탈로그에 없는 id를 적으면 컴파일 에러가 난다.
 // 이 목록은 "추가 메뉴 스코프"만 정한다 — 레이아웃 조회/저장(user_id+workspace_id)과는 무관.
-import type { WorkspacePurpose } from '@/shared/dashboard/model/template';
+import type { WorkspacePurpose } from '@/shared/dashboard/model/template.types';
 
 import type { WidgetId } from './widget-catalog';
 

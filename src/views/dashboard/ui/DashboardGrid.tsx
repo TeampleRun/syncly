@@ -13,7 +13,7 @@ import type { Layout, ResizeHandleAxis } from 'react-grid-layout';
 import { Maximize2, GripVertical, Trash2 } from 'lucide-react';
 
 import { getWidgetSize } from '@/shared/dashboard/lib/widget-size';
-import type { WidgetDefinition } from '@/shared/dashboard/model/widget';
+import type { WidgetDefinition } from '@/shared/dashboard/model/widget.types';
 
 const emptySubscribe = () => () => {};
 // 서버: false, 클라이언트 마운트 이후: true (hydration 렌더는 서버 스냅샷을 사용해 일치 보장)

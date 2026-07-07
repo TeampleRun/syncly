@@ -1,10 +1,5 @@
-// 회의록(MeetingNote) 도메인 모델 + 목데이터
-export interface MeetingNote {
-  title: string;
-  date: string;
-  /** 본문 요약(미리보기) */
-  summary: string;
-}
+// 회의록 목데이터
+import type { MeetingNote } from './meeting-note.types';
 
 export const mockMeetingNotes: MeetingNote[] = [
   {

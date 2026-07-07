@@ -2,7 +2,7 @@
 // 각 항목이 렌더러 + 추가 시 기본 배치를 함께 가진다(템플릿별 구분 없음).
 // id를 키로 두어, 여기서 WidgetId를 파생한다 → TEMPLATE_WIDGETS 등이 존재하지 않는 id를 쓰면 컴파일 에러.
 // 대시보드는 빈 상태로 시작하고, 편집 모드에서 이 카탈로그의 위젯을 추가해 구성한다.
-import type { WidgetDefinition } from '@/shared/dashboard/model/widget';
+import type { WidgetDefinition } from '@/shared/dashboard/model/widget.types';
 import { Backlog } from '@/widgets/side-project/dashboard-backlog';
 import { Calendar } from '@/widgets/side-project/dashboard-calendar';
 import { MyTasks } from '@/widgets/side-project/dashboard-my-tasks';

@@ -12,7 +12,7 @@ import {
   useDashboardLayout,
 } from '@/features/dashboard/edit-layout';
 import type { DashboardLayoutState } from '@/entities/dashboard-layout';
-import type { WorkspacePurpose } from '@/shared/dashboard/model/template';
+import type { WorkspacePurpose } from '@/shared/dashboard/model/template.types';
 
 import { TEMPLATE_WIDGETS } from '../config/template-widgets';
 import { WIDGET_CATALOG, type WidgetId } from '../config/widget-catalog';
