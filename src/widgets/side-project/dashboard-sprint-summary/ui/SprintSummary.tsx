@@ -1,6 +1,6 @@
 // 스프린트 요약 위젯 — 스프린트 배너 + 포인트 통계 3종을 하나의 카드로 조립
 import { currentSprint, sprintStats } from '@/entities/side-project/sprint';
-import { StatCard } from '@/shared/side-project/ui/stat-card';
+import { StatCard } from '@/shared/dashboard/ui/stat-card';
 
 export default function SprintSummary() {
   const [planned, done, remaining] = sprintStats;

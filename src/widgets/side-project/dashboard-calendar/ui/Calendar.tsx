@@ -8,7 +8,7 @@ import {
   WidgetCard,
   WidgetCardAction,
   WidgetCardHeader,
-} from '@/shared/side-project/ui/widget-card';
+} from '@/shared/dashboard/ui/widget-card';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 

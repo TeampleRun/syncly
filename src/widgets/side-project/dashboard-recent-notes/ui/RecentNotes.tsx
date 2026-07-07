@@ -6,7 +6,7 @@ import { FileText } from 'lucide-react';
 
 import { mockMeetingNotes } from '@/entities/side-project/meeting-note';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
-import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/side-project/ui/widget-card';
+import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
 const header = (
   <WidgetCardHeader title="최근 회의록" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />

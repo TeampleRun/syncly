@@ -11,7 +11,7 @@ import {
   WidgetCard,
   WidgetCardAction,
   WidgetCardHeader,
-} from '@/shared/side-project/ui/widget-card';
+} from '@/shared/dashboard/ui/widget-card';
 
 const header = (
   <WidgetCardHeader title="오늘 일정" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />

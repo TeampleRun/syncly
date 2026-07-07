@@ -4,7 +4,7 @@
 //  · lg: 상태별 카운트 요약 + task 리스트
 import { mockTasks, TASK_STATUS, type TaskStatus } from '@/entities/side-project/task';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
-import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/side-project/ui/widget-card';
+import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
 const header = (
   <WidgetCardHeader title="내 업무" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />

@@ -1,7 +1,7 @@
 // 벨로시티 위젯 — 스프린트별 계획/완료 포인트를 막대로 비교
 // 막대가 2그룹뿐이라 별도 차트 라이브러리 없이 순수 CSS(div height %)로 구현한다.
 import { sprintVelocity, VELOCITY_MAX } from '@/entities/side-project/sprint';
-import { WidgetCard, WidgetCardHeader } from '@/shared/side-project/ui/widget-card';
+import { WidgetCard, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
 export default function Velocity() {
   return (
