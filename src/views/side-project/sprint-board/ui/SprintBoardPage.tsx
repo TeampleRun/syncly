@@ -4,6 +4,8 @@ import { Plus_Jakarta_Sans } from 'next/font/google';
 
 import { SprintBoard } from '@/features/sprint-board';
 
+import SprintSummaryHeader from './SprintSummaryHeader';
+
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
@@ -12,7 +14,7 @@ const jakarta = Plus_Jakarta_Sans({
 export default function SprintBoardPage() {
   return (
     <div className={`${jakarta.className} bg-brand-surface min-h-full p-6`}>
-      {/* TODO(Epic B): <SprintSummaryHeader /> */}
+      <SprintSummaryHeader />
       <SprintBoard />
     </div>
   );
