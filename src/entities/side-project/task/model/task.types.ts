@@ -15,6 +15,7 @@ export const TASK_STATUS: Record<TaskStatus, StatusStyle> = {
 };
 
 export interface Task {
+  id: string;
   title: string;
   point: number;
   status: TaskStatus;

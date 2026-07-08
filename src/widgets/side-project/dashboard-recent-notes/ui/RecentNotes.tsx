@@ -33,7 +33,7 @@ export default function RecentNotes({ size = 'md' }: { size?: WidgetSize }) {
         <p className="text-brand-muted mb-2 text-xs">총 {mockMeetingNotes.length}개의 회의록</p>
         <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
           {mockMeetingNotes.map((note) => (
-            <li key={note.title} className="bg-brand-surface flex items-start gap-2 rounded-xl p-3">
+            <li key={note.id} className="bg-brand-surface flex items-start gap-2 rounded-xl p-3">
               <FileText className="text-brand-muted mt-0.5 size-4 shrink-0" />
               <div className="min-w-0">
                 <p className="text-brand-ink truncate text-sm font-semibold">{note.title}</p>
@@ -53,7 +53,7 @@ export default function RecentNotes({ size = 'md' }: { size?: WidgetSize }) {
       {header}
       <ul className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
         {mockMeetingNotes.map((note) => (
-          <li key={note.title} className="flex items-start gap-2">
+          <li key={note.id} className="flex items-start gap-2">
             <FileText className="text-brand-muted mt-0.5 size-4 shrink-0" />
             <div className="min-w-0">
               <p className="text-brand-ink truncate text-sm font-semibold">{note.title}</p>

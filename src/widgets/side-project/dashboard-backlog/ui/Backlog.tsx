@@ -32,7 +32,7 @@ export default function Backlog({ size = 'md' }: { size?: WidgetSize }) {
       {header}
       <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
         {mockBacklog.map((item) => (
-          <li key={item.title} className="flex items-center gap-2">
+          <li key={item.id} className="flex items-center gap-2">
             <span
               className="size-1.5 shrink-0 rounded-full"
               style={{ backgroundColor: BACKLOG_PRIORITY_COLOR[item.priority] }}

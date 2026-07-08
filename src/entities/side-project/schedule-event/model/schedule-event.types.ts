@@ -8,6 +8,7 @@ export const SCHEDULE_TYPE_COLOR: Record<ScheduleEventType, string> = {
 };
 
 export interface ScheduleEvent {
+  id: string;
   title: string;
   time: string;
   type: ScheduleEventType;

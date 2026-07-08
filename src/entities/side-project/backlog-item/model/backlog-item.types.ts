@@ -9,6 +9,7 @@ export const BACKLOG_PRIORITY_COLOR: Record<BacklogPriority, string> = {
 };
 
 export interface BacklogItem {
+  id: string;
   title: string;
   point: number;
   priority: BacklogPriority;

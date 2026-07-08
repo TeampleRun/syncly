@@ -30,7 +30,7 @@ export default function MyTasks({ size = 'md' }: { size?: WidgetSize }) {
       {mockTasks.map((task) => {
         const status = TASK_STATUS[task.status];
         return (
-          <li key={task.title} className="flex items-center gap-2">
+          <li key={task.id} className="flex items-center gap-2">
             <span
               className="size-1.5 shrink-0 rounded-full"
               style={{ backgroundColor: status.dot }}

@@ -41,7 +41,7 @@ export default function TodaySchedule({ size = 'md' }: { size?: WidgetSize }) {
       {header}
       <ul className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
         {events.map((event) => (
-          <li key={`${event.title}-${event.time}`} className="flex items-start gap-3">
+          <li key={event.id} className="flex items-start gap-3">
             <span
               className="w-1 shrink-0 self-stretch rounded-full"
               style={{ backgroundColor: SCHEDULE_TYPE_COLOR[event.type] }}
