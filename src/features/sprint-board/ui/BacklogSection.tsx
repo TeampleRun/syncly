@@ -10,7 +10,14 @@ import type { Task } from '@/entities/side-project/task';
 
 import { BacklogRow } from './BacklogRow';
 
-export function BacklogSection({ tasks }: { tasks: Task[] }) {
+interface BacklogSectionProps {
+  tasks: Task[];
+  onAdd: () => void;
+  onEdit: (task: Task) => void;
+  onDelete: (taskId: string) => void;
+}
+
+export function BacklogSection({ tasks, onAdd, onEdit, onDelete }: BacklogSectionProps) {
   const [open, setOpen] = useState(true);
 
   return (
@@ -38,13 +45,18 @@ export function BacklogSection({ tasks }: { tasks: Task[] }) {
         <div className="border-brand/10 border-t px-4 pb-4">
           <div className="divide-brand/10 divide-y">
             {tasks.map((task) => (
-              <BacklogRow key={task.id} task={task} />
+              <BacklogRow
+                key={task.id}
+                task={task}
+                onEdit={() => onEdit(task)}
+                onDelete={() => onDelete(task.id)}
+              />
             ))}
           </div>
 
-          {/* TODO(Epic E): 백로그 항목 추가 동작 연결 */}
           <button
             type="button"
+            onClick={onAdd}
             className="text-brand mt-3 flex items-center gap-1 text-sm font-semibold"
           >
             <Plus className="size-4" aria-hidden="true" />

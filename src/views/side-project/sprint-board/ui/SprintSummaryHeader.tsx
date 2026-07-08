@@ -1,6 +1,6 @@
-// 스프린트 요약 헤더 — 현재 스프린트 메타(기간·진행률·남은 일수/포인트)를 그라데이션 배너로 표시.
-// 순수 표시용이라 currentSprint를 직접 읽는다(상호작용 없음). 진행률은 완료/총 포인트에서 파생.
-import { currentSprint } from '@/entities/side-project/sprint';
+// 스프린트 요약 헤더 — 스프린트 메타(기간·진행률·남은 일수/포인트)를 그라데이션 배너로 표시.
+// 순수 표시용이라 sprint를 props로 받는다(상호작용 없음). 진행률은 완료/총 포인트에서 파생.
+import type { Sprint } from '@/entities/side-project/sprint';
 
 // 'YYYY-MM-DD' → 'M/D'
 const monthDay = (iso: string) => {
@@ -8,8 +8,8 @@ const monthDay = (iso: string) => {
   return `${Number(month)}/${Number(day)}`;
 };
 
-export default function SprintSummaryHeader() {
-  const { name, startDate, endDate, daysLeft, totalPoints, completedPoints } = currentSprint;
+export default function SprintSummaryHeader({ sprint }: { sprint: Sprint }) {
+  const { name, startDate, endDate, daysLeft, totalPoints, completedPoints } = sprint;
   const remainingPoints = totalPoints - completedPoints;
   const percent = totalPoints === 0 ? 0 : Math.round((completedPoints / totalPoints) * 100);
   const period = `${monthDay(startDate)} – ${monthDay(endDate)}`;
