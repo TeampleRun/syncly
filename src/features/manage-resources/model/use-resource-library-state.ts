@@ -32,7 +32,8 @@ export function useResourceLibraryState({
   uploaderName,
 }: UseResourceLibraryStateParams) {
   const workspaceResources = useMemo(
-    () => sortResources(initialResources.filter((resource) => resource.workspaceId === workspaceId)),
+    () =>
+      sortResources(initialResources.filter((resource) => resource.workspaceId === workspaceId)),
     [initialResources, workspaceId],
   );
   const [resourcesByWorkspaceId, setResourcesByWorkspaceId] = useState<

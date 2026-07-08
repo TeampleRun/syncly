@@ -166,26 +166,25 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
   return (
     <section className="mx-auto flex max-w-[1284px] flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-[32px] leading-tight font-extrabold tracking-[-0.04em] text-brand-ink">
+        <h2 className="text-brand-ink text-[32px] leading-tight font-extrabold tracking-[-0.04em]">
           프로젝트 관리
         </h2>
         <button
           type="button"
           onClick={() => setIsComposerOpen(true)}
-          className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-deep"
+          className="bg-brand hover:bg-brand-deep inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white transition-colors"
         >
-          <Plus className="size-4" />
-          새 업무
+          <Plus className="size-4" />새 업무
         </button>
       </div>
 
       {isComposerOpen ? (
-        <div className="rounded-[24px] border border-brand/20 bg-white px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-          <div className="flex items-center gap-3 rounded-full bg-brand-secondary px-5 py-3">
+        <div className="border-brand/20 rounded-[24px] border bg-white px-4 py-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+          <div className="bg-brand-secondary flex items-center gap-3 rounded-full px-5 py-3">
             <input
               ref={inputRef}
               aria-label="업무 제목 입력"
-              className="min-w-0 flex-1 bg-transparent text-base text-brand-ink outline-none placeholder:text-brand-muted"
+              className="text-brand-ink placeholder:text-brand-muted min-w-0 flex-1 bg-transparent text-base outline-none"
               placeholder="업무 제목 입력 후 Enter"
               value={taskTitle}
               onChange={(event) => setTaskTitle(event.target.value)}
@@ -197,7 +196,7 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
                 setTaskTitle('');
                 setIsComposerOpen(false);
               }}
-              className="flex size-10 items-center justify-center rounded-full bg-white text-brand-muted"
+              className="text-brand-muted flex size-10 items-center justify-center rounded-full bg-white"
               aria-label="입력 닫기"
             >
               <X className="size-4" />
@@ -216,16 +215,10 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
             onDragStartTask={handleDragStartTask}
             onDragEndTask={handleDragEndTask}
             draggingTaskId={draggingTaskId}
-            dragOverIndex={
-              dragOverState?.columnId === column.id ? dragOverState.index : null
-            }
-            onDragOverTask={(columnId, index) =>
-              setDragOverState({ columnId, index })
-            }
+            dragOverIndex={dragOverState?.columnId === column.id ? dragOverState.index : null}
+            onDragOverTask={(columnId, index) => setDragOverState({ columnId, index })}
             onDragLeaveColumn={(columnId) => {
-              setDragOverState((current) =>
-                current?.columnId === columnId ? null : current,
-              );
+              setDragOverState((current) => (current?.columnId === columnId ? null : current));
             }}
           />
         ))}

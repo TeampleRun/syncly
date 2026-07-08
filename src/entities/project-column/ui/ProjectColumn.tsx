@@ -52,9 +52,9 @@ export function ProjectColumn({
       <header className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <span className={cn('size-2.5 rounded-full', toneStyles[column.tone])} />
-          <h3 className="text-[17px] font-bold text-brand-ink">{column.title}</h3>
+          <h3 className="text-brand-ink text-[17px] font-bold">{column.title}</h3>
         </div>
-        <span className="text-[15px] font-semibold text-brand-muted">{column.tasks.length}</span>
+        <span className="text-brand-muted text-[15px] font-semibold">{column.tasks.length}</span>
       </header>
 
       <div
@@ -70,7 +70,8 @@ export function ProjectColumn({
             key={task.id}
             className={cn(
               'rounded-[18px] transition-all',
-              dragOverIndex === index && 'relative before:absolute before:-top-2 before:left-0 before:h-1 before:w-full before:rounded-full before:bg-brand',
+              dragOverIndex === index &&
+                'before:bg-brand relative before:absolute before:-top-2 before:left-0 before:h-1 before:w-full before:rounded-full',
             )}
             onDragOver={(event) => {
               event.preventDefault();
@@ -90,7 +91,7 @@ export function ProjectColumn({
         ))}
 
         {dragOverIndex === column.tasks.length ? (
-          <div className="h-1 w-full rounded-full bg-brand" />
+          <div className="bg-brand h-1 w-full rounded-full" />
         ) : null}
       </div>
     </section>

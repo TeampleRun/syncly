@@ -10,9 +10,7 @@ type ProjectManagementPageProps = {
   workspaceId: string;
 };
 
-export default function ProjectManagementPage({
-  workspaceId,
-}: ProjectManagementPageProps) {
+export default function ProjectManagementPage({ workspaceId }: ProjectManagementPageProps) {
   return (
     <div className={`${jakarta.className} bg-brand-surface min-h-full`}>
       <ProjectBoard workspaceId={workspaceId} />

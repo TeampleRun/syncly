@@ -42,5 +42,6 @@ next-env.d.ts
 
 # agent files (개인 작업용)
 AGENTS.md
+CLAUDE.md
 .agents/
 .claude/

@@ -20,12 +20,9 @@ export function NoticeDetailPanel({ notice }: NoticeDetailPanelProps) {
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             {notice.isPinned ? (
-              <Star
-                className="h-5 w-5 shrink-0 fill-amber-100 text-amber-500"
-                aria-hidden="true"
-              />
+              <Star className="h-5 w-5 shrink-0 fill-amber-100 text-amber-500" aria-hidden="true" />
             ) : null}
-            <h2 className="text-xl font-bold leading-7 text-slate-950">{notice.title}</h2>
+            <h2 className="text-xl leading-7 font-bold text-slate-950">{notice.title}</h2>
           </div>
           <p className="mt-2 text-sm font-medium text-indigo-400">
             {notice.authorName} · {notice.createdAt}
@@ -39,7 +36,9 @@ export function NoticeDetailPanel({ notice }: NoticeDetailPanelProps) {
         ) : null}
       </div>
 
-      <p className="mt-6 whitespace-pre-line text-base leading-7 text-slate-800">{notice.content}</p>
+      <p className="mt-6 text-base leading-7 whitespace-pre-line text-slate-800">
+        {notice.content}
+      </p>
     </aside>
   );
 }
