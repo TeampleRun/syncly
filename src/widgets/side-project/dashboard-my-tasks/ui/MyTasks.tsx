@@ -13,7 +13,7 @@ const header = (
 );
 
 // 현재 스프린트 편입 업무
-const sprintTasks:Task[] = getSprintTasks(currentSprint.id);
+const sprintTasks: Task[] = getSprintTasks(currentSprint.id);
 const countBy = (status: TaskStatus) => sprintTasks.filter((task) => task.status === status).length;
 
 export default function MyTasks({ size = 'md' }: { size?: WidgetSize }) {
