@@ -16,7 +16,6 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
         getWorkspace(workspaceId),
         getDashboardLayout(workspaceId, 'dashboard'),
       ]);
-  // TODO: purpose는 getWorkspace(workspaceId).purpose로 결정 (DB 연동 시). 현재는 테스트로 side-project 하드코딩.
   return (
     <DashboardView
       key={workspaceId}
