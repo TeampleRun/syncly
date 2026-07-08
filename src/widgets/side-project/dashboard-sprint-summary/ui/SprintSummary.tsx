@@ -1,9 +1,39 @@
 // 스프린트 요약 위젯 — 스프린트 배너 + 포인트 통계 3종을 하나의 카드로 조립
-import { currentSprint, sprintStats } from '@/entities/side-project/sprint';
-import { StatCard } from '@/shared/dashboard/ui/stat-card';
+// 통계(계획/완료/남은)와 기간 표시는 currentSprint 메타에서 파생한다.
+import { currentSprint } from '@/entities/side-project/sprint';
+import { StatCard, type Stat } from '@/shared/dashboard/ui/stat-card';
+
+// 'YYYY-MM-DD' → 'M/D'
+const monthDay = (iso: string) => {
+  const [, month, day] = iso.split('-');
+  return `${Number(month)}/${Number(day)}`;
+};
 
 export default function SprintSummary() {
-  const [planned, done, remaining] = sprintStats;
+  const { name, startDate, endDate, daysLeft, totalPoints, completedPoints } = currentSprint;
+  const period = `${monthDay(startDate)} – ${monthDay(endDate)}`;
+
+  const planned: Stat = {
+    id: 'planned',
+    label: '계획 포인트',
+    value: totalPoints,
+    unit: 'pt',
+    color: '#155dfc',
+  };
+  const done: Stat = {
+    id: 'done',
+    label: '완료 포인트',
+    value: completedPoints,
+    unit: 'pt',
+    color: '#00a63e',
+  };
+  const remaining: Stat = {
+    id: 'remaining',
+    label: '남은 포인트',
+    value: totalPoints - completedPoints,
+    unit: 'pt',
+    color: '#e17100',
+  };
 
   return (
     <div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-2">
@@ -13,11 +43,11 @@ export default function SprintSummary() {
         style={{ backgroundImage: 'linear-gradient(169deg, #2b7fff 0%, #00b8db 100%)' }}
       >
         <div>
-          <p className="text-xs font-semibold opacity-80">{currentSprint.name}</p>
-          <p className="mt-1 text-lg font-extrabold">{currentSprint.period}</p>
+          <p className="text-xs font-semibold opacity-80">{name}</p>
+          <p className="mt-1 text-lg font-extrabold">{period}</p>
         </div>
         <p className="flex items-end gap-2">
-          <span className="text-3xl leading-none font-extrabold">{currentSprint.daysLeft}일</span>
+          <span className="text-3xl leading-none font-extrabold">{daysLeft}일</span>
           <span className="pb-1 text-sm opacity-80">남음</span>
         </p>
       </div>

@@ -2,7 +2,8 @@
 //  · sm: 진행 중 개수 헤드라인 + 대기 건수 요약
 //  · md: task 리스트(상태 뱃지)
 //  · lg: 상태별 카운트 요약 + task 리스트
-import { mockTasks, TASK_STATUS, type TaskStatus } from '@/entities/side-project/task';
+// 스프린트 애그리거트에서 업무를 가져와 필터링한다(백로그 제외 — 스프린트에 편입된 업무만).
+import { currentSprint, TASK_STATUS, type TaskStatus } from '@/entities/side-project/sprint';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
@@ -10,7 +11,9 @@ const header = (
   <WidgetCardHeader title="내 업무" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />
 );
 
-const countBy = (status: TaskStatus) => mockTasks.filter((task) => task.status === status).length;
+// 백로그를 제외한 스프린트 편입 업무
+const sprintTasks = currentSprint.tasks.filter((task) => task.status !== 'backlog');
+const countBy = (status: TaskStatus) => sprintTasks.filter((task) => task.status === status).length;
 
 export default function MyTasks({ size = 'md' }: { size?: WidgetSize }) {
   if (size === 'sm') {
@@ -18,7 +21,7 @@ export default function MyTasks({ size = 'md' }: { size?: WidgetSize }) {
       <WidgetCard>
         {header}
         <div className="flex flex-1 flex-col justify-center">
-          <p className="text-brand text-3xl font-extrabold">{countBy('progress')}</p>
+          <p className="text-brand text-3xl font-extrabold">{countBy('in_progress')}</p>
           <p className="text-brand-muted mt-1 text-xs">진행 중 · 대기 {countBy('todo')}건</p>
         </div>
       </WidgetCard>
@@ -27,7 +30,7 @@ export default function MyTasks({ size = 'md' }: { size?: WidgetSize }) {
 
   const list = (
     <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-      {mockTasks.map((task) => {
+      {sprintTasks.map((task) => {
         const status = TASK_STATUS[task.status];
         return (
           <li key={task.id} className="flex items-center gap-2">
@@ -56,7 +59,9 @@ export default function MyTasks({ size = 'md' }: { size?: WidgetSize }) {
         <div className="text-brand-muted border-brand/10 mb-3 flex gap-4 border-b pb-2 text-xs">
           <span>
             진행 중{' '}
-            <strong style={{ color: TASK_STATUS.progress.text }}>{countBy('progress')}</strong>
+            <strong style={{ color: TASK_STATUS.in_progress.text }}>
+              {countBy('in_progress')}
+            </strong>
           </span>
           <span>
             대기 <strong style={{ color: TASK_STATUS.todo.text }}>{countBy('todo')}</strong>
