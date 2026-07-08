@@ -3,7 +3,7 @@
 // purpose는 추가 가능한 위젯을 템플릿별로 거르는 데만 쓰인다.
 import { getDashboardLayout } from '@/entities/dashboard-layout';
 import { DashboardView } from '@/views/dashboard';
-import { getWorkspace } from '@/entities/workspace';
+import { mockWorkspace } from '@/entities/workspace';
 
 interface DashboardPageProps {
   params: Promise<{ workspaceId: string }>;
@@ -12,10 +12,8 @@ interface DashboardPageProps {
 export default async function DashboardPage({ params }: DashboardPageProps) {
   const { workspaceId } = await params;
 
-    const [workspace, initialLayout] = await Promise.all([
-        getWorkspace(workspaceId),
-        getDashboardLayout(workspaceId, 'dashboard'),
-      ]);
+  const workspace = mockWorkspace;
+  const initialLayout = await getDashboardLayout(workspaceId, 'dashboard');
   return (
     <DashboardView
       key={workspaceId}

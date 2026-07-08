@@ -7,10 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:tw": "node scripts/check-tailwind-spacing.mjs",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run lint && npm run typecheck && npm run format:check"
+    "check": "npm run lint && npm run lint:tw && npm run typecheck && npm run format:check"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

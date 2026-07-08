@@ -1,4 +1,5 @@
-// 목업 워크스페이스 데이터와 타입의 공개 API입니다.
-export type { Workspace, WorkspacePurpose } from './model/workspace.types';
+// workspace 엔티티 Public API
+export type { Workspace, WorkspacePurpose, WorkspaceSummary } from './model/workspace.types';
 export { mockWorkspace } from './model/mock-workspace';
-export { getWorkspace } from './api/get-workspace';
+export { WORKSPACE_PURPOSE_META, FALLBACK_PURPOSE_META } from './config/purpose';
+export { getMyWorkspaces } from './api/get-my-workspaces';
