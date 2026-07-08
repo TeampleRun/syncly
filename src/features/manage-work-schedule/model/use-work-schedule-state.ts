@@ -56,7 +56,11 @@ function completeScheduleEntries({
   return [...schedule, ...missingEntries];
 }
 
-export function useWorkScheduleState({ initialSchedule, members, config }: UseWorkScheduleStateParams) {
+export function useWorkScheduleState({
+  initialSchedule,
+  members,
+  config,
+}: UseWorkScheduleStateParams) {
   const [schedule, setSchedule] = useState(() =>
     completeScheduleEntries({
       schedule: initialSchedule,

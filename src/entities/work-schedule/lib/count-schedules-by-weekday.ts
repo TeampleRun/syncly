@@ -13,7 +13,7 @@ export function countSchedulesByWeekday({
   config,
   weekday,
 }: CountSchedulesByWeekdayParams): Record<string, number> {
-const counts = Object.fromEntries(config.shifts.map((shift) => [shift.id, 0]));
+  const counts = Object.fromEntries(config.shifts.map((shift) => [shift.id, 0]));
 
   const uniqueEntries = new Map<string, WorkScheduleEntry>();
 

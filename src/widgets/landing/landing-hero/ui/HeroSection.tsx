@@ -47,7 +47,7 @@ export default function HeroSection() {
           className="relative z-10 flex flex-col gap-0.75 text-4xl leading-[1.4] font-extrabold tracking-[-1.2px] sm:text-5xl"
         >
           <span className="text-brand-ink">협업은 더 가볍게</span>
-          <span className="animate-gradient-x from-brand-start via-brand-end to-brand-start bg-linear-to-r bg-[length:200%_auto] bg-clip-text text-transparent">
+          <span className="animate-gradient-x from-brand-start via-brand-end to-brand-start bg-linear-to-r bg-size-[200%_auto] bg-clip-text text-transparent">
             성과는 더 빠르게
           </span>
         </motion.h1>

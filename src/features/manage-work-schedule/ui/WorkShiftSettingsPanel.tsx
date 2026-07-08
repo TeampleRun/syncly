@@ -1,10 +1,6 @@
 // 근무 옵션을 추가, 제거, 정렬하고 시간을 설정할 수 있는 인라인 편집기입니다.
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import type {
-  WorkScheduleConfig,
-  WorkShiftColor,
-  WorkShiftOption,
-} from '@/entities/work-schedule';
+import type { WorkScheduleConfig, WorkShiftColor, WorkShiftOption } from '@/entities/work-schedule';
 
 const shiftColors: WorkShiftColor[] = ['sky', 'violet', 'amber', 'slate', 'emerald', 'rose'];
 
