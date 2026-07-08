@@ -7,9 +7,7 @@ interface WorkspaceHomePageProps {
   }>;
 }
 
-export default async function WorkspaceHomePage({
-  params,
-}: WorkspaceHomePageProps) {
+export default async function WorkspaceHomePage({ params }: WorkspaceHomePageProps) {
   const { workspaceId } = await params;
   const workspace = getMockWorkspaceById(workspaceId);
 

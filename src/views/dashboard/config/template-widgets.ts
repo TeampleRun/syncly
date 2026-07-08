@@ -19,15 +19,8 @@ export const TEMPLATE_WIDGETS: Record<WorkspacePurpose, WidgetId[]> = {
   ],
   // TODO: 매장운영 템플릿에 들어가는 위젯 생성, 추가, 수정
   // 매장운영 — 일정/업무/캘린더/회의록 (개발 지표 제외)
-  'store-operation': [
-    'today-schedule',
-    'my-tasks',
-    'calendar',
-    'backlog',
-    'recent-notes',
-    'recent-notices',
-  ],
+  'store-operation': ['calendar', 'recent-notices', 'recent-resources'],
   // TODO: 팀플 템플릿에 들어가는 위젯 생성, 추가, 수정
   // 팀 프로젝트 — 진척·협업
-  'team-project': ['sprint-summary', 'my-tasks', 'velocity', 'backlog', 'recent-notes'],
+  'team-project': ['my-tasks', 'recent-notes', 'calendar', 'recent-notices', 'recent-resources'],
 };
