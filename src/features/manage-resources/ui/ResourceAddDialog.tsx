@@ -1,7 +1,7 @@
 'use client';
 
 // 자료실에 파일 목업 또는 외부 링크 목업을 추가하는 모달입니다.
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CloudUpload, GitBranch, Link, X } from 'lucide-react';
 import type { ResourceFormValues, ResourceLinkProvider, ResourceType } from '@/entities/resource';
 import { cn } from '@/shared/lib/utils';
@@ -40,19 +40,19 @@ export function ResourceAddDialog({
 
   const canSubmit = resourceType === 'file' ? fileName.trim().length > 0 : url.trim().length > 0;
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setResourceType(initialResourceType);
     setLinkProvider('link');
     setUrl('');
     setFileName('');
     setTitle('');
     setDescription('');
-  };
+  }, [initialResourceType]);
 
-  const closeDialog = () => {
+  const closeDialog = useCallback(() => {
     resetForm();
     onClose();
-  };
+  }, [onClose, resetForm]);
 
   const submitResource = () => {
     onSubmit({
@@ -112,7 +112,7 @@ export function ResourceAddDialog({
     return () => {
       document.removeEventListener('keydown', closeOnEscape);
     };
-  });
+  }, [closeDialog, isOpen]);
 
   if (!isOpen) {
     return null;
