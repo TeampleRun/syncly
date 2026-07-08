@@ -11,7 +11,9 @@ interface WorkspaceHeaderProps {
 }
 
 function getCurrentPageTitle(pathname: string, navigationItems: WorkspaceNavigationItem[]): string {
-  const currentNavigationItem = navigationItems.find((item) => pathname.endsWith(`/${item.href}`));
+  const currentNavigationItem = navigationItems.find((item) =>
+    pathname.endsWith(`/${item.href}`),
+  );
 
   return currentNavigationItem?.label ?? '대시보드';
 }
@@ -36,7 +38,7 @@ export function WorkspaceHeader({ navigationItems }: WorkspaceHeaderProps) {
 
         <button
           type="button"
-          className="flex h-10 items-center gap-2 rounded-2xl bg-indigo-600 px-4 text-sm font-bold text-white hover:bg-indigo-500"
+          className="flex h-10 items-center gap-2 rounded-2xl bg-[var(--color-brand)] px-4 text-sm font-bold text-white hover:bg-indigo-500"
         >
           <UserRoundPlus className="h-4 w-4" aria-hidden="true" />
           멤버 초대
