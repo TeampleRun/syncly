@@ -19,7 +19,7 @@ export default function DashboardEditToggle({ editing, onToggle }: DashboardEdit
       className={cn(
         'fixed right-6 bottom-6 z-20 flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold shadow-lg transition-colors',
         editing
-          ? 'bg-brand text-white hover:bg-brand/80'
+          ? 'bg-brand hover:bg-brand/80 text-white'
           : 'text-brand-ink hover:bg-brand-surface border-brand/10 border bg-white',
       )}
     >
