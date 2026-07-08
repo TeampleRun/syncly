@@ -1,7 +1,7 @@
 'use client';
 
 import type { DragEvent, KeyboardEvent } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { ProjectColumn } from '@/entities/project-column';
 import type { ProjectBoardColumn } from '@/entities/project-column';
@@ -32,6 +32,8 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
     index: number;
   } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const taskCount = tasks.length;
+  const columns = createProjectBoardColumns(tasks);
 
   useEffect(() => {
     if (!isComposerOpen) {
@@ -40,12 +42,6 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
 
     inputRef.current?.focus();
   }, [isComposerOpen]);
-
-  const taskCount = useMemo(
-    () => tasks.length,
-    [tasks],
-  );
-  const columns = useMemo(() => createProjectBoardColumns(tasks), [tasks]);
 
   const createTask = () => {
     const trimmedTitle = taskTitle.trim();
