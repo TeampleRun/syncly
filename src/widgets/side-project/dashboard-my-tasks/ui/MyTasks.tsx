@@ -2,8 +2,9 @@
 //  · sm: 진행 중 개수 헤드라인 + 대기 건수 요약
 //  · md: task 리스트(상태 뱃지)
 //  · lg: 상태별 카운트 요약 + task 리스트
-// 스프린트 애그리거트에서 업무를 가져와 필터링한다(백로그 제외 — 스프린트에 편입된 업무만).
-import { currentSprint, TASK_STATUS, type TaskStatus } from '@/entities/side-project/sprint';
+// 현재 스프린트에 편입된 업무를 셀렉터로 가져온다(백로그는 애초에 포함되지 않음).
+import { currentSprint } from '@/entities/side-project/sprint';
+import { getSprintTasks, TASK_STATUS, type TaskStatus } from '@/entities/side-project/task';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
@@ -11,8 +12,8 @@ const header = (
   <WidgetCardHeader title="내 업무" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />
 );
 
-// 백로그를 제외한 스프린트 편입 업무
-const sprintTasks = currentSprint.tasks.filter((task) => task.status !== 'backlog');
+// 현재 스프린트 편입 업무
+const sprintTasks = getSprintTasks(currentSprint.id);
 const countBy = (status: TaskStatus) => sprintTasks.filter((task) => task.status === status).length;
 
 export default function MyTasks({ size = 'md' }: { size?: WidgetSize }) {

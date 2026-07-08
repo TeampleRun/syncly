@@ -1,8 +1,9 @@
 // 백로그 위젯 — 타일 크기에 따라 밀도가 다른 변형을 렌더
 //  · sm: 최상위 항목 1건 + 외 N건
 //  · md/lg: 우선순위 점 + 항목 + 포인트 리스트(넘치면 스크롤)
-// 스프린트 애그리거트에서 status:'backlog'인 업무만 필터링해 사용한다.
-import { currentSprint, TASK_PRIORITY } from '@/entities/side-project/sprint';
+// 워크스페이스의 백로그(스프린트 미편입) 업무를 셀렉터로 가져온다.
+import { currentSprint } from '@/entities/side-project/sprint';
+import { getBacklogTasks, TASK_PRIORITY } from '@/entities/side-project/task';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
@@ -10,7 +11,7 @@ const header = (
   <WidgetCardHeader title="백로그" action={<WidgetCardAction>보드</WidgetCardAction>} />
 );
 
-const backlogItems = currentSprint.tasks.filter((task) => task.status === 'backlog');
+const backlogItems = getBacklogTasks(currentSprint.workspaceId);
 
 export default function Backlog({ size = 'md' }: { size?: WidgetSize }) {
   if (size === 'sm') {
