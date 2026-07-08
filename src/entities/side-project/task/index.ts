@@ -12,3 +12,4 @@ export {
 } from './model/task.types';
 export { getBacklogTasks } from './api/get-backlog-tasks';
 export { getSprintTasks } from './api/get-sprint-tasks';
+export { TaskCard } from './ui/TaskCard';
