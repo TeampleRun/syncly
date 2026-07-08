@@ -4,26 +4,16 @@
 // 드래그는 좌상단 핸들(.rgl-drag-handle)로만 시작된다.
 //
 // 그리드는 컨테이너 실측 width에 의존하므로 SSR/hydration 시점에는 렌더하지 않고
-// 클라이언트 마운트 이후에만 렌더한다(useSyncExternalStore로 SSR-안전하게 게이팅).
+// 클라이언트 마운트 이후에만 렌더한다(useContainerWidth의 mounted로 SSR-안전하게 게이팅).
 'use client';
 
-import { useSyncExternalStore, type Ref } from 'react';
+import type { Ref } from 'react';
 import ReactGridLayout, { useContainerWidth } from 'react-grid-layout';
 import type { Layout, ResizeHandleAxis } from 'react-grid-layout';
 import { Maximize2, GripVertical, Trash2 } from 'lucide-react';
 
 import { getWidgetSize } from '@/shared/dashboard/lib/widget-size';
 import type { WidgetDefinition } from '@/shared/dashboard/model/widget.types';
-
-const emptySubscribe = () => () => {};
-// 서버: false, 클라이언트 마운트 이후: true (hydration 렌더는 서버 스냅샷을 사용해 일치 보장)
-function useIsClient() {
-  return useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false,
-  );
-}
 
 // 우하단 리사이즈 핸들 커스텀(원형). react-resizable 기본 클래스로 위치를 잡고 배경 삼각형은 제거한다.
 const renderResizeHandle = (axis: ResizeHandleAxis, ref: Ref<HTMLElement>) => (
@@ -51,8 +41,8 @@ export default function DashboardGrid({
   onLayoutChange,
   onRemove,
 }: DashboardGridProps) {
-  const { width, containerRef } = useContainerWidth();
-  const isClient = useIsClient();
+  // measureBeforeMount: mounted를 false로 시작해 SSR/hydration 렌더에서 그리드를 게이팅한다.
+  const { width, containerRef, mounted } = useContainerWidth({ measureBeforeMount: true });
 
   const byId = new Map(widgets.map((widget) => [widget.layout.i, widget] as const));
   // 카탈로그에 렌더러가 있는 항목만 — layout prop과 children이 항상 일치하도록 이 목록만 사용한다.
@@ -69,7 +59,7 @@ export default function DashboardGrid({
           <p>필요한 위젯을 추가해 워크스페이스를 구성해보세요.</p>
         </div>
       ) : (
-        isClient &&
+        mounted &&
         width > 0 && (
           <ReactGridLayout
             // 보기 모드에서는 RGL이 남겨두는 리사이즈 핸들이 hover 시 노출되지 않도록 숨긴다.
