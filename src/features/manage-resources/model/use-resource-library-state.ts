@@ -35,9 +35,12 @@ export function useResourceLibraryState({
     () => sortResources(initialResources.filter((resource) => resource.workspaceId === workspaceId)),
     [initialResources, workspaceId],
   );
-  const [resources, setResources] = useState(workspaceResources);
+  const [resourcesByWorkspaceId, setResourcesByWorkspaceId] = useState<
+    Record<string, ResourceItem[]>
+  >({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogResourceType, setDialogResourceType] = useState<ResourceType>('file');
+  const resources = resourcesByWorkspaceId[workspaceId] ?? workspaceResources;
 
   const addResource = (values: ResourceFormValues) => {
     const title = values.title.trim() || values.fileName.trim() || values.url.trim();
@@ -64,7 +67,13 @@ export function useResourceLibraryState({
       createdAt: createTodayLabel(),
     };
 
-    setResources((currentResources) => sortResources([nextResource, ...currentResources]));
+    setResourcesByWorkspaceId((currentResourcesByWorkspaceId) => ({
+      ...currentResourcesByWorkspaceId,
+      [workspaceId]: sortResources([
+        nextResource,
+        ...(currentResourcesByWorkspaceId[workspaceId] ?? workspaceResources),
+      ]),
+    }));
     setIsDialogOpen(false);
   };
 

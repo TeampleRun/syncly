@@ -1,3 +1,5 @@
+'use client';
+
 // 자료실의 파일과 링크 자료를 카드 목록으로 렌더링합니다.
 import { Archive, ChevronRight, GitBranch, Link } from 'lucide-react';
 import type { ResourceItem } from '@/entities/resource';
@@ -17,6 +19,23 @@ function getResourceIcon(resource: ResourceItem) {
   }
 
   return Link;
+}
+
+function openResource(resource: ResourceItem) {
+  if (resource.resourceType === 'link' && resource.url) {
+    window.open(resource.url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+
+  const fileContents = `${resource.title}\n\n${resource.description}`;
+  const file = new Blob([fileContents], { type: 'text/plain;charset=utf-8' });
+  const fileUrl = URL.createObjectURL(file);
+  const downloadLink = document.createElement('a');
+
+  downloadLink.href = fileUrl;
+  downloadLink.download = resource.fileName ?? `${resource.title}.txt`;
+  downloadLink.click();
+  URL.revokeObjectURL(fileUrl);
 }
 
 export function ResourceList({ resources }: ResourceListProps) {
@@ -65,6 +84,7 @@ export function ResourceList({ resources }: ResourceListProps) {
             <button
               type="button"
               aria-label={`${resource.title} 열기`}
+              onClick={() => openResource(resource)}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-indigo-400 hover:bg-indigo-50 hover:text-[var(--color-brand)]"
             >
               <ChevronRight className="h-5 w-5" aria-hidden="true" />

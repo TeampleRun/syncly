@@ -1,7 +1,7 @@
 'use client';
 
 // 자료실에 파일 목업 또는 외부 링크 목업을 추가하는 모달입니다.
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CloudUpload, GitBranch, Link, X } from 'lucide-react';
 import type { ResourceFormValues, ResourceLinkProvider, ResourceType } from '@/entities/resource';
 import { cn } from '@/shared/lib/utils';
@@ -30,6 +30,7 @@ export function ResourceAddDialog({
   onClose,
   onSubmit,
 }: ResourceAddDialogProps) {
+  const dialogRef = useRef<HTMLElement>(null);
   const [resourceType, setResourceType] = useState<ResourceType>(initialResourceType);
   const [linkProvider, setLinkProvider] = useState<ResourceLinkProvider>('link');
   const [url, setUrl] = useState('');
@@ -37,11 +38,21 @@ export function ResourceAddDialog({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
-  if (!isOpen) {
-    return null;
-  }
-
   const canSubmit = resourceType === 'file' ? fileName.trim().length > 0 : url.trim().length > 0;
+
+  const resetForm = () => {
+    setResourceType(initialResourceType);
+    setLinkProvider('link');
+    setUrl('');
+    setFileName('');
+    setTitle('');
+    setDescription('');
+  };
+
+  const closeDialog = () => {
+    resetForm();
+    onClose();
+  };
 
   const submitResource = () => {
     onSubmit({
@@ -52,21 +63,80 @@ export function ResourceAddDialog({
       title,
       description,
     });
-    setUrl('');
-    setFileName('');
-    setTitle('');
-    setDescription('');
+    resetForm();
   };
+
+  const keepFocusInsideDialog = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Tab') {
+      return;
+    }
+
+    const focusableElements = dialogRef.current?.querySelectorAll<HTMLElement>(
+      'button:not(:disabled), input:not(:disabled), textarea:not(:disabled), [href], [tabindex]:not([tabindex="-1"])',
+    );
+
+    if (!focusableElements?.length) {
+      return;
+    }
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (event.shiftKey && document.activeElement === firstElement) {
+      event.preventDefault();
+      lastElement.focus();
+      return;
+    }
+
+    if (!event.shiftKey && document.activeElement === lastElement) {
+      event.preventDefault();
+      firstElement.focus();
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    dialogRef.current?.focus();
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeDialog();
+      }
+    };
+
+    document.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  });
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/35 px-4">
-      <section className="w-full max-w-[470px] rounded-2xl bg-white p-6 shadow-2xl">
+      <section
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="resource-add-dialog-title"
+        tabIndex={-1}
+        onKeyDown={keepFocusInsideDialog}
+        className="w-full max-w-[470px] rounded-2xl bg-white p-6 shadow-2xl outline-none"
+      >
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-950">자료 추가</h2>
+          <h2 id="resource-add-dialog-title" className="text-xl font-bold text-slate-950">
+            자료 추가
+          </h2>
           <button
             type="button"
             aria-label="자료 추가 닫기"
-            onClick={onClose}
+            onClick={closeDialog}
             className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
           >
             <X className="h-5 w-5" aria-hidden="true" />
@@ -133,6 +203,7 @@ export function ResourceAddDialog({
               </div>
 
               <input
+                aria-label="자료 링크 URL"
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
                 placeholder="https://github.com/TeampleRun/syncly"
@@ -142,12 +213,14 @@ export function ResourceAddDialog({
           )}
 
           <input
+            aria-label="자료 제목"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder={resourceType === 'file' ? '자료 제목 (비우면 파일명 사용)' : '자료 제목'}
             className="h-11 w-full rounded-xl bg-slate-100 px-4 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-300"
           />
           <textarea
+            aria-label="자료 설명"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="설명 (선택)"
@@ -159,7 +232,7 @@ export function ResourceAddDialog({
         <div className="mt-4 flex justify-end gap-2">
           <button
             type="button"
-            onClick={onClose}
+            onClick={closeDialog}
             className="h-10 rounded-2xl bg-slate-100 px-4 text-sm font-bold text-slate-700 hover:bg-slate-200"
           >
             취소
