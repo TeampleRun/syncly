@@ -12,10 +12,20 @@ interface MeetingNoteFormProps {
   workspaceId: string;
 }
 
+function getTodayIsoDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+}
+
+const initialMeetingDate = getTodayIsoDate();
+
 const defaultFormValues: MeetingNoteFormValues = {
   title: '',
-  meetingDate: '2025-06-30',
-  participants: '',
+  meetingDate: initialMeetingDate,
   decisions: '',
   followUpActions: '',
 };
@@ -73,12 +83,20 @@ function getIsoDateFromParts(yearText: string, monthText: string, dayText: strin
   return `${yearText}-${monthText.padStart(2, '0')}-${dayText.padStart(2, '0')}`;
 }
 
+function createMeetingNoteId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `meeting-note-${crypto.randomUUID()}`;
+  }
+
+  return `meeting-note-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
   const router = useRouter();
   const workspaceMembers = getMockWorkspaceMembersByWorkspaceId(workspaceId);
   const addMeetingNote = useMeetingNotesStore((state) => state.addMeetingNote);
   const [formValues, setFormValues] = useState(defaultFormValues);
-  const [dateParts, setDateParts] = useState(getDatePartsFromIso(defaultFormValues.meetingDate));
+  const [dateParts, setDateParts] = useState(getDatePartsFromIso(initialMeetingDate));
   const [selectedParticipantIds, setSelectedParticipantIds] = useState<string[]>([]);
   const [isParticipantListOpen, setIsParticipantListOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -111,15 +129,9 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
       initial: member.avatarLabel,
       color: participantPalette[index % participantPalette.length],
     }));
-    const meetingNoteId = [
-      'meeting-note',
-      workspaceId,
-      formValues.meetingDate || 'undated',
-      formValues.title.trim().replace(/\s+/g, '-'),
-    ].join('-');
 
     addMeetingNote(workspaceId, {
-      id: meetingNoteId,
+      id: createMeetingNoteId(),
       workspaceId,
       title: formValues.title.trim(),
       meetingDate: formValues.meetingDate,
@@ -250,17 +262,9 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
 
   const toggleParticipant = (userId: string) => {
     setSelectedParticipantIds((current) => {
-      const nextSelectedIds = current.includes(userId)
+      return current.includes(userId)
         ? current.filter((id) => id !== userId)
         : [...current, userId];
-
-      const nextParticipantNames = workspaceMembers
-        .filter((member) => nextSelectedIds.includes(member.userId))
-        .map((member) => member.workspaceNickname)
-        .join(', ');
-
-      handleChange('participants', nextParticipantNames);
-      return nextSelectedIds;
     });
   };
 
@@ -309,6 +313,7 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
                   }}
                   className="pointer-events-none absolute opacity-0"
                   aria-label="회의 날짜 선택"
+                  aria-hidden="true"
                   tabIndex={-1}
                 />
                 <div
@@ -458,11 +463,10 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
 
         <button
           type="submit"
-          disabled={!isTitleValid}
           className={`mt-8 inline-flex h-13 w-full items-center justify-center rounded-[18px] text-[17px] font-bold text-white shadow-[0_14px_30px_rgba(91,78,232,0.24)] transition ${
             isTitleValid
               ? 'bg-brand hover:brightness-105'
-              : 'cursor-not-allowed bg-[#cfd3e6] shadow-none'
+              : 'bg-[#cfd3e6] shadow-none hover:brightness-100'
           }`}
         >
           저장하기

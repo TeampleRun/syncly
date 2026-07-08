@@ -18,7 +18,6 @@ export interface MeetingNote {
 export interface MeetingNoteFormValues {
   title: string;
   meetingDate: string;
-  participants: string;
   decisions: string;
   followUpActions: string;
 }

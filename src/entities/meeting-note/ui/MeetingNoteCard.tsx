@@ -1,4 +1,5 @@
 import { ArrowRight, Check } from 'lucide-react';
+import type { KeyboardEvent } from 'react';
 import type { MeetingNote } from '../model/meeting-note.types';
 
 interface MeetingNoteCardProps {
@@ -12,12 +13,26 @@ export function MeetingNoteCard({
   isExpanded = false,
   onClick,
 }: MeetingNoteCardProps) {
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!onClick) {
+      return;
+    }
+
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onClick();
+    }
+  };
+
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
       className="block w-full rounded-[24px] text-left"
       aria-expanded={isExpanded}
+      aria-label={`${meetingNote.title} 회의록 상세 ${isExpanded ? '닫기' : '열기'}`}
     >
       <article className="rounded-[24px] border border-[#ebeef7] bg-white px-[22px] py-[21px] shadow-[0_10px_30px_rgba(91,78,232,0.06)] transition hover:border-[rgba(91,78,232,0.16)]">
         <div className="flex items-start justify-between gap-6">
@@ -75,6 +90,6 @@ export function MeetingNoteCard({
           </div>
         ) : null}
       </article>
-    </button>
+    </div>
   );
 }
