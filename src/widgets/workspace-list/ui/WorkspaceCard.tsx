@@ -1,7 +1,11 @@
 import Link from 'next/link';
 import { Check, ChevronRight, Clock, Users } from 'lucide-react';
 import { formatRelativeTime } from '@/shared/lib/date';
-import { WORKSPACE_PURPOSE_META, type WorkspaceSummary } from '@/entities/workspace';
+import {
+  FALLBACK_PURPOSE_META,
+  WORKSPACE_PURPOSE_META,
+  type WorkspaceSummary,
+} from '@/entities/workspace';
 
 interface WorkspaceCardProps {
   workspace: WorkspaceSummary;
@@ -11,8 +15,8 @@ interface WorkspaceCardProps {
 export default function WorkspaceCard({ workspace }: WorkspaceCardProps) {
   const { id, name, purpose, member_count, task_count, done_task_count, progress, updated_at } =
     workspace;
-  // 백엔드 연동 후 DB의 purpose가 유니언과 어긋날 수 있어 custom으로 폴백한다
-  const meta = WORKSPACE_PURPOSE_META[purpose] ?? WORKSPACE_PURPOSE_META.custom;
+  // 백엔드 연동 후 DB의 purpose가 유니언과 어긋날 수 있어 중립 메타로 폴백한다
+  const meta = WORKSPACE_PURPOSE_META[purpose] ?? FALLBACK_PURPOSE_META;
   const PurposeIcon = meta.icon;
 
   return (

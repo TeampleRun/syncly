@@ -12,15 +12,23 @@ const PRIMARY_BUTTON_SHADOW = '0px 10px 7.5px #c6d2ff, 0px 4px 3px #c6d2ff';
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-white">
+    <section className="relative min-h-[680px] overflow-hidden bg-white">
+      <Image
+        src="/images/landing/bg.svg"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="pointer-events-none absolute inset-0 z-0 object-cover object-center"
+      />
       <motion.div
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
-        className="relative mx-auto flex max-w-350 flex-col items-start gap-7.5 px-6 py-20 sm:px-16 lg:py-40"
+        className="relative z-10 mx-auto flex max-w-350 flex-col items-start gap-7.5 px-6 py-20 sm:px-16 lg:py-40"
       >
         <Image
-          src="/landing/hero-bg.png"
+          src="/images/landing/hero-bg.svg"
           alt=""
           width={916}
           height={515}

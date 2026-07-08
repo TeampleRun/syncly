@@ -1,6 +1,6 @@
 // get_my_workspaces RPC의 Mock 구현
 // 백엔드 준비 시 supabase.rpc('get_my_workspaces') 호출로 교체한다 (반환 shape 동일)
-import type { WorkspaceSummary } from '../model/types';
+import type { WorkspaceSummary } from '../model/workspace.types';
 
 // updated_at은 호출 시점 기준 상대값으로 생성해 "최근 활동" 표기가 자연스럽게 유지되도록 한다
 type MockWorkspaceSeed = Omit<WorkspaceSummary, 'updated_at' | 'progress'> & {
@@ -11,7 +11,7 @@ const MOCK_WORKSPACE_SEEDS: MockWorkspaceSeed[] = [
   {
     id: 'ws-capstone-design',
     name: '캡스톤 디자인 팀',
-    purpose: 'team_project',
+    purpose: 'team-project',
     member_count: 5,
     task_count: 12,
     done_task_count: 7,
@@ -20,7 +20,7 @@ const MOCK_WORKSPACE_SEEDS: MockWorkspaceSeed[] = [
   {
     id: 'ws-fitto-app',
     name: 'Fitto 앱 개발팀',
-    purpose: 'side_project',
+    purpose: 'side-project',
     member_count: 4,
     task_count: 24,
     done_task_count: 18,
@@ -29,7 +29,7 @@ const MOCK_WORKSPACE_SEEDS: MockWorkspaceSeed[] = [
   {
     id: 'ws-cafe-gray',
     name: '카페 그레이 운영',
-    purpose: 'store',
+    purpose: 'store-operation',
     member_count: 6,
     task_count: 8,
     done_task_count: 5,
