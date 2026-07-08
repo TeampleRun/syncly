@@ -52,7 +52,7 @@ export default function CreateWorkspacePage() {
 
       <CreateWorkspaceDialog
         purpose={selectedPurpose}
-        open={isDialogOpen}
+        open={isDialogOpen && selectedPurpose !== null}
         onOpenChange={setIsDialogOpen}
       />
     </div>

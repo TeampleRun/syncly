@@ -30,7 +30,7 @@ export default function TemplateSelectCard({ purpose, onSelect }: TemplateSelect
           <PurposeIcon className="size-[22.5px] text-white" aria-hidden />
         </div>
         <div className="flex flex-col gap-1">
-          <h3 className="text-brand-ink text-lg leading-7 font-bold">{meta.label}</h3>
+          <span className="text-brand-ink text-lg leading-7 font-bold">{meta.label}</span>
           <p className="text-brand-muted text-[13px] leading-4">{detail.subtitle}</p>
         </div>
       </div>

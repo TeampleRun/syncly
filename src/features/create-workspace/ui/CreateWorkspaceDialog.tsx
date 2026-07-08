@@ -52,8 +52,15 @@ export default function CreateWorkspaceDialog({
   const onSubmit = async (values: CreateWorkspaceForm) => {
     if (!purpose) return;
     setIsSubmitting(true);
-    await createWorkspace({ name: values.name, description: values.description, purpose });
-    router.push('/workspaces');
+    try {
+      await createWorkspace({ name: values.name, description: values.description, purpose });
+      router.push('/workspaces');
+      // 성공 시 페이지 이동으로 언마운트되므로 isSubmitting을 리셋하지 않는다(버튼 깜빡임 방지)
+    } catch (error) {
+      // TODO: 실패 알림 UI(toast 등) 추가 — 현재는 Mock이라 실패하지 않음
+      console.error(error);
+      setIsSubmitting(false);
+    }
   };
 
   const meta = purpose ? WORKSPACE_PURPOSE_META[purpose] : null;
