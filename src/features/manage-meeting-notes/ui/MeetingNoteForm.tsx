@@ -21,15 +21,6 @@ function getTodayIsoDate() {
   return `${year}-${month}-${day}`;
 }
 
-const initialMeetingDate = getTodayIsoDate();
-
-const defaultFormValues: MeetingNoteFormValues = {
-  title: '',
-  meetingDate: initialMeetingDate,
-  decisions: '',
-  followUpActions: '',
-};
-
 const fieldClassName =
   'w-full rounded-[18px] border border-[#e6eaf5] bg-[#f4f6ff] px-5 py-4 text-[16px] text-brand-ink placeholder:text-[#a0a6bf] focus:border-[var(--color-brand)] focus:bg-white focus:outline-none';
 const dateFieldClassName =
@@ -95,8 +86,17 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
   const router = useRouter();
   const workspaceMembers = getMockWorkspaceMembersByWorkspaceId(workspaceId);
   const addMeetingNote = useMeetingNotesStore((state) => state.addMeetingNote);
-  const [formValues, setFormValues] = useState(defaultFormValues);
-  const [dateParts, setDateParts] = useState(getDatePartsFromIso(initialMeetingDate));
+  const [formValues, setFormValues] = useState<MeetingNoteFormValues>(() => {
+    const initialMeetingDate = getTodayIsoDate();
+
+    return {
+      title: '',
+      meetingDate: initialMeetingDate,
+      decisions: '',
+      followUpActions: '',
+    };
+  });
+  const [dateParts, setDateParts] = useState(() => getDatePartsFromIso(getTodayIsoDate()));
   const [selectedParticipantIds, setSelectedParticipantIds] = useState<string[]>([]);
   const [isParticipantListOpen, setIsParticipantListOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
