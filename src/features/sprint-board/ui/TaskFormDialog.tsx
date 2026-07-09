@@ -1,9 +1,9 @@
 'use client';
 
-// 업무 추가/수정 모달 — 자료실(ResourceAddDialog)과 동일한 템플릿 톤(rounded-2xl 패널, 슬레이트 오버레이,
-// 브랜드 퍼플 버튼, 슬레이트 입력, 브랜드 pill 토글)으로 통일한다.
+// 업무 추가/수정 모달 — 네이티브 <dialog>.showModal()을 사용해 포커스 트랩·Escape·백드롭을 브라우저가 제공한다.
+// 톤은 자료실(ResourceAddDialog)과 동일(rounded-2xl 패널, 브랜드 퍼플 버튼, 슬레이트 입력, 브랜드 pill 토글).
 // 열림/닫힘은 부모의 조건부 마운트로 제어하므로, 마운트 시 초기값으로 seed되어 별도 리셋 로직이 필요 없다.
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { X } from 'lucide-react';
 
@@ -49,16 +49,24 @@ export function TaskFormDialog({
   onClose,
   onSubmit,
 }: TaskFormDialogProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const [values, setValues] = useState<TaskFormValues>(initialValues ?? EMPTY_TASK_FORM);
   const canSubmit = values.title.trim().length > 0;
 
-  // Escape로 닫기
+  // 네이티브 모달로 열기 — showModal()이 포커스 트랩·백드롭·Escape를 제공한다.
+  // Escape(cancel 이벤트)는 네이티브 닫힘 대신 부모 언마운트(onClose)로 통일한다.
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
+    const dialog = dialogRef.current;
+    if (!dialog) return undefined;
+
+    dialog.showModal();
+
+    const handleCancel = (event: Event) => {
+      event.preventDefault();
+      onClose();
     };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    dialog.addEventListener('cancel', handleCancel);
+    return () => dialog.removeEventListener('cancel', handleCancel);
   }, [onClose]);
 
   const handleSubmit = (event: FormEvent) => {
@@ -69,149 +77,146 @@ export function TaskFormDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/35 px-4">
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="task-form-title"
-        className="w-full max-w-[470px] rounded-2xl bg-white p-6 shadow-2xl"
-      >
-        <div className="flex items-center justify-between">
-          <h2 id="task-form-title" className="text-xl font-bold text-slate-950">
-            {title}
-          </h2>
-          <button
-            type="button"
-            aria-label="닫기"
-            onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-          >
-            <X className="h-5 w-5" aria-hidden="true" />
-          </button>
-        </div>
+    <dialog
+      ref={dialogRef}
+      aria-labelledby="task-form-title"
+      className="m-auto max-h-[90vh] w-full max-w-[470px] overflow-y-auto rounded-2xl bg-white p-6 text-slate-950 shadow-2xl [&::backdrop]:bg-slate-950/35"
+    >
+      <div className="flex items-center justify-between">
+        <h2 id="task-form-title" className="text-xl font-bold text-slate-950">
+          {title}
+        </h2>
+        <button
+          type="button"
+          aria-label="닫기"
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+        >
+          <X className="h-5 w-5" aria-hidden="true" />
+        </button>
+      </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <input
+          aria-label="업무 제목"
+          autoFocus
+          value={values.title}
+          onChange={(event) => setValues((v) => ({ ...v, title: event.target.value }))}
+          placeholder="업무 제목"
+          className={inputClass}
+        />
+
+        <div>
+          <p className={fieldLabelClass}>포인트</p>
           <input
-            aria-label="업무 제목"
-            autoFocus
-            value={values.title}
-            onChange={(event) => setValues((v) => ({ ...v, title: event.target.value }))}
-            placeholder="업무 제목"
+            type="number"
+            min={0}
+            aria-label="포인트"
+            value={values.point}
+            onChange={(event) =>
+              setValues((v) => ({ ...v, point: Number(event.target.value) || 0 }))
+            }
             className={inputClass}
           />
+        </div>
 
-          <div>
-            <p className={fieldLabelClass}>포인트</p>
-            <input
-              type="number"
-              min={0}
-              aria-label="포인트"
-              value={values.point}
-              onChange={(event) =>
-                setValues((v) => ({ ...v, point: Number(event.target.value) || 0 }))
-              }
-              className={inputClass}
-            />
-          </div>
-
-          <div>
-            <p className={fieldLabelClass}>우선순위</p>
-            <div className="flex flex-wrap gap-2">
-              {priorityOptions.map(([key, { label, color }]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setValues((v) => ({ ...v, priority: key }))}
-                  className={cn(pillClass, values.priority === key && pillActiveClass)}
-                >
-                  <span className="size-2 rounded-full" style={{ backgroundColor: color }} />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className={fieldLabelClass}>카테고리</p>
-            <div className="flex flex-wrap gap-2">
+        <div>
+          <p className={fieldLabelClass}>우선순위</p>
+          <div className="flex flex-wrap gap-2">
+            {priorityOptions.map(([key, { label, color }]) => (
               <button
+                key={key}
                 type="button"
-                onClick={() => setValues((v) => ({ ...v, category: null }))}
-                className={cn(pillClass, values.category === null && pillActiveClass)}
+                onClick={() => setValues((v) => ({ ...v, priority: key }))}
+                className={cn(pillClass, values.priority === key && pillActiveClass)}
               >
-                없음
+                <span className="size-2 rounded-full" style={{ backgroundColor: color }} />
+                {label}
               </button>
-              {categoryOptions.map(([key, { label }]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setValues((v) => ({ ...v, category: key }))}
-                  className={cn(pillClass, values.category === key && pillActiveClass)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+            ))}
           </div>
+        </div>
 
-          <div>
-            <p className={fieldLabelClass}>담당자</p>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setValues((v) => ({ ...v, assignee: null }))}
-                className={cn(pillClass, values.assignee === null && pillActiveClass)}
-              >
-                미배정
-              </button>
-              {members.map((member) => {
-                const selected = values.assignee?.name === member.workspaceNickname;
-                return (
-                  <button
-                    key={member.userId}
-                    type="button"
-                    onClick={() =>
-                      setValues((v) => ({
-                        ...v,
-                        assignee: {
-                          name: member.workspaceNickname,
-                          avatarLabel: member.avatarLabel,
-                        },
-                      }))
-                    }
-                    className={cn(pillClass, selected && pillActiveClass)}
-                  >
-                    <span
-                      className="flex size-5 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-                      style={{ backgroundColor: getAvatarColor(member.avatarLabel) }}
-                    >
-                      {member.avatarLabel}
-                    </span>
-                    {member.workspaceNickname}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-2">
+        <div>
+          <p className={fieldLabelClass}>카테고리</p>
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={onClose}
-              className="h-10 rounded-2xl bg-slate-100 px-4 text-sm font-bold text-slate-700 hover:bg-slate-200"
+              onClick={() => setValues((v) => ({ ...v, category: null }))}
+              className={cn(pillClass, values.category === null && pillActiveClass)}
             >
-              취소
+              없음
             </button>
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="h-10 rounded-2xl bg-[var(--color-brand)] px-4 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              저장
-            </button>
+            {categoryOptions.map(([key, { label }]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setValues((v) => ({ ...v, category: key }))}
+                className={cn(pillClass, values.category === key && pillActiveClass)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
-        </form>
-      </section>
-    </div>
+        </div>
+
+        <div>
+          <p className={fieldLabelClass}>담당자</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setValues((v) => ({ ...v, assignee: null }))}
+              className={cn(pillClass, values.assignee === null && pillActiveClass)}
+            >
+              미배정
+            </button>
+            {members.map((member) => {
+              const selected = values.assignee?.name === member.workspaceNickname;
+              return (
+                <button
+                  key={member.userId}
+                  type="button"
+                  onClick={() =>
+                    setValues((v) => ({
+                      ...v,
+                      assignee: {
+                        name: member.workspaceNickname,
+                        avatarLabel: member.avatarLabel,
+                      },
+                    }))
+                  }
+                  className={cn(pillClass, selected && pillActiveClass)}
+                >
+                  <span
+                    className="flex size-5 items-center justify-center rounded-full text-[10px] font-semibold text-white"
+                    style={{ backgroundColor: getAvatarColor(member.avatarLabel) }}
+                  >
+                    {member.avatarLabel}
+                  </span>
+                  {member.workspaceNickname}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-10 rounded-2xl bg-slate-100 px-4 text-sm font-bold text-slate-700 hover:bg-slate-200"
+          >
+            취소
+          </button>
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className="h-10 rounded-2xl bg-[var(--color-brand)] px-4 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            저장
+          </button>
+        </div>
+      </form>
+    </dialog>
   );
 }
