@@ -1,8 +1,11 @@
+'use client';
+
 // 내 워크스페이스 페이지 — 헤더 + 참여 중인 워크스페이스 목록(빈 상태 포함)을 조립한다
+// 목록 조회는 tanstack-query(useQuery) — GET 컨벤션 (docs/conventions/supabase-convention.md)
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { Plus, RotateCcw } from 'lucide-react';
 import { Plus_Jakarta_Sans } from 'next/font/google';
-import { getMyWorkspaces } from '@/entities/workspace';
+import { useMyWorkspaces } from '@/entities/workspace';
 import { WorkspaceList } from '@/widgets/workspace-list';
 
 // Figma 지정 폰트 — 한글은 시스템 폰트로 fallback된다
@@ -11,8 +14,8 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ['400', '600', '700', '800'],
 });
 
-export default async function WorkspacesPage() {
-  const workspaces = await getMyWorkspaces();
+export default function WorkspacesPage() {
+  const { data: workspaces, isPending, isError, refetch } = useMyWorkspaces();
 
   return (
     <div className={`${jakarta.className} bg-brand-surface flex min-h-screen flex-col`}>
@@ -29,7 +32,26 @@ export default async function WorkspacesPage() {
             <Plus className="size-4" aria-hidden />새 워크스페이스
           </Link>
         </header>
-        <WorkspaceList workspaces={workspaces} />
+
+        {isPending ? (
+          <div className="text-brand-muted flex flex-1 items-center justify-center text-sm">
+            워크스페이스를 불러오는 중...
+          </div>
+        ) : isError ? (
+          <div className="flex flex-1 flex-col items-center justify-center gap-3">
+            <p className="text-brand-muted text-sm">워크스페이스 목록을 불러오지 못했습니다.</p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="text-brand flex items-center gap-1.5 text-sm font-semibold"
+            >
+              <RotateCcw className="size-4" aria-hidden />
+              다시 시도
+            </button>
+          </div>
+        ) : (
+          <WorkspaceList workspaces={workspaces} />
+        )}
       </div>
     </div>
   );

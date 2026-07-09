@@ -2,6 +2,8 @@
 // 스키마 변경 시 `npm run gen:types` 실행하면 전부 최신화된다.
 import type {
   GenericEnums,
+  GenericFunctionArgs,
+  GenericFunctionReturns,
   GenericTables,
   GenericTablesInsert,
   GenericTablesUpdate,
@@ -19,3 +21,9 @@ export type WorkspaceUpdate = GenericTablesUpdate<'workspaces'>;
 // DB enum: 'team_project' | 'side_project' | 'store_operation'
 // 프론트 WorkspacePurpose(hyphen)는 snake_case 통일 리팩터링 때 이 타입으로 교체한다.
 export type WorkspacePurposeDb = GenericEnums<'workspace_purpose'>;
+
+/** get_my_workspaces RPC 반환 행 */
+export type MyWorkspaceRpcRow = GenericFunctionReturns<'get_my_workspaces'>[number];
+
+/** create_workspace RPC 인자 */
+export type CreateWorkspaceRpcArgs = GenericFunctionArgs<'create_workspace'>;

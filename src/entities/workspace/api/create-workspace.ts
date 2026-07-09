@@ -1,22 +1,35 @@
-// create_workspace RPC의 Mock 구현
-// 백엔드 준비 시 supabase.rpc('create_workspace')로 교체한다
-// (실제로는 workspaces insert → invite_code 생성 → owner 등록 → purpose 기준 workspace_modules 생성 후 id 반환)
-import type { WorkspacePurpose } from '../model/workspace.types';
+'use server';
 
-export interface CreateWorkspaceInput {
-  name: string;
-  description?: string;
-  purpose: WorkspacePurpose;
-}
+// 워크스페이스 생성 서버액션 — create_workspace RPC
+// (RPC가 workspaces + owner 멤버십 + purpose별 기본 모듈 + invite_code 생성을 한 트랜잭션으로 처리)
+import { createSupabaseServerClient } from '@/shared/api/supabase/server';
+import { DEV_USER_ID } from '@/shared/config/dev-user';
+import {
+  createWorkspaceInputSchema,
+  type CreateWorkspaceInput,
+} from '../model/create-workspace.schema';
+import { toDbPurpose } from '../model/purpose.mapper';
 
 export async function createWorkspace(input: CreateWorkspaceInput): Promise<{ id: string }> {
-  // Mock: 실제 저장 없이 워크스페이스 id만 생성해 반환한다
-  const slug =
-    input.name
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9가-힣]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'workspace';
+  // 클라이언트(rhf+zod) 검증과 별개로 서버에서 재검증한다
+  const parsed = createWorkspaceInputSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? '입력값이 올바르지 않습니다');
+  }
 
-  return { id: `ws-${slug}-${Date.now().toString(36)}` };
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.rpc('create_workspace', {
+    p_user_id: DEV_USER_ID,
+    p_name: parsed.data.name,
+    p_purpose: toDbPurpose(parsed.data.purpose),
+    ...(parsed.data.description ? { p_description: parsed.data.description } : {}),
+  });
+
+  if (error) {
+    // 상세 원인은 서버 로그에만 남기고, 클라이언트에는 일반화된 메시지만 반환한다
+    console.error('[createWorkspace] RPC 실패:', error);
+    throw new Error('워크스페이스 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
+  }
+
+  return { id: data };
 }

@@ -481,6 +481,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "user_dashboard_layouts_member_fk"
+            columns: ["workspace_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_members"
+            referencedColumns: ["workspace_id", "user_id"]
+          },
+          {
             foreignKeyName: "user_dashboard_layouts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -537,6 +544,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_schedule_entries_member_fk"
+            columns: ["workspace_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_members"
+            referencedColumns: ["workspace_id", "user_id"]
           },
           {
             foreignKeyName: "work_schedule_entries_user_id_fkey"
@@ -702,7 +716,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_workspace: {
+        Args: {
+          p_description?: string
+          p_name: string
+          p_purpose: Database["public"]["Enums"]["workspace_purpose"]
+          p_user_id: string
+        }
+        Returns: string
+      }
+      get_my_workspaces: {
+        Args: { p_user_id: string }
+        Returns: {
+          done_task_count: number
+          id: string
+          member_count: number
+          name: string
+          progress: number
+          purpose: Database["public"]["Enums"]["workspace_purpose"]
+          task_count: number
+          updated_at: string
+        }[]
+      }
     }
     Enums: {
       calendar_event_type: "meeting" | "deadline"

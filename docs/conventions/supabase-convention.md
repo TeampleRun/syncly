@@ -90,19 +90,33 @@ const statusSchema = z.enum(Constants.public.Enums.task_status);
 - RPC는 `auth.uid()` 대신 **`p_user_id uuid` 파라미터**로 유저를 받습니다. 테스트는 시드 계정 id를 하드코딩합니다.
 - auth 연동이 완료되면 `auth.uid()`로 교체하고, `dev_full_access` RLS 정책을 drop해 실 정책을 발동시킵니다.
 
-## 5. ENUM 규칙
+## 5. 데이터 페칭 규칙 (프론트)
+
+| 작업                 | 방식                                                | 위치                                   |
+| -------------------- | --------------------------------------------------- | -------------------------------------- |
+| 조회(GET)            | **tanstack-query `useQuery`** + 브라우저 클라이언트 | 쿼리 함수·훅: `entities/<도메인>/api/` |
+| 생성/수정/삭제(쓰기) | **server action**(`'use server'`) + 서버 클라이언트 | `entities/<도메인>/api/`               |
+
+- Supabase 클라이언트는 `@/shared/api/supabase/client`의 `getSupabaseBrowserClient()`(클라이언트 컴포넌트) / `@/shared/api/supabase/server`의 `createSupabaseServerClient()`(서버액션·RSC)를 사용합니다. **배럴(index)로 묶지 않습니다** — server 클라이언트(`next/headers`)가 클라이언트 번들에 딸려 들어가 빌드가 깨집니다.
+- 쿼리 키는 `['<도메인>', ...스코프]` 배열로 훅 파일에서 export합니다 (예: `myWorkspacesQueryKey`).
+- 쓰기 성공 후에는 관련 쿼리를 `queryClient.invalidateQueries({ queryKey: ['<도메인>'] })`로 무효화합니다.
+- 입력 검증은 **클라이언트(react-hook-form + zod)와 서버액션 양쪽**에서 같은 zod 스키마로 수행합니다. 스키마는 `entities/<도메인>/model/`이 소유하고 feature가 가져다 씁니다.
+- 임시 유저 id는 `@/shared/config/dev-user`의 `DEV_USER_ID`만 사용합니다 (하드코딩 분산 금지 — auth 연동 시 일괄 교체).
+- 기준 구현: **workspace 도메인** (`entities/workspace/api/use-my-workspaces.ts` 조회 / `create-workspace.ts` 서버액션)
+
+## 6. ENUM 규칙
 
 - enum성 컬럼은 전부 **Postgres 네이티브 ENUM + snake_case** 값으로 통일합니다.
 - 현재 7종: `workspace_purpose`, `task_status`, `task_priority`, `task_category`, `resource_type`, `calendar_event_type`, `member_role`
 - 값 추가는 `alter type <enum명> add value '<값>'` 마이그레이션 → `npm run gen:types` 재실행 순서로 진행합니다.
 - 프론트에서 enum 값을 문자열 리터럴로 중복 정의하지 않고 `GenericEnums`로 파생합니다.
 
-## 6. 마이그레이션 규칙
+## 7. 마이그레이션 규칙
 
 - 스키마 변경은 반드시 마이그레이션으로 기록하고, 원격에 적용된 버전과 **동일한 파일명**으로 `supabase/migrations/`에 동기화합니다.
 - 스키마 변경 후에는 `npm run gen:types`를 실행해 `database.types.ts` 갱신분을 같은 PR에 포함합니다.
 
-## 7. 테스트 시드
+## 8. 테스트 시드
 
 | 항목         | 값                                                                                                                               |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------- |
