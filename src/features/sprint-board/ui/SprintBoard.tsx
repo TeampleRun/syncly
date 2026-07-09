@@ -17,10 +17,7 @@ import { TaskFormDialog } from './TaskFormDialog';
 
 // 다이얼로그 상태 — 스프린트 추가 / 백로그 추가 / 수정(대상 Task) / 닫힘
 type DialogState =
-  | { mode: 'add-sprint' }
-  | { mode: 'add-backlog' }
-  | { mode: 'edit'; task: Task }
-  | null;
+  { mode: 'add-sprint' } | { mode: 'add-backlog' } | { mode: 'edit'; task: Task } | null;
 
 interface SprintBoardProps {
   sprintId: string;

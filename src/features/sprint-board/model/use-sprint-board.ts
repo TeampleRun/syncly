@@ -55,7 +55,8 @@ export function useSprintBoard({
 
   // 수정/삭제는 업무가 어느 목록에 있든 처리(스프린트·백로그 공통)
   const updateTask = useCallback((id: string, values: TaskFormValues) => {
-    const patch = (list: Task[]) => list.map((t) => (t.id === id ? applyValuesToTask(t, values) : t));
+    const patch = (list: Task[]) =>
+      list.map((t) => (t.id === id ? applyValuesToTask(t, values) : t));
     setSprintTasks(patch);
     setBacklogTasks(patch);
   }, []);

@@ -7,6 +7,7 @@ import type { Task } from '@/entities/side-project/task';
 import type { WorkspaceMember } from '@/entities/workspace-member';
 import { SprintBoard } from '@/features/sprint-board';
 
+import SprintSelector from './SprintSelector';
 import SprintSummaryHeader from './SprintSummaryHeader';
 
 const jakarta = Plus_Jakarta_Sans({
@@ -14,25 +15,30 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ['400', '500', '600', '700', '800'],
 });
 
-interface SprintBoardPageProps {
+interface SprintBoardViewProps {
   workspaceId: string;
   sprint: Sprint;
+  sprints: Sprint[];
   initialTasks: Task[];
   initialBacklog: Task[];
   members: WorkspaceMember[];
 }
 
-export default function SprintBoardPage({
+export default function SprintBoardView({
   workspaceId,
   sprint,
+  sprints,
   initialTasks,
   initialBacklog,
   members,
-}: SprintBoardPageProps) {
+}: SprintBoardViewProps) {
   return (
     <div className={`${jakarta.className} bg-brand-surface min-h-full`}>
+      <SprintSelector sprints={sprints} currentSprintId={sprint.id} />
       <SprintSummaryHeader sprint={sprint} />
+      {/* key={sprint.id}: 스프린트 전환 시 보드를 리마운트해 초기 데이터로 다시 seed한다 */}
       <SprintBoard
+        key={sprint.id}
         sprintId={sprint.id}
         workspaceId={workspaceId}
         initialTasks={initialTasks}
