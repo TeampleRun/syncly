@@ -1,17 +1,16 @@
 'use client';
 
 // 팀원 초대(이메일/링크)와 멤버 목록 상태를 관리합니다.
+// 멤버 목록은 서버(RSC)에서 조회해 initialMembers로 주입받고, 훅은 로컬 상태로 seed만 한다.
 // 백엔드 연동 전이므로 초대는 목록에 '초대됨' 상태의 멤버를 추가하는 목업으로 동작합니다.
 import { useMemo, useState } from 'react';
-import {
-  getMockWorkspaceMembersByWorkspaceId,
-  type WorkspaceMember,
-} from '@/entities/workspace-member';
+import type { WorkspaceMember } from '@/entities/workspace-member';
 
 export type InviteMode = 'email' | 'link';
 
 interface UseMemberManagementParams {
   workspaceId: string;
+  initialMembers: WorkspaceMember[];
 }
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -32,10 +31,8 @@ function toAvatarLabel(email: string) {
   return email.charAt(0).toUpperCase();
 }
 
-export function useMemberManagement({ workspaceId }: UseMemberManagementParams) {
-  const [members, setMembers] = useState<WorkspaceMember[]>(() =>
-    getMockWorkspaceMembersByWorkspaceId(workspaceId),
-  );
+export function useMemberManagement({ workspaceId, initialMembers }: UseMemberManagementParams) {
+  const [members, setMembers] = useState<WorkspaceMember[]>(initialMembers);
   const [inviteMode, setInviteMode] = useState<InviteMode>('email');
   const [email, setEmail] = useState('');
 

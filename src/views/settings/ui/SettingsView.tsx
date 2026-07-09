@@ -2,11 +2,13 @@
 
 // 설정 페이지 셸 — 폰트/레이아웃을 잡고 URL 쿼리(?tab=) 기준으로 탭을 전환한다.
 // 활성 탭은 서버에서 파싱해 prop으로 받는다(스프린트 보드와 동일한 URL 기반 패턴).
-// 각 탭의 실제 내용은 이후 feature 컴포넌트로 채운다.
+// 각 탭 내용은 feature 컴포넌트에 위임하고, 표시 데이터는 서버에서 주입받는다.
 import Link from 'next/link';
 import type { Workspace } from '@/entities/workspace';
+import type { WorkspaceMember } from '@/entities/workspace-member';
 import { WorkspaceInfoForm } from '@/features/manage-workspace-info';
 import { MemberManagementPanel } from '@/features/manage-workspace-members';
+import { MemberProfileForm } from '@/features/manage-member-profile';
 import { plusJakartaSans } from '@/shared/lib/fonts';
 import { cn } from '@/shared/lib/utils';
 import { SETTINGS_TABS, type SettingsTabKey } from '../model/settings-tab';
@@ -15,9 +17,19 @@ interface SettingsViewProps {
   workspace: Workspace;
   workspaceId: string;
   activeTab: SettingsTabKey;
+  members: WorkspaceMember[];
+  currentUserId: string;
+  currentNickname: string;
 }
 
-export function SettingsView({ workspace, workspaceId, activeTab }: SettingsViewProps) {
+export function SettingsView({
+  workspace,
+  workspaceId,
+  activeTab,
+  members,
+  currentUserId,
+  currentNickname,
+}: SettingsViewProps) {
   return (
     <div className={`${plusJakartaSans.className} mx-auto max-w-3xl`}>
       <h1 className="text-2xl font-bold text-slate-950">설정</h1>
@@ -46,18 +58,15 @@ export function SettingsView({ workspace, workspaceId, activeTab }: SettingsView
 
       <div className="mt-6">
         {activeTab === 'workspace' && <WorkspaceInfoForm workspace={workspace} />}
-        {activeTab === 'members' && <MemberManagementPanel workspaceId={workspaceId} />}
-        {activeTab === 'profile' && <SettingsTabPlaceholder label="프로필" />}
+        {activeTab === 'members' && (
+          <MemberManagementPanel
+            workspaceId={workspaceId}
+            initialMembers={members}
+            currentUserId={currentUserId}
+          />
+        )}
+        {activeTab === 'profile' && <MemberProfileForm initialNickname={currentNickname} />}
       </div>
     </div>
-  );
-}
-
-// TODO(T4~T6): 각 탭을 feature 컴포넌트로 교체한다.
-function SettingsTabPlaceholder({ label }: { label: string }) {
-  return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
-      {label} 탭 (구현 예정)
-    </section>
   );
 }

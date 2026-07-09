@@ -1,16 +1,23 @@
 'use client';
 
 // 팀원 관리 탭 패널 — 초대 섹션과 멤버 목록을 상태 훅으로 묶는다.
-import { mockCurrentWorkspaceMember } from '@/entities/workspace-member';
+// 멤버 목록/현재 사용자 식별자는 서버(RSC)에서 조회해 prop으로 주입받는다.
+import type { WorkspaceMember } from '@/entities/workspace-member';
 import { useMemberManagement } from '../model/use-member-management';
 import { MemberInviteSection } from './MemberInviteSection';
 import { MemberList } from './MemberList';
 
 interface MemberManagementPanelProps {
   workspaceId: string;
+  initialMembers: WorkspaceMember[];
+  currentUserId: string;
 }
 
-export function MemberManagementPanel({ workspaceId }: MemberManagementPanelProps) {
+export function MemberManagementPanel({
+  workspaceId,
+  initialMembers,
+  currentUserId,
+}: MemberManagementPanelProps) {
   const {
     members,
     inviteMode,
@@ -21,7 +28,7 @@ export function MemberManagementPanel({ workspaceId }: MemberManagementPanelProp
     canInvite,
     isDuplicate,
     inviteByEmail,
-  } = useMemberManagement({ workspaceId });
+  } = useMemberManagement({ workspaceId, initialMembers });
 
   return (
     <div className="space-y-6">
@@ -35,7 +42,7 @@ export function MemberManagementPanel({ workspaceId }: MemberManagementPanelProp
         onInviteByEmail={inviteByEmail}
         inviteLink={inviteLink}
       />
-      <MemberList members={members} currentUserId={mockCurrentWorkspaceMember.userId} />
+      <MemberList members={members} currentUserId={currentUserId} />
     </div>
   );
 }
