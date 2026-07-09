@@ -12,6 +12,7 @@ import { TodaySchedule } from '@/widgets/side-project/dashboard-today-schedule';
 import { Velocity } from '@/widgets/side-project/dashboard-velocity';
 import { RecentNotices } from '@/widgets/store-operation/dashboard-recent-notices';
 import { RecentResources } from '@/widgets/store-operation/dashboard-recent-resources';
+import { WorkScheduleSummary } from '@/widgets/store-operation/dashboard-work-schedule';
 
 // layout의 x/y는 "추가될 때의 기본 위치"이며, 그리드가 충돌 시 자동 정렬한다.
 // key는 layout.i(위젯 id)와 일치해야 한다.
@@ -51,6 +52,13 @@ export const WIDGET_CATALOG = {
     layout: { i: 'recent-resources', x: 0, y: 10, w: 6, h: 5, minW: 2, minH: 3 },
     title: '최근 자료',
     render: (size, { workspaceId }) => <RecentResources workspaceId={workspaceId} size={size} />,
+  },
+  'work-schedule': {
+    layout: { i: 'work-schedule', x: 6, y: 10, w: 6, h: 5, minW: 3, minH: 3 },
+    title: '업무 스케줄',
+    render: (size, { workspaceId }) => (
+      <WorkScheduleSummary workspaceId={workspaceId} size={size} />
+    ),
   },
   'today-schedule': {
     layout: { i: 'today-schedule', x: 0, y: 10, w: 6, h: 4, minW: 2, minH: 3 },
