@@ -2,7 +2,7 @@
 
 // 워크스페이스의 목업 매장 근무 일정 화면을 구성합니다.
 import { createInitialWorkSchedule, mockWorkScheduleConfig } from '@/entities/work-schedule';
-import { mockWorkspaceMembers } from '@/entities/workspace-member';
+import { getMockWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
 import { WorkScheduleBoard } from '@/features/manage-work-schedule';
 
 interface WorkScheduleViewProps {
@@ -10,9 +10,10 @@ interface WorkScheduleViewProps {
 }
 
 export function WorkScheduleView({ workspaceId }: WorkScheduleViewProps) {
+  const members = getMockWorkspaceMembersByWorkspaceId(workspaceId);
   const initialSchedule = createInitialWorkSchedule({
     workspaceId,
-    members: mockWorkspaceMembers,
+    members,
     config: mockWorkScheduleConfig,
   });
 
@@ -24,7 +25,7 @@ export function WorkScheduleView({ workspaceId }: WorkScheduleViewProps) {
       </div>
 
       <WorkScheduleBoard
-        members={mockWorkspaceMembers}
+        members={members}
         config={mockWorkScheduleConfig}
         initialSchedule={initialSchedule}
       />

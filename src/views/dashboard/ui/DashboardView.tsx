@@ -57,6 +57,7 @@ export default function DashboardView({
     <>
       {editMode && <EditModeBanner />}
       <DashboardGrid
+        workspaceId={workspaceId}
         widgets={CATALOG_WIDGETS}
         layout={layout}
         editMode={editMode}

@@ -2,7 +2,7 @@
 // 화면에 배치된 위젯 = layout. 추가는 카탈로그 항목(LayoutItem)을 넣고, 삭제는 layout에서 뺀다.
 // 초기 레이아웃은 서버(RSC)에서 조회해 initialLayout으로 주입받는다(마운트 후 재조회 없음).
 // 저장(쓰기)만 서버액션으로 위임한다. 영속화 키는 (workspaceId, pageType). editMode는 저장하지 않는다.
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Layout, LayoutItem } from 'react-grid-layout';
 
 import { saveDashboardLayout, type DashboardLayoutState } from '@/entities/dashboard-layout';
@@ -26,43 +26,41 @@ export function useDashboardLayout({
 }: UseDashboardLayoutParams) {
   const [layout, setLayout] = useState<Layout>(initialLayout.layout);
   const [editMode, setEditMode] = useState(false);
+  const didMountRef = useRef(false);
 
   // TODO: DB 연동 — 변경 저장 (드래그 중 잦은 호출은 debounce 예정)
-  const commit = useCallback(
-    (next: Layout) => {
-      void saveDashboardLayout(workspaceId, pageType, { layout: next });
-    },
-    [workspaceId, pageType],
-  );
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+
+    void saveDashboardLayout(workspaceId, pageType, { layout });
+  }, [layout, workspaceId, pageType]);
 
   const handleLayoutChange = useCallback(
     (next: Layout) => {
       const positions = next.map(toPosition);
       setLayout(positions);
-      commit(positions);
     },
-    [commit],
+    [],
   );
 
   const addWidget = useCallback(
     (item: LayoutItem) =>
       setLayout((prev) => {
         if (prev.some((entry) => entry.i === item.i)) return prev;
-        const next = [...prev, toPosition(item)];
-        commit(next);
-        return next;
+        return [...prev, toPosition(item)];
       }),
-    [commit],
+    [],
   );
 
   const removeWidget = useCallback(
     (id: string) =>
       setLayout((prev) => {
-        const next = prev.filter((entry) => entry.i !== id);
-        commit(next);
-        return next;
+        return prev.filter((entry) => entry.i !== id);
       }),
-    [commit],
+    [],
   );
 
   const toggleEdit = useCallback(() => setEditMode((prev) => !prev), []);

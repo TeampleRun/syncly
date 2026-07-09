@@ -9,9 +9,6 @@ import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 import { cn } from '@/shared/lib/utils';
 
-// 작성일(내림차순) 정렬 — "최근" 자료를 위로. 원본 배열을 변형하지 않도록 복사 후 정렬한다.
-const sortedResources = [...mockResources].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-
 const header = (
   <WidgetCardHeader title="최근 자료" action={<WidgetCardAction>자료실</WidgetCardAction>} />
 );
@@ -41,7 +38,28 @@ function ResourceIcon({ resource, className }: { resource: ResourceItem; classNa
   );
 }
 
-export default function RecentResources({ size = 'md' }: { size?: WidgetSize }) {
+interface RecentResourcesProps {
+  workspaceId: string;
+  size?: WidgetSize;
+}
+
+export default function RecentResources({ workspaceId, size = 'md' }: RecentResourcesProps) {
+  // 작성일(내림차순) 정렬 — "최근" 자료를 위로. 원본 배열을 변형하지 않도록 복사 후 정렬한다.
+  const sortedResources = mockResources
+    .filter((resource) => resource.workspaceId === workspaceId)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  if (sortedResources.length === 0) {
+    return (
+      <WidgetCard>
+        {header}
+        <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
+          등록된 자료가 없습니다.
+        </div>
+      </WidgetCard>
+    );
+  }
+
   if (size === 'sm') {
     const latest = sortedResources[0];
     return (
