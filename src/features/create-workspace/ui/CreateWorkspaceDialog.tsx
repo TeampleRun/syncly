@@ -1,9 +1,10 @@
 'use client';
 
-// 워크스페이스 생성 Dialog — 선택된 템플릿 요약 + 이름/설명 입력 후 Mock 생성
+// 워크스페이스 생성 Dialog — 선택된 템플릿 요약 + 이름/설명 입력 후 서버액션으로 생성
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   WORKSPACE_PURPOSE_META,
@@ -32,6 +33,7 @@ export default function CreateWorkspaceDialog({
   onOpenChange,
 }: CreateWorkspaceDialogProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
@@ -54,10 +56,12 @@ export default function CreateWorkspaceDialog({
     setIsSubmitting(true);
     try {
       await createWorkspace({ name: values.name, description: values.description, purpose });
+      // 새 워크스페이스가 목록에 반영되도록 캐시 무효화 후 이동
+      await queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       router.push('/workspaces');
       // 성공 시 페이지 이동으로 언마운트되므로 isSubmitting을 리셋하지 않는다(버튼 깜빡임 방지)
     } catch (error) {
-      // TODO: 실패 알림 UI(toast 등) 추가 — 현재는 Mock이라 실패하지 않음
+      // TODO: 실패 알림 UI(toast 등) 추가
       console.error(error);
       setIsSubmitting(false);
     }

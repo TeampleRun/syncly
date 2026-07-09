@@ -1,12 +1,2 @@
-import { z } from 'zod';
-
-export const createWorkspaceSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(1, '워크스페이스 이름을 입력해주세요')
-    .max(50, '이름은 50자 이내로 입력해주세요'),
-  description: z.string().trim().max(200, '설명은 200자 이내로 입력해주세요').optional(),
-});
-
-export type CreateWorkspaceForm = z.infer<typeof createWorkspaceSchema>;
+// 폼 스키마는 서버액션 재검증과 공유하기 위해 entities/workspace가 소유한다 — 여기서는 재노출만
+export { createWorkspaceSchema, type CreateWorkspaceForm } from '@/entities/workspace';

@@ -3,6 +3,9 @@
 // 도메인별 사용처: entities/<도메인>/model/<도메인>.db.types.ts (예: entities/workspace)
 import type { Database } from './database.types';
 
+// 인프라 계층(Supabase 클라이언트 생성)에서 스키마 전체 제네릭이 필요할 때 사용
+export type { Database };
+
 type PublicSchema = Database['public'];
 
 /** 테이블 조회(Row) 타입 — 예: GenericTables<'workspaces'> */
