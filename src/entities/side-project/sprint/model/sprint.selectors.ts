@@ -4,8 +4,10 @@
 import type { Sprint } from './sprint.types';
 
 export function resolveCurrentSprint(sprints: Sprint[]): Sprint | undefined {
-  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+    now.getDate(),
+  ).padStart(2, '0')}`; // 로컬 타임존 기준 YYYY-MM-DD
   const ongoing = sprints.find((sprint) => sprint.startDate <= today && today <= sprint.endDate);
   if (ongoing) return ongoing;
 
