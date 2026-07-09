@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run lint && npm run lint:tw && npm run typecheck && npm run format:check"
+    "check": "npm run lint && npm run lint:tw && npm run typecheck && npm run format:check",
+    "gen:types": "npx supabase gen types typescript --project-id atkvaovvzdiznndrkjgt --schema public > src/shared/model/database.types.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

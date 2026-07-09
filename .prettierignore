@@ -6,3 +6,7 @@ coverage
 public
 package-lock.json
 next-env.d.ts
+
+# supabase 자동 생성 파일 (gen:types 출력 그대로 유지)
+src/shared/model/database.types.ts
+supabase/migrations
