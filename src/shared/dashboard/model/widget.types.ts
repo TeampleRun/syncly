@@ -5,11 +5,15 @@ import type { LayoutItem } from 'react-grid-layout';
 
 import type { WidgetSize } from '../lib/widget-size';
 
+export interface WidgetRenderContext {
+  workspaceId: string;
+}
+
 export interface WidgetDefinition {
   /** 위젯을 추가할 때의 기본 배치 + 위젯 id(layout.i) */
   layout: LayoutItem;
   /** 위젯 추가 목록·라벨 표시명 */
   title: string;
   /** 현재 타일 크기(sm/md/lg)를 받아 밀도가 다른 변형을 렌더 */
-  render: (size: WidgetSize) => ReactNode;
+  render: (size: WidgetSize, context: WidgetRenderContext) => ReactNode;
 }
