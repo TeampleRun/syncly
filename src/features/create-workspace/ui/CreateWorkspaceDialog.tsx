@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   WORKSPACE_PURPOSE_META,
@@ -61,8 +62,9 @@ export default function CreateWorkspaceDialog({
       router.push('/workspaces');
       // 성공 시 페이지 이동으로 언마운트되므로 isSubmitting을 리셋하지 않는다(버튼 깜빡임 방지)
     } catch (error) {
-      // TODO: 실패 알림 UI(toast 등) 추가
+      // 상세 원인은 콘솔에만 — 사용자에게는 일반화된 메시지 (네트워크 오류 등 영문 노출 방지)
       console.error(error);
+      toast.error('워크스페이스 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
       setIsSubmitting(false);
     }
   };

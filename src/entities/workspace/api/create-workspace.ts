@@ -26,7 +26,9 @@ export async function createWorkspace(input: CreateWorkspaceInput): Promise<{ id
   });
 
   if (error) {
-    throw new Error(`워크스페이스 생성에 실패했습니다: ${error.message}`);
+    // 상세 원인은 서버 로그에만 남기고, 클라이언트에는 일반화된 메시지만 반환한다
+    console.error('[createWorkspace] RPC 실패:', error);
+    throw new Error('워크스페이스 생성에 실패했습니다. 잠시 후 다시 시도해주세요.');
   }
 
   return { id: data };
