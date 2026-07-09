@@ -60,7 +60,9 @@ export function MemberInviteSection({
               aria-pressed={isActive}
               className={cn(
                 'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
-                isActive ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800',
+                isActive
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-800',
               )}
             >
               {mode.label}

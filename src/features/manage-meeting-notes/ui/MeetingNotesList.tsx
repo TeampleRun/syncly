@@ -29,10 +29,10 @@ export function MeetingNotesList({ workspaceId, meetingNotes }: MeetingNotesList
   return (
     <section className="max-w-[714px]">
       <div className="mb-[26px] flex items-center justify-between gap-4">
-        <h1 className="text-[36px] font-extrabold tracking-[-0.04em] text-brand-ink">회의록</h1>
+        <h1 className="text-brand-ink text-[36px] font-extrabold tracking-[-0.04em]">회의록</h1>
         <Link
           href={`/workspaces/${workspaceId}/meeting-notes/new`}
-          className="inline-flex h-12 items-center gap-2 rounded-full bg-brand px-5 text-[16px] font-bold text-white shadow-[0_10px_24px_rgba(91,78,232,0.24)] transition hover:brightness-105"
+          className="bg-brand inline-flex h-12 items-center gap-2 rounded-full px-5 text-[16px] font-bold text-white shadow-[0_10px_24px_rgba(91,78,232,0.24)] transition hover:brightness-105"
         >
           <Plus className="size-4" />
           회의록 작성

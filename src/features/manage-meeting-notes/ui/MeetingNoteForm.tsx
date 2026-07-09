@@ -272,7 +272,7 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
     <section className="max-w-[714px]">
       <Link
         href={`/workspaces/${workspaceId}/meeting-notes`}
-        className="inline-flex items-center gap-2 text-[16px] font-semibold text-brand-muted transition hover:text-brand-ink"
+        className="text-brand-muted hover:text-brand-ink inline-flex items-center gap-2 text-[16px] font-semibold transition"
       >
         <span aria-hidden="true">←</span>
         목록으로
@@ -282,11 +282,11 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
         onSubmit={handleSubmit}
         className="mt-[21px] rounded-[32px] border border-[#eceffa] bg-white px-[26.5px] pt-[26.5px] pb-[28px] shadow-[0_20px_48px_rgba(91,78,232,0.08)]"
       >
-        <h1 className="text-[34px] font-extrabold tracking-[-0.04em] text-brand-ink">새 회의록</h1>
+        <h1 className="text-brand-ink text-[34px] font-extrabold tracking-[-0.04em]">새 회의록</h1>
 
         <div className="mt-8 space-y-[22px]">
           <label className="block">
-            <span className="mb-2.5 block text-[17px] font-semibold text-brand-ink">회의 제목</span>
+            <span className="text-brand-ink mb-2.5 block text-[17px] font-semibold">회의 제목</span>
             <input
               type="text"
               value={formValues.title}
@@ -295,13 +295,15 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
               className={`${fieldClassName} ${hasSubmitted && !isTitleValid ? 'border-[#ff6b6b] bg-[#fff6f6] focus:border-[#ff6b6b]' : ''}`}
             />
             {hasSubmitted && !isTitleValid ? (
-              <p className="mt-2 text-[14px] font-medium text-[#ff6b6b]">회의 제목을 입력해주세요.</p>
+              <p className="mt-2 text-[14px] font-medium text-[#ff6b6b]">
+                회의 제목을 입력해주세요.
+              </p>
             ) : null}
           </label>
 
           <div className="grid gap-5 md:grid-cols-2">
             <label className="block">
-              <span className="mb-2.5 block text-[17px] font-semibold text-brand-ink">날짜</span>
+              <span className="text-brand-ink mb-2.5 block text-[17px] font-semibold">날짜</span>
               <div className="relative">
                 <input
                   ref={dateInputRef}
@@ -317,7 +319,7 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
                   tabIndex={-1}
                 />
                 <div
-                  className={`${dateFieldClassName} gap-2 pr-[14px] text-[18px] font-medium tracking-[-0.03em] text-brand-ink`}
+                  className={`${dateFieldClassName} text-brand-ink gap-2 pr-[14px] text-[18px] font-medium tracking-[-0.03em]`}
                 >
                   <input
                     ref={yearInputRef}
@@ -328,7 +330,7 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
                     onKeyDown={(event) => handleDatePartKeyDown(event, 'year')}
                     onBlur={handleDatePartBlur}
                     placeholder="2025"
-                    className="w-[4ch] bg-transparent text-center text-brand-ink outline-none placeholder:text-[#a0a6bf]"
+                    className="text-brand-ink w-[4ch] bg-transparent text-center outline-none placeholder:text-[#a0a6bf]"
                   />
                   <span className="text-brand-muted">.</span>
                   <input
@@ -340,7 +342,7 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
                     onKeyDown={(event) => handleDatePartKeyDown(event, 'month')}
                     onBlur={handleDatePartBlur}
                     placeholder="06"
-                    className="w-[2ch] bg-transparent text-center text-brand-ink outline-none placeholder:text-[#a0a6bf]"
+                    className="text-brand-ink w-[2ch] bg-transparent text-center outline-none placeholder:text-[#a0a6bf]"
                   />
                   <span className="text-brand-muted">.</span>
                   <input
@@ -352,14 +354,14 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
                     onKeyDown={(event) => handleDatePartKeyDown(event, 'day')}
                     onBlur={handleDatePartBlur}
                     placeholder="30"
-                    className="w-[2ch] bg-transparent text-center text-brand-ink outline-none placeholder:text-[#a0a6bf]"
+                    className="text-brand-ink w-[2ch] bg-transparent text-center outline-none placeholder:text-[#a0a6bf]"
                   />
                   <span className="text-brand-muted">.</span>
                   <div className="ml-auto">
                     <button
                       type="button"
                       onClick={handleOpenDatePicker}
-                      className="flex size-6 items-center justify-center rounded-md bg-white/70 text-[#d5d9e8] transition hover:text-brand-muted"
+                      className="hover:text-brand-muted flex size-6 items-center justify-center rounded-md bg-white/70 text-[#d5d9e8] transition"
                       aria-label="달력 열기"
                     >
                       <CalendarDays className="size-4" aria-hidden="true" />
@@ -370,7 +372,7 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
             </label>
 
             <label className="block">
-              <span className="mb-2.5 block text-[17px] font-semibold text-brand-ink">참석자</span>
+              <span className="text-brand-ink mb-2.5 block text-[17px] font-semibold">참석자</span>
               <div ref={participantFieldRef} className="relative">
                 <button
                   type="button"
@@ -382,7 +384,7 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
                       selectedParticipants.map((member) => (
                         <span
                           key={member.userId}
-                          className="inline-flex items-center rounded-full bg-white px-3 py-1 text-[14px] font-medium text-brand-ink shadow-[0_1px_4px_rgba(91,78,232,0.08)]"
+                          className="text-brand-ink inline-flex items-center rounded-full bg-white px-3 py-1 text-[14px] font-medium shadow-[0_1px_4px_rgba(91,78,232,0.08)]"
                         >
                           {member.workspaceNickname}
                         </span>
@@ -408,17 +410,17 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
                             key={member.userId}
                             type="button"
                             onClick={() => toggleParticipant(member.userId)}
-                            className="flex w-full items-center justify-between rounded-[14px] px-3 py-3 text-left transition hover:bg-brand-soft"
+                            className="hover:bg-brand-soft flex w-full items-center justify-between rounded-[14px] px-3 py-3 text-left transition"
                           >
                             <div className="flex items-center gap-3">
-                              <div className="flex size-9 items-center justify-center rounded-full bg-brand text-[15px] font-semibold text-white">
+                              <div className="bg-brand flex size-9 items-center justify-center rounded-full text-[15px] font-semibold text-white">
                                 {member.avatarLabel}
                               </div>
                               <div>
-                                <p className="text-[15px] font-semibold text-brand-ink">
+                                <p className="text-brand-ink text-[15px] font-semibold">
                                   {member.workspaceNickname}
                                 </p>
-                                <p className="text-[13px] text-brand-muted">
+                                <p className="text-brand-muted text-[13px]">
                                   {member.role === 'owner' ? '팀장' : '팀원'}
                                 </p>
                               </div>
@@ -439,7 +441,7 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
           </div>
 
           <label className="block">
-            <span className="mb-2.5 block text-[17px] font-semibold text-brand-ink">결정사항</span>
+            <span className="text-brand-ink mb-2.5 block text-[17px] font-semibold">결정사항</span>
             <textarea
               value={formValues.decisions}
               onChange={(event) => handleChange('decisions', event.target.value)}
@@ -450,7 +452,7 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
           </label>
 
           <label className="block">
-            <span className="mb-2.5 block text-[17px] font-semibold text-brand-ink">후속 업무</span>
+            <span className="text-brand-ink mb-2.5 block text-[17px] font-semibold">후속 업무</span>
             <textarea
               value={formValues.followUpActions}
               onChange={(event) => handleChange('followUpActions', event.target.value)}

@@ -30,7 +30,9 @@ export function MemberList({ members, currentUserId }: MemberListProps) {
       <h2 className="text-base font-bold text-slate-950">멤버 ({members.length})</h2>
 
       {members.length === 0 ? (
-        <p className="mt-4 text-sm text-slate-500">아직 참여한 멤버가 없어요. 팀원을 초대해 보세요.</p>
+        <p className="mt-4 text-sm text-slate-500">
+          아직 참여한 멤버가 없어요. 팀원을 초대해 보세요.
+        </p>
       ) : (
         <ul className="mt-4 space-y-3">
           {members.map((member, index) => {

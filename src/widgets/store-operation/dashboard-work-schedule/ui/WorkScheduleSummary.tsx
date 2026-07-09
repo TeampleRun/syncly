@@ -171,7 +171,10 @@ export default function WorkScheduleSummary({
               );
 
               return (
-                <div key={weekday.key} className="bg-brand-surface rounded-xl px-2 py-2 text-center">
+                <div
+                  key={weekday.key}
+                  className="bg-brand-surface rounded-xl px-2 py-2 text-center"
+                >
                   <p className="text-brand-muted text-[11px]">{weekday.label}</p>
                   <p className="text-brand-ink mt-0.5 text-sm font-bold">{workingCount}명</p>
                 </div>
