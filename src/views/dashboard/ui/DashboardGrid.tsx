@@ -26,6 +26,8 @@ const renderResizeHandle = (axis: ResizeHandleAxis, ref: Ref<HTMLElement>) => (
 );
 
 interface DashboardGridProps {
+  /** 위젯 데이터 조회 스코프 */
+  workspaceId: string;
   /** 위젯 카탈로그 (id → 렌더러) */
   widgets: WidgetDefinition[];
   layout: Layout;
@@ -35,6 +37,7 @@ interface DashboardGridProps {
 }
 
 export default function DashboardGrid({
+  workspaceId,
   widgets,
   layout,
   editMode,
@@ -104,7 +107,7 @@ export default function DashboardGrid({
                       </button>
                     </>
                   )}
-                  {widget.render(size)}
+                  {widget.render(size, { workspaceId })}
                 </div>
               );
             })}

@@ -50,7 +50,7 @@ export const WIDGET_CATALOG = {
   'recent-resources': {
     layout: { i: 'recent-resources', x: 0, y: 10, w: 6, h: 5, minW: 2, minH: 3 },
     title: '최근 자료',
-    render: (size) => <RecentResources size={size} />,
+    render: (size, { workspaceId }) => <RecentResources workspaceId={workspaceId} size={size} />,
   },
   'today-schedule': {
     layout: { i: 'today-schedule', x: 0, y: 10, w: 6, h: 4, minW: 2, minH: 3 },
