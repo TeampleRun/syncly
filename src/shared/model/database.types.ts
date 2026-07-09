@@ -702,11 +702,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_workspace_member: {
-        Args: { p_workspace_id: string }
-        Returns: boolean
-      }
-      is_workspace_owner: { Args: { p_workspace_id: string }; Returns: boolean }
+      [_ in never]: never
     }
     Enums: {
       calendar_event_type: "meeting" | "deadline"
