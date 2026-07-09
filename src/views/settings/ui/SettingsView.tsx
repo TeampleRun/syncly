@@ -5,6 +5,7 @@
 // 각 탭의 실제 내용은 이후 feature 컴포넌트로 채운다.
 import Link from 'next/link';
 import type { Workspace } from '@/entities/workspace';
+import { WorkspaceInfoForm } from '@/features/manage-workspace-info';
 import { plusJakartaSans } from '@/shared/lib/fonts';
 import { cn } from '@/shared/lib/utils';
 import { SETTINGS_TABS, type SettingsTabKey } from '../model/settings-tab';
@@ -43,7 +44,7 @@ export function SettingsView({ workspace, workspaceId, activeTab }: SettingsView
       </nav>
 
       <div className="mt-6">
-        {activeTab === 'workspace' && <SettingsTabPlaceholder label="워크스페이스 정보" />}
+        {activeTab === 'workspace' && <WorkspaceInfoForm workspace={workspace} />}
         {activeTab === 'members' && <SettingsTabPlaceholder label="팀원 관리" />}
         {activeTab === 'profile' && <SettingsTabPlaceholder label="프로필" />}
       </div>
