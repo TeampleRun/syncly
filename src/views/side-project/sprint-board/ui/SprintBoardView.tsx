@@ -24,7 +24,7 @@ interface SprintBoardViewProps {
   members: WorkspaceMember[];
 }
 
-export default function SprintBoardView({
+export function SprintBoardView({
   workspaceId,
   sprint,
   sprints,

@@ -5,7 +5,7 @@
 import { getSprints, resolveCurrentSprint } from '@/entities/side-project/sprint';
 import { getBacklogTasks, getSprintTasks } from '@/entities/side-project/task';
 import { mockWorkspaceMembers } from '@/entities/workspace-member';
-import SprintBoardView from '@/views/side-project/sprint-board/ui/SprintBoardView';
+import { SprintBoardView } from '@/views/side-project/sprint-board';
 
 interface SprintBoardRouteProps {
   params: Promise<{ workspaceId: string }>;
