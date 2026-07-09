@@ -3,6 +3,11 @@ import { cache } from 'react';
 import type { Workspace } from './workspace.types';
 
 const mockWorkspacesById: Record<string, Workspace> = {
+  test: {
+    id: 'test',
+    name: '캡스톤 디자인 팀',
+    purpose: 'team-project',
+  },
   'store-workspace': {
     id: 'store-workspace',
     name: '카페 그레이 운영',
