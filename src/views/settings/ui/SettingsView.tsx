@@ -6,6 +6,7 @@
 import Link from 'next/link';
 import type { Workspace } from '@/entities/workspace';
 import { WorkspaceInfoForm } from '@/features/manage-workspace-info';
+import { MemberManagementPanel } from '@/features/manage-workspace-members';
 import { plusJakartaSans } from '@/shared/lib/fonts';
 import { cn } from '@/shared/lib/utils';
 import { SETTINGS_TABS, type SettingsTabKey } from '../model/settings-tab';
@@ -45,7 +46,7 @@ export function SettingsView({ workspace, workspaceId, activeTab }: SettingsView
 
       <div className="mt-6">
         {activeTab === 'workspace' && <WorkspaceInfoForm workspace={workspace} />}
-        {activeTab === 'members' && <SettingsTabPlaceholder label="팀원 관리" />}
+        {activeTab === 'members' && <MemberManagementPanel workspaceId={workspaceId} />}
         {activeTab === 'profile' && <SettingsTabPlaceholder label="프로필" />}
       </div>
     </div>
