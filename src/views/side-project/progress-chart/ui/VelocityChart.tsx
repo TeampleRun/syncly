@@ -18,7 +18,10 @@ export default function VelocityChart({
   // 상단 눈금값을 4의 배수로 올림 → 0/¼/½/¾/max 눈금이 정수로 떨어진다.
   const top = Math.ceil(maxCompleted / TICK_STEPS) * TICK_STEPS;
   // 위에서 아래로 그리기 위해 큰 값부터 나열
-  const ticks = Array.from({ length: TICK_STEPS + 1 }, (_, i) => (top / TICK_STEPS) * (TICK_STEPS - i));
+  const ticks = Array.from(
+    { length: TICK_STEPS + 1 },
+    (_, i) => (top / TICK_STEPS) * (TICK_STEPS - i),
+  );
 
   return (
     <WidgetCard className={cn('min-h-[280px]', className)}>
