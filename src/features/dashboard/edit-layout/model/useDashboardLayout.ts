@@ -38,13 +38,10 @@ export function useDashboardLayout({
     void saveDashboardLayout(workspaceId, pageType, { layout });
   }, [layout, workspaceId, pageType]);
 
-  const handleLayoutChange = useCallback(
-    (next: Layout) => {
-      const positions = next.map(toPosition);
-      setLayout(positions);
-    },
-    [],
-  );
+  const handleLayoutChange = useCallback((next: Layout) => {
+    const positions = next.map(toPosition);
+    setLayout(positions);
+  }, []);
 
   const addWidget = useCallback(
     (item: LayoutItem) =>

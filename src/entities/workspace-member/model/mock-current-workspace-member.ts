@@ -6,5 +6,7 @@ export const mockCurrentWorkspaceMember: WorkspaceMember = {
   userId: 'user-1',
   workspaceNickname: '김민서',
   avatarLabel: '김',
+  email: 'minseo@example.com',
   role: 'owner',
+  status: 'joined',
 };

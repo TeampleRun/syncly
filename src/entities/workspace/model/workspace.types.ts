@@ -5,6 +5,8 @@ export interface Workspace {
   id: string;
   name: string;
   purpose: WorkspacePurpose;
+  // 설정 페이지에서 편집하는 워크스페이스 소개 문구입니다. (선택 값)
+  description?: string;
 }
 
 // get_my_workspaces RPC 반환 형태 (내 워크스페이스 목록)
