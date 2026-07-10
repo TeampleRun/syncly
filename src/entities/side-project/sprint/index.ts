@@ -4,8 +4,7 @@ export { VELOCITY_MAX, type Sprint, type VelocityPoint } from './model/sprint.ty
 export {
   currentSprint,
   mockSprints,
-  sprintVelocity,
   SIDE_PROJECT_WORKSPACE_ID,
 } from './model/sprint.mock';
 export { getSprints } from './api/get-sprints';
-export { resolveCurrentSprint } from './model/sprint.selectors';
+export { resolveCurrentSprint, selectVelocity } from './model/sprint.selectors';
