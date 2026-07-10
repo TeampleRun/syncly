@@ -23,7 +23,7 @@ interface ProgressChartViewProps {
 
 export function ProgressChartView({ sprint, velocity, statusCounts }: ProgressChartViewProps) {
   return (
-    <div className={`${jakarta.className} bg-brand-surface min-h-full p-6`}>
+    <div className={`${jakarta.className} bg-brand-surface min-h-full `}>
       <div className="flex flex-col gap-4">
         <ProgressStatRow sprint={sprint} />
 
