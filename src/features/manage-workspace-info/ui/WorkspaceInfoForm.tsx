@@ -2,7 +2,7 @@
 
 // 워크스페이스 정보(이름·설명) 수정 폼입니다.
 // 백엔드 연동 전이므로 저장은 로컬 상태를 확정(commit)하는 목업으로 동작합니다.
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import type { Workspace } from '@/entities/workspace';
 
 interface WorkspaceInfoFormProps {
@@ -21,7 +21,7 @@ export function WorkspaceInfoForm({ workspace }: WorkspaceInfoFormProps) {
   const isDirty = name !== committedName || description !== committedDescription;
   const canSubmit = name.trim().length > 0 && isDirty;
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canSubmit) {
       return;
