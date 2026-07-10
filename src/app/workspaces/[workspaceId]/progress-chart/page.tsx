@@ -4,6 +4,8 @@
 import { getSprints, resolveCurrentSprint, selectVelocity } from '@/entities/side-project/sprint';
 import { countByStatus, getSprintTasks } from '@/entities/side-project/task';
 import { ProgressChartView } from '@/views/side-project/progress-chart';
+import { notFound } from 'next/navigation';
+import { getMockWorkspaceById } from '@/entities/workspace';
 
 interface ProgressChartRouteProps {
   params: Promise<{ workspaceId: string }>;
@@ -12,21 +14,27 @@ interface ProgressChartRouteProps {
 export default async function ProgressChartPage({ params }: ProgressChartRouteProps) {
   const { workspaceId } = await params;
 
-  const sprints = getSprints(workspaceId);
-  // 진행 중(오늘이 기간 안) 스프린트 우선 → 없으면 최신
-  const sprint = resolveCurrentSprint(sprints);
+  const workspace = getMockWorkspaceById(workspaceId);
+  if(!workspace) return notFound()
+  if (workspace.purpose === 'side-project') {
+    const sprints = getSprints(workspaceId);
+    // 진행 중(오늘이 기간 안) 스프린트 우선 → 없으면 최신
+    const sprint = resolveCurrentSprint(sprints);
 
-  // 스프린트가 하나도 없는 워크스페이스 — 빈 상태
-  if (!sprint) {
-    return (
-      <div className="text-brand-muted flex min-h-full items-center justify-center p-6 text-sm">
-        아직 생성된 스프린트가 없습니다.
-      </div>
-    );
+    // 스프린트가 하나도 없는 워크스페이스 — 빈 상태
+    if (!sprint) {
+      return (
+        <div className="text-brand-muted flex min-h-full items-center justify-center p-6 text-sm">
+          아직 생성된 스프린트가 없습니다.
+        </div>
+      );
+    }
+
+    const velocity = selectVelocity(sprints);
+    const statusCounts = countByStatus(getSprintTasks(sprint.id));
+
+    return <ProgressChartView sprint={sprint} velocity={velocity} statusCounts={statusCounts} />;
   }
-
-  const velocity = selectVelocity(sprints);
-  const statusCounts = countByStatus(getSprintTasks(sprint.id));
-
-  return <ProgressChartView sprint={sprint} velocity={velocity} statusCounts={statusCounts} />;
+  //TODO:
+  return <></>;
 }

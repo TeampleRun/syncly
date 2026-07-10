@@ -4,7 +4,7 @@
 // 실 API 전환 시 아래 조회부만 async(Supabase)로 교체한다.
 import { getSprints, resolveCurrentSprint } from '@/entities/side-project/sprint';
 import { getBacklogTasks, getSprintTasks } from '@/entities/side-project/task';
-import { mockWorkspaceMembers } from '@/entities/workspace-member';
+import { getMockWorkspaceMembersByWorkspaceId, mockWorkspaceMembers } from '@/entities/workspace-member';
 import { SprintBoardView } from '@/views/side-project/sprint-board';
 
 interface SprintBoardRouteProps {
@@ -32,7 +32,7 @@ export default async function SprintBoardPage({ params, searchParams }: SprintBo
 
   const initialTasks = getSprintTasks(sprint.id);
   const initialBacklog = getBacklogTasks(workspaceId);
-
+  const members=getMockWorkspaceMembersByWorkspaceId(workspaceId)
   return (
     <SprintBoardView
       workspaceId={workspaceId}
@@ -40,7 +40,7 @@ export default async function SprintBoardPage({ params, searchParams }: SprintBo
       sprints={sprints}
       initialTasks={initialTasks}
       initialBacklog={initialBacklog}
-      members={mockWorkspaceMembers}
+      members={members}
     />
   );
 }
