@@ -4,7 +4,7 @@
 // Task → Sprint 방향의 의도된 교차 참조(FK 방향과 일치, 비순환): 목 id를 sprint 슬라이스와 동기화한다.
 import { currentSprint, SIDE_PROJECT_WORKSPACE_ID } from '@/entities/side-project/sprint';
 
-import type { Task } from '../model/task.types';
+import type { Task } from './task.types';
 
 const workspaceId = SIDE_PROJECT_WORKSPACE_ID;
 const sprintId = currentSprint.id;
