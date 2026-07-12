@@ -1,9 +1,12 @@
 // 업무(Task) 도메인 모델 — 워크스페이스가 소유하고, 선택적으로 스프린트에 편입된다.
 // status는 진행 상태(대기/진행 중/완료)만 나타낸다.
 // 백로그 여부는 status가 아니라 sprintId로 판별한다(sprintId === null → 백로그).
-export type TaskStatus = 'todo' | 'in_progress' | 'done';
-export type TaskPriority = 'high' | 'medium' | 'low';
-export type TaskCategory = 'design' | 'frontend' | 'backend' | 'planning';
+// enum 리터럴은 DB 네이티브 ENUM에서 파생한다(중복 정의 금지) — supabase-convention §6.
+import type { GenericEnums } from '@/shared/model/supabase.types';
+
+export type TaskStatus = GenericEnums<'task_status'>;
+export type TaskPriority = GenericEnums<'task_priority'>;
+export type TaskCategory = GenericEnums<'task_category'>;
 
 interface StatusStyle {
   label: string;
