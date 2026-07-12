@@ -12,6 +12,8 @@ export {
 } from './model/task.types';
 export { getBacklogTasks } from './api/get-backlog-tasks';
 export { getSprintTasks } from './api/get-sprint-tasks';
+export { backlogTasksQueryKey, useBacklogTasks } from './api/use-backlog-tasks';
+export { sprintTasksQueryKey, useSprintTasks } from './api/use-sprint-tasks';
 export { getMockBacklogTasks, getMockSprintTasks } from './model/task.mock';
 export { countByStatus } from './model/task.selectors';
 export { toTask } from './model/task.mapper';
