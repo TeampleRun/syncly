@@ -12,6 +12,7 @@ export {
 } from './model/task.types';
 export { getBacklogTasks } from './api/get-backlog-tasks';
 export { getSprintTasks } from './api/get-sprint-tasks';
+export { getMockBacklogTasks, getMockSprintTasks } from './model/task.mock';
 export { countByStatus } from './model/task.selectors';
 export { toTask } from './model/task.mapper';
 export type { TaskRow, TaskWithAssigneeRow } from './model/task.db.types';

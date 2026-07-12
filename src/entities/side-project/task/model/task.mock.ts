@@ -147,3 +147,13 @@ export const mockTasks: Task[] = [
     assignee: null,
   },
 ];
+
+// 대시보드 위젯 전용 동기 mock 접근자 — api/get-*-tasks.ts가 async(Supabase)로 전환되어 분리한다.
+// 대시보드 실 연동 시 이 접근자와 mock 데이터를 함께 제거한다.
+export function getMockSprintTasks(sprintId: string): Task[] {
+  return mockTasks.filter((task) => task.sprintId === sprintId);
+}
+
+export function getMockBacklogTasks(workspaceId: string): Task[] {
+  return mockTasks.filter((task) => task.workspaceId === workspaceId && task.sprintId === null);
+}

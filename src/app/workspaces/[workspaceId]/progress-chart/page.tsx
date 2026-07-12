@@ -1,8 +1,9 @@
 // 진행률 차트 라우트 — 현재 스프린트를 판정해, 통계/벨로시티/상태 분포를 파생해 뷰에 주입한다.
 // 상호작용이 없어 클라이언트 페칭 없이 RSC에서 데이터를 조립한다.
 // 실 API 전환 시 아래 조회부만 async(Supabase)로 교체한다.
-import { getSprints, resolveCurrentSprint, selectVelocity } from '@/entities/side-project/sprint';
-import { countByStatus, getSprintTasks } from '@/entities/side-project/task';
+// TODO(Epic 4): getMock* → useQuery 훅(client 전환)으로 교체. 현재는 async fetcher 전환 중 임시 mock.
+import { getMockSprints, resolveCurrentSprint, selectVelocity } from '@/entities/side-project/sprint';
+import { countByStatus, getMockSprintTasks } from '@/entities/side-project/task';
 import { ProgressChartView } from '@/views/side-project/progress-chart';
 import { notFound } from 'next/navigation';
 import { getMockWorkspaceById } from '@/entities/workspace';
@@ -17,7 +18,7 @@ export default async function ProgressChartPage({ params }: ProgressChartRoutePr
   const workspace = getMockWorkspaceById(workspaceId);
   if(!workspace) return notFound()
   if (workspace.purpose === 'side-project') {
-    const sprints = getSprints(workspaceId);
+    const sprints = getMockSprints(workspaceId);
     // 진행 중(오늘이 기간 안) 스프린트 우선 → 없으면 최신
     const sprint = resolveCurrentSprint(sprints);
 
@@ -31,7 +32,7 @@ export default async function ProgressChartPage({ params }: ProgressChartRoutePr
     }
 
     const velocity = selectVelocity(sprints);
-    const statusCounts = countByStatus(getSprintTasks(sprint.id));
+    const statusCounts = countByStatus(getMockSprintTasks(sprint.id));
 
     return <ProgressChartView sprint={sprint} velocity={velocity} statusCounts={statusCounts} />;
   }

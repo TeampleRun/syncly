@@ -32,3 +32,9 @@ export const currentSprint: Sprint = {
 
 // 워크스페이스의 스프린트 목록(선택기용) — 시간순
 export const mockSprints: Sprint[] = [sprint1, currentSprint];
+
+// 대시보드 위젯 전용 동기 mock 접근자 — api/get-sprints.ts가 async(Supabase)로 전환되어 분리한다.
+// 대시보드 실 연동 시 이 접근자와 mock 데이터를 함께 제거한다.
+export function getMockSprints(workspaceId: string): Sprint[] {
+  return mockSprints.filter((sprint) => sprint.workspaceId === workspaceId);
+}

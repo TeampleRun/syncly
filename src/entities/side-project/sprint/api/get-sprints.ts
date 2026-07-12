@@ -1,9 +1,15 @@
-// 워크스페이스의 스프린트 목록 조회 — Mock 구현.
-// 백엔드 준비 시 supabase.from('sprints').select().eq('workspace_id', workspaceId).order('start_date') 로 교체한다.
-// TODO(async): Supabase 전환 시 Promise 반환으로 바꾼다.
+// 워크스페이스의 스프린트 목록 조회 — get_sprints RPC (포인트 집계·days_left 포함 단일 쿼리)
+import { getSupabaseBrowserClient } from '@/shared/api/supabase/client';
+import { toSprint } from '../model/sprint.mapper';
 import type { Sprint } from '../model/sprint.types';
-import { mockSprints } from '../model/sprint.mock';
 
-export function getSprints(workspaceId: string): Sprint[] {
-  return mockSprints.filter((sprint) => sprint.workspaceId === workspaceId);
+export async function getSprints(workspaceId: string): Promise<Sprint[]> {
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase.rpc('get_sprints', { p_workspace_id: workspaceId });
+
+  if (error) {
+    throw new Error(`스프린트 목록 조회에 실패했습니다: ${error.message}`);
+  }
+
+  return (data ?? []).map(toSprint);
 }
