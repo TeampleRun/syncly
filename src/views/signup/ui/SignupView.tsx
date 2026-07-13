@@ -61,6 +61,7 @@ export default function SignupView() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(OTP_SECONDS);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { signInWithOAuth, oauthError, oauthLoading } = useOAuthSignIn();
@@ -68,7 +69,10 @@ export default function SignupView() {
   useEffect(() => {
     const checkSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setCheckingSession(false);
+        return;
+      }
       const { data: profile } = await supabase
         .from('profiles')
         .select('real_name')
@@ -78,6 +82,7 @@ export default function SignupView() {
         router.push('/workspaces');
       } else {
         setStep('info');
+        setCheckingSession(false);
       }
     };
     checkSession();
@@ -185,6 +190,8 @@ export default function SignupView() {
     }
     setLoading(false);
   };
+
+  if (checkingSession) return null;
 
   return (
     <div className="bg-brand-surface flex min-h-screen items-center justify-center px-4">
