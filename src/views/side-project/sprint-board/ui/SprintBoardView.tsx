@@ -50,8 +50,19 @@ export function SprintBoardView({ workspaceId, selectedSprintId, members }: Spri
   if (sprintsQuery.isError)
     return <CenteredMessage>스프린트를 불러오지 못했습니다.</CenteredMessage>;
 
-  // 스프린트가 하나도 없는 워크스페이스 — 빈 상태
-  if (!sprint) return <CenteredMessage>아직 생성된 스프린트가 없습니다.</CenteredMessage>;
+  // 스프린트가 하나도 없는 워크스페이스 — 빈 상태(생성 버튼은 노출)
+  if (!sprint) {
+    return (
+      <div className={`${jakarta.className} bg-brand-surface min-h-full`}>
+        <div className="mb-4 flex justify-end">
+          <SprintToolbar workspaceId={workspaceId} />
+        </div>
+        <CenteredMessage>
+          아직 생성된 스프린트가 없습니다. 새 스프린트를 만들어 시작하세요.
+        </CenteredMessage>
+      </div>
+    );
+  }
 
   if (tasksQuery.isPending || backlogQuery.isPending)
     return <CenteredMessage>불러오는 중…</CenteredMessage>;

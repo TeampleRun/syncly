@@ -24,7 +24,8 @@ const iconButtonClass =
 
 interface SprintToolbarProps {
   workspaceId: string;
-  sprint: Sprint;
+  /** 현재 스프린트. 없으면(첫 생성 전) 생성 버튼만 노출한다 */
+  sprint?: Sprint;
 }
 
 export function SprintToolbar({ workspaceId, sprint }: SprintToolbarProps) {
@@ -36,7 +37,7 @@ export function SprintToolbar({ workspaceId, sprint }: SprintToolbarProps) {
 
   // 폼 값(name/startDate/endDate)은 SprintInput과 형태가 같아 그대로 넘긴다(서버에서 재검증)
   const handleSubmit = (values: SprintFormValues) => {
-    if (dialog?.mode === 'edit') {
+    if (dialog?.mode === 'edit' && sprint) {
       updateSprint.mutate({ id: sprint.id, input: values });
     } else {
       createSprint.mutate({ input: values });
@@ -52,22 +53,28 @@ export function SprintToolbar({ workspaceId, sprint }: SprintToolbarProps) {
       >
         <Plus className="size-4" aria-hidden />새 스프린트
       </button>
-      <button
-        type="button"
-        aria-label="스프린트 수정"
-        onClick={() => setDialog({ mode: 'edit' })}
-        className={iconButtonClass}
-      >
-        <Pencil className="size-4" aria-hidden />
-      </button>
-      <button
-        type="button"
-        aria-label="스프린트 삭제"
-        onClick={() => setDialog({ mode: 'delete' })}
-        className={`${iconButtonClass} hover:text-red-500`}
-      >
-        <Trash2 className="size-4" aria-hidden />
-      </button>
+
+      {/* 수정/삭제는 대상 스프린트가 있을 때만 */}
+      {sprint && (
+        <>
+          <button
+            type="button"
+            aria-label="스프린트 수정"
+            onClick={() => setDialog({ mode: 'edit' })}
+            className={iconButtonClass}
+          >
+            <Pencil className="size-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            aria-label="스프린트 삭제"
+            onClick={() => setDialog({ mode: 'delete' })}
+            className={`${iconButtonClass} hover:text-red-500`}
+          >
+            <Trash2 className="size-4" aria-hidden />
+          </button>
+        </>
+      )}
 
       {(dialog?.mode === 'create' || dialog?.mode === 'edit') && (
         <SprintFormDialog
@@ -77,7 +84,7 @@ export function SprintToolbar({ workspaceId, sprint }: SprintToolbarProps) {
           onSubmit={handleSubmit}
         />
       )}
-      {dialog?.mode === 'delete' && (
+      {dialog?.mode === 'delete' && sprint && (
         <SprintDeleteDialog
           sprintName={sprint.name}
           onClose={() => setDialog(null)}
