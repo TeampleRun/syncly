@@ -1,8 +1,7 @@
 'use client';
 
 import { Plus } from 'lucide-react';
-import { mockNotices } from '@/entities/notice';
-import { mockCurrentWorkspaceMember } from '@/entities/workspace-member';
+import type { NoticeBoardData } from '@/entities/notice';
 import {
   NoticeComposer,
   NoticeDetailPanel,
@@ -12,9 +11,10 @@ import {
 
 interface NoticesViewProps {
   workspaceId: string;
+  initialData: NoticeBoardData;
 }
 
-export function NoticesView({ workspaceId }: NoticesViewProps) {
+export function NoticesView({ workspaceId, initialData }: NoticesViewProps) {
   const {
     notices,
     selectedNotice,
@@ -27,10 +27,11 @@ export function NoticesView({ workspaceId }: NoticesViewProps) {
     submitNotice,
     deleteNotice,
     togglePinned,
+    viewer,
+    isSaving,
   } = useNoticeBoardState({
-    initialNotices: mockNotices,
+    initialData,
     workspaceId,
-    authorName: mockCurrentWorkspaceMember.workspaceNickname,
   });
 
   return (
@@ -65,6 +66,8 @@ export function NoticesView({ workspaceId }: NoticesViewProps) {
             onEditNotice={openEditComposer}
             onDeleteNotice={deleteNotice}
             onTogglePinned={togglePinned}
+            viewer={viewer}
+            isSaving={isSaving}
           />
         </div>
 

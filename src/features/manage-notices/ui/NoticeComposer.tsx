@@ -5,22 +5,25 @@ import type { Notice, NoticeFormValues } from '@/entities/notice';
 
 interface NoticeComposerProps {
   editingNotice: Notice | null;
-  onSubmit: (values: NoticeFormValues) => void;
+  onSubmit: (values: NoticeFormValues) => Promise<void>;
   onCancel: () => void;
 }
 
 export function NoticeComposer({ editingNotice, onSubmit, onCancel }: NoticeComposerProps) {
   const [title, setTitle] = useState(editingNotice?.title ?? '');
   const [content, setContent] = useState(editingNotice?.content ?? '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canSubmit = title.trim().length > 0 && content.trim().length > 0;
 
   return (
     <form
       className="rounded-2xl border border-indigo-200 bg-white p-6 shadow-sm"
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
-        onSubmit({ title, content });
+        setIsSubmitting(true);
+        await onSubmit({ title, content });
+        setIsSubmitting(false);
       }}
     >
       <h2 className="text-base font-bold text-slate-950">
@@ -53,14 +56,15 @@ export function NoticeComposer({ editingNotice, onSubmit, onCancel }: NoticeComp
       <div className="mt-5 flex items-center gap-2">
         <button
           type="submit"
-          disabled={!canSubmit}
+          disabled={!canSubmit || isSubmitting}
           className="h-11 rounded-2xl bg-[var(--color-brand)] px-5 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {editingNotice ? '저장' : '등록'}
+          {isSubmitting ? '저장 중' : editingNotice ? '저장' : '등록'}
         </button>
         <button
           type="button"
           onClick={onCancel}
+          disabled={isSubmitting}
           className="h-11 rounded-2xl bg-slate-100 px-5 text-sm font-bold text-slate-700 hover:bg-slate-200"
         >
           취소

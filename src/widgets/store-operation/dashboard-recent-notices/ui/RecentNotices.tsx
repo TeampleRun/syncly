@@ -3,17 +3,14 @@
 //  · md: 리스트(제목 + 작성자·작성일)
 //  · lg: 총 개수 + 리스트(제목 + 본문 미리보기 + 작성자·작성일)
 import { Bell, Pin } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
-import { mockNotices, type Notice } from '@/entities/notice';
+import { getNoticeBoard } from '@/entities/notice/api/get-notice-board';
+import { noticeBoardQueryKey } from '@/entities/notice/model/notice-query';
+import type { Notice } from '@/entities/notice';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 import { cn } from '@/shared/lib/utils';
-
-// 고정 공지 우선 → 작성일(내림차순) 정렬. 원본 배열을 변형하지 않도록 복사 후 정렬한다.
-const sortedNotices = [...mockNotices].sort((a, b) => {
-  if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
-  return b.createdAt.localeCompare(a.createdAt);
-});
 
 const header = (
   <WidgetCardHeader title="최근 공지" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />
@@ -36,9 +33,54 @@ function noticeMeta(notice: Notice) {
   return `${notice.authorName} · ${notice.createdAt}`;
 }
 
-export default function RecentNotices({ size = 'md' }: { size?: WidgetSize }) {
+interface RecentNoticesProps {
+  workspaceId: string;
+  size?: WidgetSize;
+}
+
+export default function RecentNotices({ workspaceId, size = 'md' }: RecentNoticesProps) {
+  const { data, isError, isPending } = useQuery({
+    queryKey: noticeBoardQueryKey(workspaceId),
+    queryFn: () => getNoticeBoard(workspaceId),
+  });
+
+  if (isError) {
+    return (
+      <WidgetCard>
+        {header}
+        <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
+          최근 공지를 불러오지 못했습니다.
+        </div>
+      </WidgetCard>
+    );
+  }
+
+  if (isPending || !data) {
+    return (
+      <WidgetCard>
+        {header}
+        <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
+          최근 공지를 불러오는 중입니다.
+        </div>
+      </WidgetCard>
+    );
+  }
+
+  const notices = data.notices;
+
+  if (notices.length === 0) {
+    return (
+      <WidgetCard>
+        {header}
+        <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
+          등록된 공지가 없습니다.
+        </div>
+      </WidgetCard>
+    );
+  }
+
   if (size === 'sm') {
-    const latest = sortedNotices[0];
+    const latest = notices[0];
     return (
       <WidgetCard>
         {header}
@@ -54,9 +96,9 @@ export default function RecentNotices({ size = 'md' }: { size?: WidgetSize }) {
     return (
       <WidgetCard>
         {header}
-        <p className="text-brand-muted mb-2 text-xs">총 {sortedNotices.length}개의 공지</p>
+        <p className="text-brand-muted mb-2 text-xs">총 {notices.length}개의 공지</p>
         <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-          {sortedNotices.map((notice) => (
+          {notices.map((notice) => (
             <li key={notice.id} className="bg-brand-surface flex items-start gap-2 rounded-xl p-3">
               <NoticeIcon isPinned={notice.isPinned} className="mt-0.5 size-4 shrink-0" />
               <div className="min-w-0">
@@ -76,7 +118,7 @@ export default function RecentNotices({ size = 'md' }: { size?: WidgetSize }) {
     <WidgetCard>
       {header}
       <ul className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
-        {sortedNotices.map((notice) => (
+        {notices.map((notice) => (
           <li key={notice.id} className="flex items-start gap-2">
             <NoticeIcon isPinned={notice.isPinned} className="mt-0.5 size-4 shrink-0" />
             <div className="min-w-0">

@@ -1,3 +1,2 @@
-// 공지 도메인의 타입과 목업 데이터 공개 API입니다.
-export type { Notice, NoticeFormValues } from './model/notice.types';
-export { mockNotices } from './model/mock-notices';
+// 공지 도메인이 외부 레이어에 제공하는 타입 공개 API입니다.
+export type { Notice, NoticeBoardData, NoticeFormValues, NoticeViewer } from './model/notice.types';
