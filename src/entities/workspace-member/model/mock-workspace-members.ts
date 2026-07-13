@@ -176,7 +176,21 @@ const workspaceMemberAliasById: Record<string, string> = {
   [STORE_OPERATION_WORKSPACE_UUID]: 'store-workspace',
 };
 
-export function getMockWorkspaceMembersByWorkspaceId(workspaceId: string): WorkspaceMember[] {
-  const resolvedWorkspaceId = workspaceMemberAliasById[workspaceId] ?? workspaceId;
+function resolveWorkspaceMemberKey(workspaceId: string, fallbackWorkspaceId?: string) {
+  return workspaceMemberAliasById[workspaceId] ?? workspaceId ?? fallbackWorkspaceId;
+}
+
+export function getMockWorkspaceMembersByWorkspaceId(
+  workspaceId: string,
+  fallbackWorkspaceId?: string,
+): WorkspaceMember[] {
+  const resolvedWorkspaceId = resolveWorkspaceMemberKey(workspaceId, fallbackWorkspaceId);
+
+  if (!mockWorkspaceMembers.some((member) => member.workspaceId === resolvedWorkspaceId)) {
+    return fallbackWorkspaceId
+      ? mockWorkspaceMembers.filter((member) => member.workspaceId === fallbackWorkspaceId)
+      : [];
+  }
+
   return mockWorkspaceMembers.filter((member) => member.workspaceId === resolvedWorkspaceId);
 }

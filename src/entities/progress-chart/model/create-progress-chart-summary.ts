@@ -26,7 +26,7 @@ function toPercentage(value: number, total: number) {
     return 0;
   }
 
-  return Math.round((value / total) * 100);
+  return Math.round((value / total) * 1000) / 10;
 }
 
 function countByStatus(tasks: Task[], status: TaskStatus) {

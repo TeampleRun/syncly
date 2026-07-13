@@ -1,14 +1,7 @@
+import { createProgressChartSummary } from '@/entities/progress-chart';
 import { getMockTasksByWorkspaceId } from '@/entities/task';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
-
-function toPrecisePercentage(value: number, total: number) {
-  if (total === 0) {
-    return 0;
-  }
-
-  return Math.round((value / total) * 1000) / 10;
-}
 
 export default function OverallProgress({
   workspaceId,
@@ -18,9 +11,7 @@ export default function OverallProgress({
   size?: WidgetSize;
 }) {
   const tasks = getMockTasksByWorkspaceId(workspaceId, 'team-workspace');
-  const doneCount = tasks.filter((task) => task.status === 'done').length;
-  const totalCount = tasks.length;
-  const progressRate = toPrecisePercentage(doneCount, totalCount);
+  const summary = createProgressChartSummary(tasks);
   const isCompact = size === 'sm';
 
   return (
@@ -39,7 +30,7 @@ export default function OverallProgress({
               isCompact ? 'text-[17px]' : 'text-[22px]'
             }`}
           >
-            {doneCount} / {totalCount}
+            {summary.doneTaskCount} / {summary.totalTaskCount}
           </p>
         </div>
 
@@ -48,7 +39,7 @@ export default function OverallProgress({
         >
           <div
             className="h-full rounded-full bg-[linear-gradient(90deg,#534bf2_0%,#8a56ff_100%)]"
-            style={{ width: `${progressRate}%` }}
+            style={{ width: `${summary.overallProgressRate}%` }}
           />
         </div>
 
@@ -57,7 +48,7 @@ export default function OverallProgress({
             isCompact ? 'mt-5 text-[15px]' : 'mt-6 text-[18px]'
           }`}
         >
-          {progressRate}% 달성
+          {summary.overallProgressRate}% 달성
         </p>
       </div>
     </WidgetCard>

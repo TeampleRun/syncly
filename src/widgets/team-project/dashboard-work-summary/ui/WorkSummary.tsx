@@ -1,4 +1,5 @@
-import { getMockTasksByWorkspaceId, type TaskStatus } from '@/entities/task';
+import { createProgressChartSummary } from '@/entities/progress-chart';
+import { getMockTasksByWorkspaceId } from '@/entities/task';
 import { getMockWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 
@@ -26,10 +27,6 @@ const cardMeta: Record<
     valueClassName: 'text-[#8b3dff]',
   },
 };
-
-function countByStatus(tasks: ReturnType<typeof getMockTasksByWorkspaceId>, status: TaskStatus) {
-  return tasks.filter((task) => task.status === status).length;
-}
 
 function SummaryCard({
   label,
@@ -60,24 +57,21 @@ export default function WorkSummary({
   size?: WidgetSize;
 }) {
   const tasks = getMockTasksByWorkspaceId(workspaceId, 'team-workspace');
-  const members = getMockWorkspaceMembersByWorkspaceId(workspaceId);
-  const totalCount = tasks.length;
-  const doneCount = countByStatus(tasks, 'done');
-  const inProgressCount = countByStatus(tasks, 'in-progress');
-  const completionRate = totalCount === 0 ? 0 : Math.round((doneCount / totalCount) * 100);
+  const summary = createProgressChartSummary(tasks);
+  const members = getMockWorkspaceMembersByWorkspaceId(workspaceId, 'team-workspace');
 
   const cards = [
     {
       key: 'total' as const,
-      value: totalCount,
+      value: summary.totalTaskCount,
     },
     {
       key: 'done' as const,
-      value: doneCount,
+      value: summary.doneTaskCount,
     },
     {
       key: 'in-progress' as const,
-      value: inProgressCount,
+      value: summary.inProgressTaskCount,
     },
     {
       key: 'members' as const,

@@ -5,6 +5,7 @@
 import type { WorkspacePurpose } from '@/shared/dashboard/model/template.types';
 
 import type { WidgetId } from './widget-catalog';
+import { validateTemplateWidgetLayouts } from './validate-template-widget-layouts';
 
 export const TEMPLATE_WIDGETS: Record<WorkspacePurpose, WidgetId[]> = {
   // 사이드 프로젝트 — 개발 진척 전반
@@ -32,3 +33,7 @@ export const TEMPLATE_WIDGETS: Record<WorkspacePurpose, WidgetId[]> = {
     'recent-resources',
   ],
 };
+
+if (process.env.NODE_ENV !== 'production') {
+  validateTemplateWidgetLayouts(TEMPLATE_WIDGETS);
+}

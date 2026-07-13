@@ -46,7 +46,7 @@ export const WIDGET_CATALOG = {
     render: (size) => <RecentNotes size={size} />,
   },
   'recent-notices': {
-    layout: { i: 'recent-notices', x: 6, y: 5, w: 6, h: 5, minW: 2, minH: 3 },
+    layout: { i: 'recent-notices', x: 0, y: 5, w: 6, h: 5, minW: 2, minH: 3 },
     title: '최근 공지',
     render: (size) => <RecentNotices size={size} />,
   },
@@ -68,17 +68,17 @@ export const WIDGET_CATALOG = {
     render: (size) => <TodaySchedule size={size} />,
   },
   'overall-progress': {
-    layout: { i: 'overall-progress', x: 6, y: 10, w: 6, h: 5, minW: 3, minH: 4 },
+    layout: { i: 'overall-progress', x: 9, y: 10, w: 3, h: 5, minW: 3, minH: 4 },
     title: '전체 진행률',
     render: (size, { workspaceId }) => <OverallProgress workspaceId={workspaceId} size={size} />,
   },
   'work-summary': {
-    layout: { i: 'work-summary', x: 0, y: 0, w: 12, h: 5, minW: 6, minH: 4 },
+    layout: { i: 'work-summary', x: 0, y: 15, w: 12, h: 5, minW: 6, minH: 4 },
     title: '업무 요약',
     render: (size, { workspaceId }) => <WorkSummary workspaceId={workspaceId} size={size} />,
   },
   calendar: {
-    layout: { i: 'calendar', x: 6, y: 14, w: 6, h: 8, minW: 4, minH: 6 },
+    layout: { i: 'calendar', x: 6, y: 20, w: 6, h: 8, minW: 4, minH: 6 },
     title: '캘린더',
     render: (size) => <Calendar size={size} />,
   },
