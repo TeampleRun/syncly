@@ -9,7 +9,6 @@ interface ProgressChartPageProps {
 }
 
 export default async function ProgressChartPage({ workspaceId }: ProgressChartPageProps) {
-
   const workspace = await getWorkspaceById(workspaceId);
   if (!workspace) return notFound();
 
