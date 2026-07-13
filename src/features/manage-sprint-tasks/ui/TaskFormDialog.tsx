@@ -165,26 +165,18 @@ export function TaskFormDialog({
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setValues((v) => ({ ...v, assignee: null }))}
-              className={cn(pillClass, values.assignee === null && pillActiveClass)}
+              onClick={() => setValues((v) => ({ ...v, assigneeId: null }))}
+              className={cn(pillClass, values.assigneeId === null && pillActiveClass)}
             >
               미배정
             </button>
             {members.map((member) => {
-              const selected = values.assignee?.name === member.workspaceNickname;
+              const selected = values.assigneeId === member.userId;
               return (
                 <button
                   key={member.userId}
                   type="button"
-                  onClick={() =>
-                    setValues((v) => ({
-                      ...v,
-                      assignee: {
-                        name: member.workspaceNickname,
-                        avatarLabel: member.avatarLabel,
-                      },
-                    }))
-                  }
+                  onClick={() => setValues((v) => ({ ...v, assigneeId: member.userId }))}
                   className={cn(pillClass, selected && pillActiveClass)}
                 >
                   <span

@@ -6,9 +6,7 @@ interface WorkspaceCalendarPageProps {
   }>;
 }
 
-export default async function WorkspaceCalendarPage({
-  params,
-}: WorkspaceCalendarPageProps) {
+export default async function WorkspaceCalendarPage({ params }: WorkspaceCalendarPageProps) {
   const { workspaceId } = await params;
 
   return <CalendarPage workspaceId={workspaceId} />;

@@ -798,6 +798,19 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_sprints: {
+        Args: { p_workspace_id: string }
+        Returns: {
+          completed_points: number
+          days_left: number
+          end_date: string
+          id: string
+          name: string
+          start_date: string
+          total_points: number
+          workspace_id: string
+        }[]
+      }
       replace_and_delete_work_shift_type: {
         Args: {
           p_deleted_shift_type_id: string

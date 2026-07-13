@@ -8,7 +8,18 @@ export {
   type TaskStatus,
   type TaskPriority,
   type TaskCategory,
-  type TaskAssignee,
 } from './model/task.types';
 export { getBacklogTasks } from './api/get-backlog-tasks';
 export { getSprintTasks } from './api/get-sprint-tasks';
+export { backlogTasksQueryKey, useBacklogTasks } from './api/use-backlog-tasks';
+export { sprintTasksQueryKey, useSprintTasks } from './api/use-sprint-tasks';
+export { getMockBacklogTasks, getMockSprintTasks } from './model/task.mock';
+export { countByStatus } from './model/task.selectors';
+export { toTask } from './model/task.mapper';
+export type { TaskRow } from './model/task.db.types';
+export { taskInputSchema, type TaskInput } from './model/task.schema';
+export { useCreateTask } from './api/use-create-task';
+export { useUpdateTask } from './api/use-update-task';
+export { useDeleteTask } from './api/use-delete-task';
+export { useUpdateTaskStatus } from './api/use-update-task-status';
+export { useUpdateTaskSprint } from './api/use-update-task-sprint';

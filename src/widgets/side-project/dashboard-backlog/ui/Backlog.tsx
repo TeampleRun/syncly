@@ -3,7 +3,7 @@
 //  · md/lg: 우선순위 점 + 항목 + 포인트 리스트(넘치면 스크롤)
 // 워크스페이스의 백로그(스프린트 미편입) 업무를 셀렉터로 가져온다.
 import { currentSprint } from '@/entities/side-project/sprint';
-import { getBacklogTasks, type Task, TASK_PRIORITY } from '@/entities/side-project/task';
+import { getMockBacklogTasks, type Task, TASK_PRIORITY } from '@/entities/side-project/task';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
@@ -11,7 +11,7 @@ const header = (
   <WidgetCardHeader title="백로그" action={<WidgetCardAction>보드</WidgetCardAction>} />
 );
 
-const backlogItems: Task[] = getBacklogTasks(currentSprint.workspaceId);
+const backlogItems: Task[] = getMockBacklogTasks(currentSprint.workspaceId);
 
 export default function Backlog({ size = 'md' }: { size?: WidgetSize }) {
   if (size === 'sm') {

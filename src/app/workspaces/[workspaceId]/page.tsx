@@ -18,6 +18,9 @@ export default async function WorkspaceHomePage({ params }: WorkspaceHomePagePro
   if (workspace.purpose === 'store-operation') {
     redirect(`/workspaces/${workspaceId}/work-schedule`);
   }
+  if (workspace.purpose === 'side-project') {
+    redirect(`/workspaces/${workspaceId}/sprint-board`);
+  }
 
   redirect(`/workspaces/${workspaceId}/project-management`);
 }

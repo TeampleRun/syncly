@@ -76,7 +76,9 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
   const initializeWorkspace = useCalendarEventsStore((state) => state.initializeWorkspace);
   const addCalendarEvent = useCalendarEventsStore((state) => state.addCalendarEvent);
   const removeCalendarEvent = useCalendarEventsStore((state) => state.removeCalendarEvent);
-  const storedEvents = useCalendarEventsStore((state) => state.calendarEventsByWorkspaceId[workspaceId]);
+  const storedEvents = useCalendarEventsStore(
+    (state) => state.calendarEventsByWorkspaceId[workspaceId],
+  );
 
   useEffect(() => {
     initializeWorkspace(workspaceId, initialEvents);
@@ -96,10 +98,13 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
   const modalDateLabel = `${year}년 ${Number(month)}월 ${Number(day)}일 일정 추가`;
   const selectedDateLabel = formatSelectedDateLabel(selectedDate);
 
-  const eventsByDate = calendarEvents.reduce<Record<string, CalendarEvent[]>>((accumulator, event) => {
-    accumulator[event.date] = [...(accumulator[event.date] ?? []), event];
-    return accumulator;
-  }, {});
+  const eventsByDate = calendarEvents.reduce<Record<string, CalendarEvent[]>>(
+    (accumulator, event) => {
+      accumulator[event.date] = [...(accumulator[event.date] ?? []), event];
+      return accumulator;
+    },
+    {},
+  );
   const selectedDateEvents = eventsByDate[selectedDate] ?? [];
 
   const openAddEventModal = (isoDate: string) => {
@@ -135,7 +140,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
           <div className="w-full flex-1">
             <div className="mb-5 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 text-brand-ink">
+              <div className="text-brand-ink flex items-center gap-3">
                 <button
                   type="button"
                   onClick={() =>
@@ -143,7 +148,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                       (current) => new Date(current.getFullYear(), current.getMonth() - 1, 1),
                     )
                   }
-                  className="text-brand-muted transition hover:text-brand-ink"
+                  className="text-brand-muted hover:text-brand-ink transition"
                   aria-label="이전 달"
                 >
                   <ChevronLeft className="size-5" />
@@ -158,7 +163,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                       (current) => new Date(current.getFullYear(), current.getMonth() + 1, 1),
                     )
                   }
-                  className="text-brand-muted transition hover:text-brand-ink"
+                  className="text-brand-muted hover:text-brand-ink transition"
                   aria-label="다음 달"
                 >
                   <ChevronRight className="size-5" />
@@ -168,7 +173,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
               <button
                 type="button"
                 onClick={() => openAddEventModal(selectedDate)}
-                className="inline-flex h-9 items-center gap-2 rounded-full bg-brand px-4 text-[13px] font-bold text-white shadow-[0_10px_22px_rgba(91,78,232,0.2)] transition hover:brightness-105"
+                className="bg-brand inline-flex h-9 items-center gap-2 rounded-full px-4 text-[13px] font-bold text-white shadow-[0_10px_22px_rgba(91,78,232,0.2)] transition hover:brightness-105"
               >
                 <Plus className="size-4" />
                 일정 추가
@@ -203,7 +208,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                       key={cell.isoDate}
                       type="button"
                       onClick={() => setSelectedDate(cell.isoDate)}
-                      className={`relative min-h-[98px] border-r border-b border-[rgba(91,78,232,0.1)] px-[8px] pt-[5px] pb-[8px] text-left align-top transition hover:bg-brand-soft/30 sm:min-h-[108px] ${
+                      className={`hover:bg-brand-soft/30 relative min-h-[98px] border-r border-b border-[rgba(91,78,232,0.1)] px-[8px] pt-[5px] pb-[8px] text-left align-top transition sm:min-h-[108px] ${
                         (index + 1) % 7 === 0 ? 'border-r-0' : ''
                       } ${isSelected ? 'bg-[rgba(238,240,251,0.6)]' : ''}`}
                     >
@@ -240,14 +245,14 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
             <div className="rounded-[20px] border border-[rgba(91,78,232,0.1)] bg-white p-5 shadow-[0_10px_30px_rgba(91,78,232,0.06)]">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-[18px] font-bold tracking-[-0.03em] text-brand-ink">
+                  <h2 className="text-brand-ink text-[18px] font-bold tracking-[-0.03em]">
                     {selectedDateLabel}
                   </h2>
                 </div>
                 <button
                   type="button"
                   onClick={() => openAddEventModal(selectedDate)}
-                  className="inline-flex size-9 items-center justify-center rounded-full bg-brand-soft text-brand transition hover:bg-brand hover:text-white"
+                  className="bg-brand-soft text-brand hover:bg-brand inline-flex size-9 items-center justify-center rounded-full transition hover:text-white"
                   aria-label="선택한 날짜 일정 추가"
                 >
                   <Plus className="size-4" />
@@ -268,10 +273,10 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                             aria-hidden="true"
                           />
                           <div className="min-w-0">
-                            <p className="truncate text-[14px] font-semibold text-brand-ink">
+                            <p className="text-brand-ink truncate text-[14px] font-semibold">
                               {calendarEvent.title}
                             </p>
-                            <p className="mt-1 text-[12px] font-medium text-brand-muted">
+                            <p className="text-brand-muted mt-1 text-[12px] font-medium">
                               {calendarEvent.time ?? '시간 미정'}
                             </p>
                           </div>
@@ -279,7 +284,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                         <button
                           type="button"
                           onClick={() => removeCalendarEvent(workspaceId, calendarEvent.id)}
-                          className="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-brand-muted transition hover:bg-brand-soft hover:text-brand-ink"
+                          className="text-brand-muted hover:bg-brand-soft hover:text-brand-ink inline-flex size-6 shrink-0 items-center justify-center rounded-full transition"
                           aria-label={`${calendarEvent.title} 일정 삭제`}
                         >
                           <X className="size-3.5" />
@@ -289,13 +294,10 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                   ))
                 ) : (
                   <div className="rounded-[18px] border border-dashed border-[rgba(91,78,232,0.16)] bg-[#fbfbff] px-4 py-6 text-center">
-                    <p className="text-[14px] font-semibold text-brand-ink">
-                      등록된 일정이 없어요
-                    </p>
-                    <p className="mt-1 text-[12px] leading-5 text-brand-muted">
+                    <p className="text-brand-ink text-[14px] font-semibold">등록된 일정이 없어요</p>
+                    <p className="text-brand-muted mt-1 text-[12px] leading-5">
                       오른쪽 상단 버튼이나 일정 추가 버튼으로
-                      <br />
-                      새 일정을 등록해보세요.
+                      <br />새 일정을 등록해보세요.
                     </p>
                   </div>
                 )}
@@ -309,13 +311,13 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#1a1b2e]/18 px-4">
           <div className="w-full max-w-[280px] rounded-[20px] bg-white p-4 shadow-[0_18px_40px_rgba(26,27,46,0.18)] sm:max-w-[420px] sm:p-5">
             <div className="flex items-start justify-between gap-4">
-              <h2 className="text-[17px] font-bold tracking-[-0.03em] text-brand-ink sm:text-[18px]">
+              <h2 className="text-brand-ink text-[17px] font-bold tracking-[-0.03em] sm:text-[18px]">
                 {modalDateLabel}
               </h2>
               <button
                 type="button"
                 onClick={() => setIsAddEventOpen(false)}
-                className="rounded-full p-1 text-brand-muted transition hover:bg-brand-soft hover:text-brand-ink"
+                className="text-brand-muted hover:bg-brand-soft hover:text-brand-ink rounded-full p-1 transition"
                 aria-label="모달 닫기"
               >
                 <X className="size-4" />
@@ -324,7 +326,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
 
             <form onSubmit={handleSubmit} className="mt-4">
               <div>
-                <label className="block text-[12px] font-semibold text-brand-muted">
+                <label className="text-brand-muted block text-[12px] font-semibold">
                   일정 이름 <span className="text-[#ff6565]">*</span>
                 </label>
                 <input
@@ -334,8 +336,10 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                     setFormValues((current) => ({ ...current, title: event.target.value }))
                   }
                   placeholder="예: 팀 회의"
-                  className={`mt-2 h-11 w-full rounded-[16px] bg-[#f1f3fb] px-4 text-[14px] text-brand-ink placeholder:text-[#a8afc8] outline-none transition ${
-                    hasSubmitted && !isTitleValid ? 'ring-1 ring-[#ff6b6b]' : 'focus:ring-1 focus:ring-brand'
+                  className={`text-brand-ink mt-2 h-11 w-full rounded-[16px] bg-[#f1f3fb] px-4 text-[14px] transition outline-none placeholder:text-[#a8afc8] ${
+                    hasSubmitted && !isTitleValid
+                      ? 'ring-1 ring-[#ff6b6b]'
+                      : 'focus:ring-brand focus:ring-1'
                   }`}
                 />
                 {hasSubmitted && !isTitleValid ? (
@@ -346,7 +350,9 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
               </div>
 
               <div className="mt-4">
-                <label className="block text-[12px] font-semibold text-brand-muted">시간 (선택)</label>
+                <label className="text-brand-muted block text-[12px] font-semibold">
+                  시간 (선택)
+                </label>
                 <input
                   type="text"
                   value={formValues.time}
@@ -354,12 +360,12 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                     setFormValues((current) => ({ ...current, time: event.target.value }))
                   }
                   placeholder="예: 오후 3:00"
-                  className="mt-2 h-11 w-full rounded-[16px] bg-[#f1f3fb] px-4 text-[14px] text-brand-ink placeholder:text-[#a8afc8] outline-none transition focus:ring-1 focus:ring-brand"
+                  className="text-brand-ink focus:ring-brand mt-2 h-11 w-full rounded-[16px] bg-[#f1f3fb] px-4 text-[14px] transition outline-none placeholder:text-[#a8afc8] focus:ring-1"
                 />
               </div>
 
               <div className="mt-4">
-                <p className="text-[12px] font-semibold text-brand-muted">색상</p>
+                <p className="text-brand-muted text-[12px] font-semibold">색상</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {colorOptions.map((color) => (
                     <button
@@ -367,7 +373,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                       type="button"
                       onClick={() => setFormValues((current) => ({ ...current, color }))}
                       className={`size-6 rounded-full ${colorButtonClassNames[color]} ${
-                        formValues.color === color ? 'ring-2 ring-offset-2 ring-[#d7dcf6]' : ''
+                        formValues.color === color ? 'ring-2 ring-[#d7dcf6] ring-offset-2' : ''
                       }`}
                       aria-label={`${color} 색상 선택`}
                     />
@@ -379,13 +385,13 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                 <button
                   type="button"
                   onClick={() => setIsAddEventOpen(false)}
-                  className="h-10 rounded-full bg-[#f1f3fb] text-[15px] font-semibold text-brand-ink"
+                  className="text-brand-ink h-10 rounded-full bg-[#f1f3fb] text-[15px] font-semibold"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
-                  className="h-10 rounded-full bg-brand text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(91,78,232,0.2)]"
+                  className="bg-brand h-10 rounded-full text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(91,78,232,0.2)]"
                 >
                   추가
                 </button>

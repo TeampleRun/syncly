@@ -1,9 +1,12 @@
 // 업무(Task) 도메인 모델 — 워크스페이스가 소유하고, 선택적으로 스프린트에 편입된다.
 // status는 진행 상태(대기/진행 중/완료)만 나타낸다.
 // 백로그 여부는 status가 아니라 sprintId로 판별한다(sprintId === null → 백로그).
-export type TaskStatus = 'todo' | 'in_progress' | 'done';
-export type TaskPriority = 'high' | 'medium' | 'low';
-export type TaskCategory = 'design' | 'frontend' | 'backend' | 'planning';
+// enum 리터럴은 DB 네이티브 ENUM에서 파생한다(중복 정의 금지) — supabase-convention §6.
+import type { GenericEnums } from '@/shared/model/supabase.types';
+
+export type TaskStatus = GenericEnums<'task_status'>;
+export type TaskPriority = GenericEnums<'task_priority'>;
+export type TaskCategory = GenericEnums<'task_category'>;
 
 interface StatusStyle {
   label: string;
@@ -34,13 +37,6 @@ export const TASK_CATEGORY: Record<TaskCategory, { label: string; bg: string; te
   planning: { label: '기획', bg: '#fef3c7', text: '#b45309' },
 };
 
-export interface TaskAssignee {
-  /** 워크스페이스 멤버 표시명 */
-  name: string;
-  /** 아바타 이니셜(성 한 글자) */
-  avatarLabel: string;
-}
-
 export interface Task {
   id: string;
   /** 소유 워크스페이스 — Task의 기준(anchor). 백로그·스프린트 무관하게 항상 존재 */
@@ -53,6 +49,10 @@ export interface Task {
   priority: TaskPriority;
   /** 칸반 카드 태그. 백로그 항목은 아직 미지정일 수 있어 null 허용 */
   category: TaskCategory | null;
-  /** 담당자. 미배정(백로그 등) 시 null */
-  assignee: TaskAssignee | null;
+  /**
+   * 담당자 참조 — profiles.id(= workspace_members.userId). 미배정 시 null.
+   * 표시명(닉네임)/아바타는 담지 않는다 — 워크스페이스 members에서 이 id로 해석한다
+   * (닉네임은 워크스페이스별이라 members가 단일 출처).
+   */
+  assigneeId: string | null;
 }

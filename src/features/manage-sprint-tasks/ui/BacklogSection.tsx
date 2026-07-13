@@ -15,9 +15,17 @@ interface BacklogSectionProps {
   onAdd: () => void;
   onEdit: (task: Task) => void;
   onDelete: (taskId: string) => void;
+  /** 백로그 항목을 현재 스프린트로 편입 */
+  onMoveToSprint: (taskId: string) => void;
 }
 
-export function BacklogSection({ tasks, onAdd, onEdit, onDelete }: BacklogSectionProps) {
+export function BacklogSection({
+  tasks,
+  onAdd,
+  onEdit,
+  onDelete,
+  onMoveToSprint,
+}: BacklogSectionProps) {
   const [open, setOpen] = useState(true);
 
   return (
@@ -50,6 +58,7 @@ export function BacklogSection({ tasks, onAdd, onEdit, onDelete }: BacklogSectio
                 task={task}
                 onEdit={() => onEdit(task)}
                 onDelete={() => onDelete(task.id)}
+                onMoveToSprint={() => onMoveToSprint(task.id)}
               />
             ))}
           </div>

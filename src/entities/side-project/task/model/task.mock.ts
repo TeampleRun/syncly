@@ -4,7 +4,7 @@
 // Task → Sprint 방향의 의도된 교차 참조(FK 방향과 일치, 비순환): 목 id를 sprint 슬라이스와 동기화한다.
 import { currentSprint, SIDE_PROJECT_WORKSPACE_ID } from '@/entities/side-project/sprint';
 
-import type { Task } from '../model/task.types';
+import type { Task } from './task.types';
 
 const workspaceId = SIDE_PROJECT_WORKSPACE_ID;
 const sprintId = currentSprint.id;
@@ -20,7 +20,7 @@ export const mockTasks: Task[] = [
     status: 'todo',
     priority: 'medium',
     category: 'design',
-    assignee: { name: '최민준', avatarLabel: '최' },
+    assigneeId: 'mock-user-choi',
   },
   {
     id: 'task-2',
@@ -31,7 +31,7 @@ export const mockTasks: Task[] = [
     status: 'todo',
     priority: 'medium',
     category: 'frontend',
-    assignee: { name: '박서준', avatarLabel: '박' },
+    assigneeId: 'mock-user-park',
   },
   {
     id: 'task-3',
@@ -42,7 +42,7 @@ export const mockTasks: Task[] = [
     status: 'todo',
     priority: 'medium',
     category: 'planning',
-    assignee: { name: '김지은', avatarLabel: '김' },
+    assigneeId: 'mock-user-kim',
   },
   // 스프린트 편입 · 진행 중 (in_progress) — 11pt
   {
@@ -54,7 +54,7 @@ export const mockTasks: Task[] = [
     status: 'in_progress',
     priority: 'medium',
     category: 'frontend',
-    assignee: { name: '박서준', avatarLabel: '박' },
+    assigneeId: 'mock-user-park',
   },
   {
     id: 'task-5',
@@ -65,7 +65,7 @@ export const mockTasks: Task[] = [
     status: 'in_progress',
     priority: 'medium',
     category: 'planning',
-    assignee: { name: '김지은', avatarLabel: '김' },
+    assigneeId: 'mock-user-kim',
   },
   // 스프린트 편입 · 완료 (done) — 18pt
   {
@@ -77,7 +77,7 @@ export const mockTasks: Task[] = [
     status: 'done',
     priority: 'medium',
     category: 'backend',
-    assignee: { name: '이하은', avatarLabel: '이' },
+    assigneeId: 'mock-user-lee',
   },
   {
     id: 'task-7',
@@ -88,7 +88,7 @@ export const mockTasks: Task[] = [
     status: 'done',
     priority: 'medium',
     category: 'backend',
-    assignee: { name: '이하은', avatarLabel: '이' },
+    assigneeId: 'mock-user-lee',
   },
   {
     id: 'task-8',
@@ -99,7 +99,7 @@ export const mockTasks: Task[] = [
     status: 'done',
     priority: 'medium',
     category: 'frontend',
-    assignee: { name: '박서준', avatarLabel: '박' },
+    assigneeId: 'mock-user-park',
   },
   // 백로그 (sprintId: null) — 카테고리·담당자 미지정, status는 대기(todo)
   {
@@ -111,7 +111,7 @@ export const mockTasks: Task[] = [
     status: 'todo',
     priority: 'high',
     category: null,
-    assignee: null,
+    assigneeId: null,
   },
   {
     id: 'task-10',
@@ -122,7 +122,7 @@ export const mockTasks: Task[] = [
     status: 'todo',
     priority: 'medium',
     category: null,
-    assignee: null,
+    assigneeId: null,
   },
   {
     id: 'task-11',
@@ -133,7 +133,7 @@ export const mockTasks: Task[] = [
     status: 'todo',
     priority: 'low',
     category: null,
-    assignee: null,
+    assigneeId: null,
   },
   {
     id: 'task-12',
@@ -144,6 +144,16 @@ export const mockTasks: Task[] = [
     status: 'todo',
     priority: 'low',
     category: null,
-    assignee: null,
+    assigneeId: null,
   },
 ];
+
+// 대시보드 위젯 전용 동기 mock 접근자 — api/get-*-tasks.ts가 async(Supabase)로 전환되어 분리한다.
+// 대시보드 실 연동 시 이 접근자와 mock 데이터를 함께 제거한다.
+export function getMockSprintTasks(sprintId: string): Task[] {
+  return mockTasks.filter((task) => task.sprintId === sprintId);
+}
+
+export function getMockBacklogTasks(workspaceId: string): Task[] {
+  return mockTasks.filter((task) => task.workspaceId === workspaceId && task.sprintId === null);
+}
