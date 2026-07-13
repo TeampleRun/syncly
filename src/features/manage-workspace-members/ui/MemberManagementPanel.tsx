@@ -11,12 +11,14 @@ interface MemberManagementPanelProps {
   workspaceId: string;
   initialMembers: WorkspaceMember[];
   currentUserId: string;
+  inviteCode: string | null;
 }
 
 export function MemberManagementPanel({
   workspaceId,
   initialMembers,
   currentUserId,
+  inviteCode,
 }: MemberManagementPanelProps) {
   const {
     members,
@@ -28,7 +30,7 @@ export function MemberManagementPanel({
     canInvite,
     isDuplicate,
     inviteByEmail,
-  } = useMemberManagement({ workspaceId, initialMembers });
+  } = useMemberManagement({ workspaceId, initialMembers, inviteCode });
 
   return (
     <div className="space-y-6">

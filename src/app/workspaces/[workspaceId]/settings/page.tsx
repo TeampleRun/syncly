@@ -1,11 +1,8 @@
 // 설정 페이지 라우트 — 활성 탭을 searchParam(?tab=)으로 읽고, 표시에 필요한 데이터를 RSC에서 조회해 주입한다.
-// 실 API 전환 시 아래 조회부만 async(Supabase)로 교체하면 되고, 하위 뷰/훅은 그대로 둔다.
 import { notFound } from 'next/navigation';
 import { getWorkspaceById } from '@/entities/workspace/api/get-workspace-by-id';
-import {
-  getMockWorkspaceMembersByWorkspaceId,
-  mockCurrentWorkspaceMember,
-} from '@/entities/workspace-member';
+import { getWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member/api/get-workspace-members-by-id';
+import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { SettingsView, parseSettingsTab } from '@/views/settings';
 
 interface WorkspaceSettingsPageProps {
@@ -29,7 +26,13 @@ export default async function WorkspaceSettingsPage({
     notFound();
   }
 
-  const members = getMockWorkspaceMembersByWorkspaceId(workspaceId);
+  // 멤버 목록과 현재 사용자 식별자를 병렬 조회하고, 현재 사용자의 닉네임은 멤버 목록에서 파생한다.
+  const [members, currentUserId] = await Promise.all([
+    getWorkspaceMembersByWorkspaceId(workspaceId),
+    getCurrentUserId(),
+  ]);
+  const currentNickname =
+    members.find((member) => member.userId === currentUserId)?.workspaceNickname ?? '';
 
   return (
     <SettingsView
@@ -37,8 +40,8 @@ export default async function WorkspaceSettingsPage({
       workspaceId={workspaceId}
       activeTab={parseSettingsTab(tab)}
       members={members}
-      currentUserId={mockCurrentWorkspaceMember.userId}
-      currentNickname={mockCurrentWorkspaceMember.workspaceNickname}
+      currentUserId={currentUserId}
+      currentNickname={currentNickname}
     />
   );
 }

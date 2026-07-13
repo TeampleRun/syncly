@@ -42,9 +42,12 @@ export function SettingsView({
             workspaceId={workspaceId}
             initialMembers={members}
             currentUserId={currentUserId}
+            inviteCode={workspace.inviteCode ?? null}
           />
         )}
-        {activeTab === 'profile' && <MemberProfileForm initialNickname={currentNickname} />}
+        {activeTab === 'profile' && (
+          <MemberProfileForm workspaceId={workspaceId} initialNickname={currentNickname} />
+        )}
       </div>
     </div>
   );
