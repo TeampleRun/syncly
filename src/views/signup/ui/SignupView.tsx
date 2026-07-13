@@ -2,11 +2,13 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { createClient } from '@/shared/lib/client';
+import { useOAuthSignIn } from '@/shared/lib/use-oauth-sign-in';
 import { Input } from '@/shared/ui/input';
 
 const INPUT_CLASS =
@@ -48,6 +50,7 @@ function formatTimer(seconds: number) {
 
 export default function SignupView() {
   const supabase = createClient();
+  const router = useRouter();
 
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
@@ -60,6 +63,25 @@ export default function SignupView() {
   const [timer, setTimer] = useState(OTP_SECONDS);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { signInWithOAuth, oauthError, oauthLoading } = useOAuthSignIn();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('real_name')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (profile?.real_name) {
+        router.push('/workspaces');
+      } else {
+        setStep('info');
+      }
+    };
+    checkSession();
+  }, []);
 
   const startTimer = () => {
     setTimer(OTP_SECONDS);
@@ -81,19 +103,6 @@ export default function SignupView() {
     },
     [],
   );
-
-  const handleOAuthSignIn = async (provider: 'google' | 'github') => {
-    setError(null);
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
-    if (error) {
-      setError(toKoreanError(error.message));
-      setLoading(false);
-    }
-  };
 
   const handleEmailNext = async () => {
     setError(null);
@@ -232,21 +241,22 @@ export default function SignupView() {
             </div>
 
             <button
-              onClick={() => handleOAuthSignIn('google')}
-              disabled={loading}
+              onClick={() => signInWithOAuth('google')}
+              disabled={loading || oauthLoading}
               className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-60"
             >
               <Image src="/images/auth/icon-google.svg" alt="" width={21} height={20} />
               <span className="flex-1 text-center">Google로 계속하기</span>
             </button>
             <button
-              onClick={() => handleOAuthSignIn('github')}
-              disabled={loading}
+              onClick={() => signInWithOAuth('github')}
+              disabled={loading || oauthLoading}
               className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-60"
             >
               <Image src="/images/auth/icon-github.svg" alt="" width={21} height={20} />
               <span className="flex-1 text-center">GitHub로 계속하기</span>
             </button>
+            {oauthError && <p className="text-sm text-red-500">{oauthError}</p>}
           </div>
         )}
 

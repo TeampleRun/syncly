@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { createClient } from '@/shared/lib/client';
+import { useOAuthSignIn } from '@/shared/lib/use-oauth-sign-in';
 import { Input } from '@/shared/ui/input';
 
 const AUTH_ERROR_MAP: Record<string, string> = {
@@ -56,18 +57,7 @@ export default function LoginView() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleOAuthSignIn = async (provider: 'google' | 'github') => {
-    setError(null);
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
-    if (error) {
-      setError(toKoreanError(error.message));
-      setLoading(false);
-    }
-  };
+  const { signInWithOAuth, oauthError, oauthLoading } = useOAuthSignIn();
 
   const signInWithEmail = async () => {
     setEmailError(null);
@@ -117,8 +107,8 @@ export default function LoginView() {
 
         <div className="border-brand/10 flex flex-col gap-3 rounded-[16px] border bg-white p-6 shadow-sm">
           <button
-            onClick={() => handleOAuthSignIn('google')}
-            disabled={loading}
+            onClick={() => signInWithOAuth('google')}
+            disabled={loading || oauthLoading}
             className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-60"
           >
             <Image src="/images/auth/icon-google.svg" alt="" width={21} height={20} />
@@ -126,13 +116,15 @@ export default function LoginView() {
           </button>
 
           <button
-            onClick={() => handleOAuthSignIn('github')}
-            disabled={loading}
+            onClick={() => signInWithOAuth('github')}
+            disabled={loading || oauthLoading}
             className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-60"
           >
             <Image src="/images/auth/icon-github.svg" alt="" width={21} height={20} />
             <span className="flex-1 text-center">GitHub로 계속하기</span>
           </button>
+
+          {oauthError && <p className="px-1 text-sm text-red-500">{oauthError}</p>}
 
           <div className="flex items-center gap-3 py-1">
             <div className="bg-brand/10 h-px flex-1" />
