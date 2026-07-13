@@ -1,13 +1,15 @@
-// 목업 근무 일정 모듈의 설정과 항목에 대한 핵심 타입입니다.
+// DB 컬럼을 화면에서 다루기 쉬운 camelCase 형태로 표현하는 근무유형과 일정 타입입니다.
 import type { WeekdayKey } from './weekdays';
 
 export type WorkShiftColor = 'sky' | 'violet' | 'amber' | 'slate' | 'emerald' | 'rose';
 
 export interface WorkShiftOption {
   id: string;
+  code: string;
   name: string;
   startTime: string | null;
   endTime: string | null;
+  endsNextDay: boolean;
   color: WorkShiftColor;
   isOff: boolean;
 }
@@ -20,5 +22,6 @@ export interface WorkScheduleEntry {
   workspaceId: string;
   userId: string;
   weekday: WeekdayKey;
-  shiftOptionId: string;
+  workDate: string;
+  shiftTypeId: string;
 }

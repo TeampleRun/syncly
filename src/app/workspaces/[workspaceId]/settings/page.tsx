@@ -1,7 +1,7 @@
 // 설정 페이지 라우트 — 활성 탭을 searchParam(?tab=)으로 읽고, 표시에 필요한 데이터를 RSC에서 조회해 주입한다.
 // 실 API 전환 시 아래 조회부만 async(Supabase)로 교체하면 되고, 하위 뷰/훅은 그대로 둔다.
 import { notFound } from 'next/navigation';
-import { getMockWorkspaceById } from '@/entities/workspace';
+import { getWorkspaceById } from '@/entities/workspace/api/get-workspace-by-id';
 import {
   getMockWorkspaceMembersByWorkspaceId,
   mockCurrentWorkspaceMember,
@@ -23,7 +23,7 @@ export default async function WorkspaceSettingsPage({
 }: WorkspaceSettingsPageProps) {
   const { workspaceId } = await params;
   const { tab } = await searchParams;
-  const workspace = getMockWorkspaceById(workspaceId);
+  const workspace = await getWorkspaceById(workspaceId);
 
   if (!workspace) {
     notFound();

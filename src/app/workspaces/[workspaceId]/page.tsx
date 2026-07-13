@@ -1,5 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
-import { getMockWorkspaceById } from '@/entities/workspace';
+import { getWorkspaceById } from '@/entities/workspace/api/get-workspace-by-id';
 
 interface WorkspaceHomePageProps {
   params: Promise<{
@@ -9,7 +9,7 @@ interface WorkspaceHomePageProps {
 
 export default async function WorkspaceHomePage({ params }: WorkspaceHomePageProps) {
   const { workspaceId } = await params;
-  const workspace = getMockWorkspaceById(workspaceId);
+  const workspace = await getWorkspaceById(workspaceId);
 
   if (!workspace) {
     notFound();
