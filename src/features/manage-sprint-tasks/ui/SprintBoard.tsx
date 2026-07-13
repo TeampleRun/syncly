@@ -35,6 +35,7 @@ export function SprintBoard({ sprintId, workspaceId, tasks, backlog, members }: 
     addBacklogTask,
     updateTask,
     deleteTask,
+    moveToSprint,
     dragProps,
     dropProps,
     dragOverStatus,
@@ -82,6 +83,7 @@ export function SprintBoard({ sprintId, workspaceId, tasks, backlog, members }: 
         onAdd={() => setDialog({ mode: 'add-backlog' })}
         onEdit={(task) => setDialog({ mode: 'edit', task })}
         onDelete={deleteTask}
+        onMoveToSprint={moveToSprint}
       />
 
       {dialog && (

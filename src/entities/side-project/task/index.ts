@@ -23,3 +23,4 @@ export { useCreateTask } from './api/use-create-task';
 export { useUpdateTask } from './api/use-update-task';
 export { useDeleteTask } from './api/use-delete-task';
 export { useUpdateTaskStatus } from './api/use-update-task-status';
+export { useUpdateTaskSprint } from './api/use-update-task-sprint';

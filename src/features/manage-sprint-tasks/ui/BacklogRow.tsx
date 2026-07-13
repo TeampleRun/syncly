@@ -1,7 +1,7 @@
 // 백로그 행 — 우선순위 점 · 제목 · 포인트 · 우선순위 배지 + (호버 시) 수정/삭제 액션.
 // 우선순위 색(TASK_PRIORITY)은 entities를 단일 출처로 사용한다.
 // '낮음'은 지정색(#d1d5dc)이 옅어 배지 텍스트로 쓰면 대비가 부족하므로 뮤트 그레이로 대체한다.
-import { Pencil, Trash2 } from 'lucide-react';
+import { ArrowRightToLine, Pencil, Trash2 } from 'lucide-react';
 
 import { type Task, TASK_PRIORITY } from '@/entities/side-project/task';
 
@@ -9,9 +9,11 @@ interface BacklogRowProps {
   task: Task;
   onEdit: () => void;
   onDelete: () => void;
+  /** 현재 스프린트로 편입 */
+  onMoveToSprint: () => void;
 }
 
-export function BacklogRow({ task, onEdit, onDelete }: BacklogRowProps) {
+export function BacklogRow({ task, onEdit, onDelete, onMoveToSprint }: BacklogRowProps) {
   const priority = TASK_PRIORITY[task.priority];
   const isLow = task.priority === 'low';
 
@@ -33,6 +35,15 @@ export function BacklogRow({ task, onEdit, onDelete }: BacklogRowProps) {
       </span>
 
       <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <button
+          type="button"
+          onClick={onMoveToSprint}
+          aria-label="현재 스프린트로 이동"
+          title="현재 스프린트로 이동"
+          className="text-brand-muted hover:text-brand flex size-6 items-center justify-center rounded-md"
+        >
+          <ArrowRightToLine className="size-3.5" aria-hidden="true" />
+        </button>
         <button
           type="button"
           onClick={onEdit}

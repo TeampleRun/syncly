@@ -9,6 +9,7 @@ import {
   useCreateTask,
   useDeleteTask,
   useUpdateTask,
+  useUpdateTaskSprint,
   useUpdateTaskStatus,
 } from '@/entities/side-project/task';
 
@@ -32,6 +33,7 @@ export function useSprintBoard({ sprintId, workspaceId, tasks, backlog }: UseSpr
   const updateMutation = useUpdateTask();
   const deleteMutation = useDeleteTask();
   const statusMutation = useUpdateTaskStatus();
+  const sprintMutation = useUpdateTaskSprint();
 
   // 스프린트에 새 업무 추가(기본 상태: 대기)
   const addSprintTask = useCallback(
@@ -55,6 +57,12 @@ export function useSprintBoard({ sprintId, workspaceId, tasks, backlog }: UseSpr
 
   const deleteTask = useCallback((id: string) => deleteMutation.mutate(id), [deleteMutation]);
 
+  // 백로그 항목을 현재 스프린트로 편입(sprint_id = 현재 스프린트). status는 유지된다.
+  const moveToSprint = useCallback(
+    (id: string) => sprintMutation.mutate({ id, sprintId }),
+    [sprintMutation, sprintId],
+  );
+
   // 드래그로 컬럼(상태) 이동 — 스프린트 업무에만 적용
   const moveTask = useCallback(
     (id: string, status: TaskStatus) => statusMutation.mutate({ id, status }),
@@ -71,6 +79,7 @@ export function useSprintBoard({ sprintId, workspaceId, tasks, backlog }: UseSpr
     addBacklogTask,
     updateTask,
     deleteTask,
+    moveToSprint,
     dragProps: dnd.dragProps,
     dropProps: dnd.dropProps,
     dragOverStatus: dnd.dragOverStatus,
