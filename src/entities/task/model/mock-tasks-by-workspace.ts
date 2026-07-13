@@ -1,5 +1,9 @@
 import type { Task } from './task.types';
 
+const TEAM_PROJECT_WORKSPACE_UUID = '00000000-0000-0000-0000-000000001001';
+const SIDE_PROJECT_WORKSPACE_UUID = '00000000-0000-0000-0000-000000001002';
+const STORE_OPERATION_WORKSPACE_UUID = '00000000-0000-0000-0000-000000001003';
+
 const mockTasksByWorkspaceId: Record<string, Task[]> = {
   test: [
     {
@@ -73,8 +77,248 @@ const mockTasksByWorkspaceId: Record<string, Task[]> = {
       status: 'done',
     },
   ],
+  'team-workspace': [
+    {
+      id: 'task-1',
+      workspaceId: 'team-workspace',
+      title: '사용자 인터뷰 설문지 제작',
+      assignee: '박서준',
+      assigneeInitial: '박',
+      assigneeColor: '#00C950',
+      dueDate: '7/5',
+      status: 'todo',
+    },
+    {
+      id: 'task-2',
+      workspaceId: 'team-workspace',
+      title: 'DB 스키마 설계',
+      assignee: '김지은',
+      assigneeInitial: '김',
+      assigneeColor: '#FE9A00',
+      dueDate: '7/6',
+      status: 'todo',
+    },
+    {
+      id: 'task-3',
+      workspaceId: 'team-workspace',
+      title: '스프린트 1 회고 준비',
+      assignee: '이하은',
+      assigneeInitial: '이',
+      assigneeColor: '#615FFF',
+      dueDate: '7/10',
+      status: 'todo',
+    },
+    {
+      id: 'task-4',
+      workspaceId: 'team-workspace',
+      title: '와이어프레임 초안 작성',
+      assignee: '김지은',
+      assigneeInitial: '김',
+      assigneeColor: '#00B8DB',
+      dueDate: '7/3',
+      status: 'in-progress',
+    },
+    {
+      id: 'task-5',
+      workspaceId: 'team-workspace',
+      title: '랜딩 페이지 디자인',
+      assignee: '최민준',
+      assigneeInitial: '최',
+      assigneeColor: '#2B7FFF',
+      dueDate: '7/8',
+      status: 'in-progress',
+    },
+    {
+      id: 'task-6',
+      workspaceId: 'team-workspace',
+      title: 'API 명세서 문서화',
+      assignee: '이하은',
+      assigneeInitial: '이',
+      assigneeColor: '#615FFF',
+      dueDate: '7/2',
+      status: 'done',
+    },
+    {
+      id: 'task-7',
+      workspaceId: 'team-workspace',
+      title: '로고 시안 3종 작성',
+      assignee: '박서준',
+      assigneeInitial: '박',
+      assigneeColor: '#FE9A00',
+      dueDate: '6/30',
+      status: 'done',
+    },
+    {
+      id: 'task-8',
+      workspaceId: 'team-workspace',
+      title: '중간 발표 리허설 진행',
+      assignee: '최민준',
+      assigneeInitial: '최',
+      assigneeColor: '#2B7FFF',
+      dueDate: '7/12',
+      status: 'in-progress',
+    },
+    {
+      id: 'task-9',
+      workspaceId: 'team-workspace',
+      title: '최종 보고서 목차 정리',
+      assignee: '김지은',
+      assigneeInitial: '김',
+      assigneeColor: '#FE9A00',
+      dueDate: '7/14',
+      status: 'todo',
+    },
+    {
+      id: 'task-10',
+      workspaceId: 'team-workspace',
+      title: '인터뷰 대상자 일정 조율',
+      assignee: '이하은',
+      assigneeInitial: '이',
+      assigneeColor: '#615FFF',
+      dueDate: '7/16',
+      status: 'todo',
+    },
+    {
+      id: 'task-11',
+      workspaceId: 'team-workspace',
+      title: '프로토타입 수정 사항 반영',
+      assignee: '최민준',
+      assigneeInitial: '최',
+      assigneeColor: '#2B7FFF',
+      dueDate: '7/4',
+      status: 'done',
+    },
+    {
+      id: 'task-12',
+      workspaceId: 'team-workspace',
+      title: '경쟁 서비스 비교표 작성',
+      assignee: '박서준',
+      assigneeInitial: '박',
+      assigneeColor: '#00C950',
+      dueDate: '7/1',
+      status: 'done',
+    },
+    {
+      id: 'task-13',
+      workspaceId: 'team-workspace',
+      title: '발표 스크립트 1차 작성',
+      assignee: '김지은',
+      assigneeInitial: '김',
+      assigneeColor: '#FE9A00',
+      dueDate: '7/2',
+      status: 'done',
+    },
+    {
+      id: 'task-14',
+      workspaceId: 'team-workspace',
+      title: '사용성 테스트 결과 정리',
+      assignee: '이하은',
+      assigneeInitial: '이',
+      assigneeColor: '#615FFF',
+      dueDate: '7/3',
+      status: 'done',
+    },
+    {
+      id: 'task-15',
+      workspaceId: 'team-workspace',
+      title: '발표 자료 시각 보정',
+      assignee: '정우진',
+      assigneeInitial: '정',
+      assigneeColor: '#8B5CF6',
+      dueDate: '7/5',
+      status: 'done',
+    },
+  ],
+  'side-workspace': [
+    {
+      id: 'side-task-1',
+      workspaceId: 'side-workspace',
+      title: '온보딩 플로우 개선',
+      assignee: '최민준',
+      assigneeInitial: '최',
+      assigneeColor: '#2B7FFF',
+      dueDate: '7/14',
+      status: 'todo',
+    },
+    {
+      id: 'side-task-2',
+      workspaceId: 'side-workspace',
+      title: '베타 테스터 모집 공고',
+      assignee: '김지은',
+      assigneeInitial: '김',
+      assigneeColor: '#FE9A00',
+      dueDate: '7/15',
+      status: 'todo',
+    },
+    {
+      id: 'side-task-3',
+      workspaceId: 'side-workspace',
+      title: '운동 통계 차트',
+      assignee: '박서준',
+      assigneeInitial: '박',
+      assigneeColor: '#00B8DB',
+      dueDate: '7/12',
+      status: 'in-progress',
+    },
+    {
+      id: 'side-task-4',
+      workspaceId: 'side-workspace',
+      title: '푸시 알림 설정',
+      assignee: '김지은',
+      assigneeInitial: '김',
+      assigneeColor: '#FE9A00',
+      dueDate: '7/11',
+      status: 'in-progress',
+    },
+    {
+      id: 'side-task-5',
+      workspaceId: 'side-workspace',
+      title: '소셜 로그인 연동',
+      assignee: '이하은',
+      assigneeInitial: '이',
+      assigneeColor: '#615FFF',
+      dueDate: '7/9',
+      status: 'done',
+    },
+    {
+      id: 'side-task-6',
+      workspaceId: 'side-workspace',
+      title: '운동 기록 CRUD API',
+      assignee: '이하은',
+      assigneeInitial: '이',
+      assigneeColor: '#615FFF',
+      dueDate: '7/8',
+      status: 'done',
+    },
+  ],
 };
 
-export function getMockTasksByWorkspaceId(workspaceId: string): Task[] {
-  return mockTasksByWorkspaceId[workspaceId]?.map((task) => ({ ...task })) ?? [];
+const taskWorkspaceAliasById: Record<string, keyof typeof mockTasksByWorkspaceId> = {
+  [TEAM_PROJECT_WORKSPACE_UUID]: 'team-workspace',
+  [SIDE_PROJECT_WORKSPACE_UUID]: 'side-workspace',
+  [STORE_OPERATION_WORKSPACE_UUID]: 'store-workspace',
+};
+
+function resolveTaskWorkspaceKey(
+  workspaceId: string,
+  fallbackWorkspaceId?: keyof typeof mockTasksByWorkspaceId,
+) {
+  if (workspaceId in mockTasksByWorkspaceId) {
+    return workspaceId as keyof typeof mockTasksByWorkspaceId;
+  }
+
+  return taskWorkspaceAliasById[workspaceId] ?? fallbackWorkspaceId;
+}
+
+export function getMockTasksByWorkspaceId(
+  workspaceId: string,
+  fallbackWorkspaceId?: keyof typeof mockTasksByWorkspaceId,
+): Task[] {
+  const resolvedWorkspaceId = resolveTaskWorkspaceKey(workspaceId, fallbackWorkspaceId);
+
+  if (!resolvedWorkspaceId) {
+    return [];
+  }
+
+  return mockTasksByWorkspaceId[resolvedWorkspaceId]?.map((task) => ({ ...task })) ?? [];
 }

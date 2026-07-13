@@ -22,5 +22,13 @@ export const TEMPLATE_WIDGETS: Record<WorkspacePurpose, WidgetId[]> = {
   'store-operation': ['work-schedule', 'calendar', 'recent-notices', 'recent-resources'],
   // TODO: 팀플 템플릿에 들어가는 위젯 생성, 추가, 수정
   // 팀 프로젝트 — 진척·협업
-  'team-project': ['my-tasks', 'recent-notes', 'calendar', 'recent-notices', 'recent-resources'],
+  'team-project': [
+    'my-tasks',
+    'recent-notes',
+    'overall-progress',
+    'work-summary',
+    'calendar',
+    'recent-notices',
+    'recent-resources',
+  ],
 };
