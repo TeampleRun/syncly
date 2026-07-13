@@ -38,14 +38,21 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  const PUBLIC_PATHS = ['/', '/login', '/signup', '/auth'];
+  const isPublic = PUBLIC_PATHS.some(
+    (p) => request.nextUrl.pathname === p || request.nextUrl.pathname.startsWith(p + '/'),
+  );
+
+  if (!user && !isPublic) {
     const url = request.nextUrl.clone();
-    url.pathname = '/auth/login';
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
+  const AUTH_PAGES = ['/login', '/signup'];
+  if (user && AUTH_PAGES.includes(request.nextUrl.pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/workspaces';
     return NextResponse.redirect(url);
   }
 
