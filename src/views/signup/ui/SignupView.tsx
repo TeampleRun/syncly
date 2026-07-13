@@ -391,12 +391,14 @@ export default function SignupView() {
                 ← 이전
               </button>
             )}
-            <p className="text-brand-muted text-sm">
-              이미 계정이 있으신가요?{' '}
-              <Link href="/login" className="text-brand font-semibold underline">
-                로그인
-              </Link>
-            </p>
+            {step === 'email' && (
+              <p className="text-brand-muted text-sm">
+                이미 계정이 있으신가요?{' '}
+                <Link href="/login" className="text-brand font-semibold underline">
+                  로그인
+                </Link>
+              </p>
+            )}
           </div>
         )}
       </div>
