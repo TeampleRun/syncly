@@ -44,7 +44,7 @@ export default function LandingHeader() {
             로그인
           </Link>
           <Link
-            href="/signUp"
+            href="/signup"
             className="bg-brand hover:bg-brand-deep flex items-center gap-0.75 rounded-[18px] px-3.5 py-2 text-sm font-semibold whitespace-nowrap text-white transition-colors sm:px-5"
           >
             무료로 시작하기
