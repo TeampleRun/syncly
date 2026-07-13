@@ -31,6 +31,7 @@ function toKoreanError(message: string): string {
 const CALLBACK_ERROR_MAP: Record<string, string> = {
   auth_failed: '소셜 로그인에 실패했어요. 다시 시도해주세요',
   session_exchange_failed: '인증 처리 중 오류가 발생했어요. 다시 시도해주세요',
+  email_missing: 'OAuth 계정에서 이메일 정보를 확인할 수 없어요. 다른 방법으로 로그인해 주세요',
 };
 
 const SAVED_EMAIL_KEY = 'syncly_saved_email';
@@ -55,18 +56,17 @@ export default function LoginView() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
+  const handleOAuthSignIn = async (provider: 'google' | 'github') => {
+    setError(null);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
-  };
-
-  const signInWithGitHub = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
+    if (error) {
+      setError(toKoreanError(error.message));
+      setLoading(false);
+    }
   };
 
   const signInWithEmail = async () => {
@@ -98,7 +98,8 @@ export default function LoginView() {
     if (error) {
       setError(toKoreanError(error.message));
     } else {
-      router.push('/workspaces');
+      const redirect = searchParams.get('redirect');
+      router.push(redirect ?? '/workspaces');
     }
     setLoading(false);
   };
@@ -116,16 +117,18 @@ export default function LoginView() {
 
         <div className="border-brand/10 flex flex-col gap-3 rounded-[16px] border bg-white p-6 shadow-sm">
           <button
-            onClick={signInWithGoogle}
-            className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors"
+            onClick={() => handleOAuthSignIn('google')}
+            disabled={loading}
+            className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-60"
           >
             <Image src="/images/auth/icon-google.svg" alt="" width={21} height={20} />
             <span className="flex-1 text-center">Google로 계속하기</span>
           </button>
 
           <button
-            onClick={signInWithGitHub}
-            className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors"
+            onClick={() => handleOAuthSignIn('github')}
+            disabled={loading}
+            className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-60"
           >
             <Image src="/images/auth/icon-github.svg" alt="" width={21} height={20} />
             <span className="flex-1 text-center">GitHub로 계속하기</span>
@@ -147,6 +150,7 @@ export default function LoginView() {
           >
             <div className="flex flex-col gap-1">
               <Input
+                suppressHydrationWarning
                 type="email"
                 placeholder="이메일 주소"
                 value={email}
@@ -173,6 +177,7 @@ export default function LoginView() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
                   className="text-brand-muted hover:text-brand-ink absolute top-1/2 right-3 -translate-y-1/2"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}

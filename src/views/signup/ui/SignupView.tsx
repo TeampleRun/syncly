@@ -82,18 +82,17 @@ export default function SignupView() {
     [],
   );
 
-  const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
+  const handleOAuthSignIn = async (provider: 'google' | 'github') => {
+    setError(null);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
-  };
-
-  const signInWithGitHub = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
+    if (error) {
+      setError(toKoreanError(error.message));
+      setLoading(false);
+    }
   };
 
   const handleEmailNext = async () => {
@@ -145,26 +144,35 @@ export default function SignupView() {
 
   const handleInfoSubmit = async () => {
     setError(null);
+    const realName = name.trim();
+    if (!realName) {
+      setError('이름을 입력해주세요');
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.updateUser({
       password,
-      data: { full_name: name },
+      data: { full_name: realName },
     });
     if (error) {
       setError(toKoreanError(error.message));
     } else {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from('profiles').upsert({
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        setError('가입 정보를 확인하지 못했어요. 다시 시도해주세요');
+      } else {
+        const { error: profileError } = await supabase.from('profiles').upsert({
           id: user.id,
           email: user.email!,
-          real_name: name,
+          real_name: realName,
           avatar_url: null,
         });
+        if (profileError) {
+          setError('프로필 저장에 실패했어요. 다시 시도해주세요');
+        } else {
+          setStep('done');
+        }
       }
-      setStep('done');
     }
     setLoading(false);
   };
@@ -224,15 +232,17 @@ export default function SignupView() {
             </div>
 
             <button
-              onClick={signInWithGoogle}
-              className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors"
+              onClick={() => handleOAuthSignIn('google')}
+              disabled={loading}
+              className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-60"
             >
               <Image src="/images/auth/icon-google.svg" alt="" width={21} height={20} />
               <span className="flex-1 text-center">Google로 계속하기</span>
             </button>
             <button
-              onClick={signInWithGitHub}
-              className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors"
+              onClick={() => handleOAuthSignIn('github')}
+              disabled={loading}
+              className="border-brand/10 text-brand-ink hover:bg-brand-surface flex h-11 w-full items-center gap-3 rounded-[18px] border px-5 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-60"
             >
               <Image src="/images/auth/icon-github.svg" alt="" width={21} height={20} />
               <span className="flex-1 text-center">GitHub로 계속하기</span>
@@ -323,6 +333,7 @@ export default function SignupView() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보이기'}
                   className="text-brand-muted hover:text-brand-ink absolute top-1/2 right-3 -translate-y-1/2"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}

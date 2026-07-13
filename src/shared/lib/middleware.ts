@@ -1,6 +1,9 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+const PUBLIC_PATHS = ['/', '/login', '/signup', '/auth'];
+const AUTH_PAGES = ['/login', '/signup'];
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -38,7 +41,6 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  const PUBLIC_PATHS = ['/', '/login', '/signup', '/auth'];
   const isPublic = PUBLIC_PATHS.some(
     (p) => request.nextUrl.pathname === p || request.nextUrl.pathname.startsWith(p + '/'),
   );
@@ -46,10 +48,10 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
+    url.search = new URLSearchParams({ redirect: request.nextUrl.pathname }).toString();
     return NextResponse.redirect(url);
   }
 
-  const AUTH_PAGES = ['/login', '/signup'];
   if (user && AUTH_PAGES.includes(request.nextUrl.pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = '/workspaces';
