@@ -1,8 +1,8 @@
 'use server';
 
 // 업무 생성 서버액션 — 검증 후 tasks insert (created_by는 서버에서 현재 유저로 채운다)
+import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
-import { DEV_USER_ID } from '@/shared/config/dev-user';
 import { toTaskInsert } from '../model/task.mapper';
 import { taskInputSchema, type TaskInput } from '../model/task.schema';
 
@@ -25,7 +25,8 @@ export async function createTask({
   }
 
   const supabase = await createSupabaseServerClient();
-  const payload = toTaskInsert(parsed.data, { workspaceId, sprintId, createdBy: DEV_USER_ID });
+  const createdBy = await getCurrentUserId();
+  const payload = toTaskInsert(parsed.data, { workspaceId, sprintId, createdBy });
   const { error } = await supabase.from('tasks').insert(payload);
 
   if (error) {
