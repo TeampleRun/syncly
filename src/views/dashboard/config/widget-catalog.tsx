@@ -26,22 +26,22 @@ export const WIDGET_CATALOG = {
     render: () => <SprintSummary />,
   },
   'my-tasks': {
-    layout: { i: 'my-tasks', x: 0, y: 0, w: 6, h: 5, minW: 2, minH: 3 },
+    layout: { i: 'my-tasks', x: 0, y: 4, w: 6, h: 5, minW: 2, minH: 3 },
     title: '내 업무',
     render: (size) => <MyTasks size={size} />,
   },
   velocity: {
-    layout: { i: 'velocity', x: 6, y: 0, w: 6, h: 5, minW: 4, minH: 4 },
+    layout: { i: 'velocity', x: 6, y: 4, w: 6, h: 5, minW: 4, minH: 4 },
     title: '벨로시티',
     render: () => <Velocity />,
   },
   backlog: {
-    layout: { i: 'backlog', x: 0, y: 5, w: 6, h: 5, minW: 2, minH: 3 },
+    layout: { i: 'backlog', x: 0, y: 9, w: 6, h: 5, minW: 2, minH: 3 },
     title: '백로그',
     render: (size) => <Backlog size={size} />,
   },
   'recent-notes': {
-    layout: { i: 'recent-notes', x: 6, y: 5, w: 6, h: 5, minW: 2, minH: 3 },
+    layout: { i: 'recent-notes', x: 0, y: 14, w: 6, h: 5, minW: 2, minH: 3 },
     title: '최근 회의록',
     render: (size) => <RecentNotes size={size} />,
   },
@@ -63,7 +63,7 @@ export const WIDGET_CATALOG = {
     ),
   },
   'today-schedule': {
-    layout: { i: 'today-schedule', x: 0, y: 10, w: 6, h: 4, minW: 2, minH: 3 },
+    layout: { i: 'today-schedule', x: 6, y: 9, w: 6, h: 4, minW: 2, minH: 3 },
     title: '오늘 일정',
     render: (size) => <TodaySchedule size={size} />,
   },
@@ -78,7 +78,7 @@ export const WIDGET_CATALOG = {
     render: (size, { workspaceId }) => <WorkSummary workspaceId={workspaceId} size={size} />,
   },
   calendar: {
-    layout: { i: 'calendar', x: 6, y: 20, w: 6, h: 8, minW: 4, minH: 6 },
+    layout: { i: 'calendar', x: 6, y: 13, w: 6, h: 8, minW: 4, minH: 6 },
     title: '캘린더',
     render: (size) => <Calendar size={size} />,
   },
