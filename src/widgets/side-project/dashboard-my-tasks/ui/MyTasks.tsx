@@ -6,7 +6,7 @@
 import { currentSprint } from '@/entities/side-project/sprint';
 import {
   getMockSprintTasks,
-  Task,
+  type Task,
   TASK_STATUS,
   type TaskStatus,
 } from '@/entities/side-project/task';
