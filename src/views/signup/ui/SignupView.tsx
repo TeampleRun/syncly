@@ -371,7 +371,7 @@ export default function SignupView() {
         )}
 
         {step !== 'done' && (
-          <div className="flex items-center justify-between">
+          <div className={`flex items-center ${step === 'email' ? 'justify-between' : 'justify-center'}`}>
             {step === 'email' && (
               <Link
                 href="/"
