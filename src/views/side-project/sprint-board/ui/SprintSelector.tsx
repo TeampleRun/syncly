@@ -12,7 +12,7 @@ interface SprintSelectorProps {
 
 export default function SprintSelector({ sprints, currentSprintId }: SprintSelectorProps) {
   return (
-    <div className="mb-4 flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2">
       {sprints.map((sprint) => {
         const isActive = sprint.id === currentSprintId;
         return (

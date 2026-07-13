@@ -9,7 +9,9 @@ import { Plus_Jakarta_Sans } from 'next/font/google';
 import { resolveCurrentSprint, useSprints } from '@/entities/side-project/sprint';
 import { useBacklogTasks, useSprintTasks } from '@/entities/side-project/task';
 import { getMockWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
-import { SprintBoard } from '@/features/sprint-board';
+import { SprintBoard } from '@/features/manage-sprint-tasks';
+
+import { SprintToolbar } from '@/features/manage-sprints';
 
 import SprintSelector from './SprintSelector';
 import SprintSummaryHeader from './SprintSummaryHeader';
@@ -57,7 +59,10 @@ export function SprintBoardView({ workspaceId, selectedSprintId }: SprintBoardVi
 
   return (
     <div className={`${jakarta.className} bg-brand-surface min-h-full`}>
-      <SprintSelector sprints={sprintsQuery.data} currentSprintId={sprint.id} />
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <SprintSelector sprints={sprintsQuery.data} currentSprintId={sprint.id} />
+        <SprintToolbar sprint={sprint} />
+      </div>
       <SprintSummaryHeader sprint={sprint} />
       {/* key={sprint.id}: 스프린트 전환 시 보드를 리마운트해 초기 데이터로 다시 seed한다 */}
       <SprintBoard
