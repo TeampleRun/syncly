@@ -3,6 +3,7 @@
 // 초기 레이아웃은 서버(RSC)에서 조회해 initialLayout으로 주입받는다(마운트 후 재조회 없음).
 // 저장(쓰기)만 서버액션으로 위임한다. 현재 DB 영속화 키는 (userId, workspaceId)이며 editMode는 저장하지 않는다.
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import type { Layout, LayoutItem } from 'react-grid-layout';
 
 import { saveDashboardLayout } from '@/entities/dashboard-layout/api/save-dashboard-layout';
@@ -28,15 +29,25 @@ export function useDashboardLayout({
   const [layout, setLayout] = useState<Layout>(initialLayout.layout);
   const [editMode, setEditMode] = useState(false);
   const didMountRef = useRef(false);
+  const saveQueueRef = useRef(Promise.resolve());
 
-  // TODO: DB 연동 — 변경 저장 (드래그 중 잦은 호출은 debounce 예정)
   useEffect(() => {
     if (!didMountRef.current) {
       didMountRef.current = true;
       return;
     }
 
-    void saveDashboardLayout(workspaceId, pageType, { layout });
+    const timeoutId = window.setTimeout(() => {
+      saveQueueRef.current = saveQueueRef.current
+        .catch(() => undefined)
+        .then(() => saveDashboardLayout(workspaceId, pageType, { layout }))
+        .catch((error: unknown) => {
+          console.error(error);
+          toast.error('대시보드 레이아웃 저장에 실패했습니다.');
+        });
+    }, 400);
+
+    return () => window.clearTimeout(timeoutId);
   }, [layout, workspaceId, pageType]);
 
   const handleLayoutChange = useCallback((next: Layout) => {

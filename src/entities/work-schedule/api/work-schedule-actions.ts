@@ -8,13 +8,11 @@ import { createSupabaseServerClient } from '@/shared/api/supabase/server';
 import type { WorkShiftColor, WorkShiftOption } from '../model/work-schedule.types';
 
 const colorSchema = z.enum(['sky', 'violet', 'amber', 'slate', 'emerald', 'rose']);
-// PostgreSQL이 허용하는 UUID 형식 전체를 받는다. 현재 개발 시드 ID는 RFC 버전 비트가 0이다.
-const uuidSchema = z
-  .string()
-  .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, {
-    message: '유효한 UUID 형식이 아닙니다.',
-  });
-const timeSchema = z.string().regex(/^\d{2}:\d{2}$/);
+// 개발 시드 UUID처럼 RFC 버전 비트가 0인 GUID도 허용한다.
+const uuidSchema = z.guid();
+const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, {
+  message: '시간은 00:00부터 23:59 사이여야 합니다.',
+});
 
 const shiftTypeSchema = z
   .object({
@@ -67,18 +65,41 @@ export async function saveWorkScheduleEntry(input: {
     })
     .parse(input);
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.from('work_schedule_entries').upsert(
-    {
+  const updateExistingEntry = () =>
+    supabase
+      .from('work_schedule_entries')
+      .update({ shift_type_id: value.shiftTypeId })
+      .eq('workspace_id', value.workspaceId)
+      .eq('user_id', value.userId)
+      .eq('work_date', value.workDate)
+      .select('id')
+      .maybeSingle();
+
+  const { data: updatedEntry, error: updateError } = await updateExistingEntry();
+
+  if (updateError) throw new Error(`근무 스케줄 저장에 실패했습니다: ${updateError.message}`);
+
+  if (!updatedEntry) {
+    const { error: insertError } = await supabase.from('work_schedule_entries').insert({
       workspace_id: value.workspaceId,
       user_id: value.userId,
       work_date: value.workDate,
       shift_type_id: value.shiftTypeId,
       created_by: await getCurrentUserId(),
-    },
-    { onConflict: 'workspace_id,user_id,work_date' },
-  );
+    });
 
-  if (error) throw new Error(`근무 스케줄 저장에 실패했습니다: ${error.message}`);
+    if (insertError?.code === '23505') {
+      const { data: retriedEntry, error: retryError } = await updateExistingEntry();
+      if (retryError || !retriedEntry) {
+        throw new Error(
+          `근무 스케줄 저장에 실패했습니다: ${retryError?.message ?? insertError.message}`,
+        );
+      }
+    } else if (insertError) {
+      throw new Error(`근무 스케줄 생성에 실패했습니다: ${insertError.message}`);
+    }
+  }
+
   revalidateWorkspace(value.workspaceId);
 }
 

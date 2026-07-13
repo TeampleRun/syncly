@@ -5,18 +5,15 @@
 //  · md: 오늘 근무 유형별 인원
 //  · lg: 오늘 근무 유형별 인원 + 다음 4일 근무 인원
 import { ClipboardList } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import {
   countSchedulesByWeekday,
   weekdays,
   type WeekdayKey,
-  type WorkScheduleEntry,
   type WorkShiftColor,
-  type WorkShiftOption,
 } from '@/entities/work-schedule';
 import { getDashboardWorkSchedule } from '@/entities/work-schedule/api/get-dashboard-work-schedule';
-import type { WorkspaceMember } from '@/entities/workspace-member';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 import { cn } from '@/shared/lib/utils';
@@ -66,42 +63,16 @@ interface WorkScheduleSummaryProps {
   size?: WidgetSize;
 }
 
-interface WorkScheduleData {
-  members: WorkspaceMember[];
-  shifts: WorkShiftOption[];
-  schedule: WorkScheduleEntry[];
-}
-
 export default function WorkScheduleSummary({
   workspaceId,
   size = 'md',
 }: WorkScheduleSummaryProps) {
-  const [data, setData] = useState<WorkScheduleData | null>(null);
-  const [hasError, setHasError] = useState(false);
+  const { data, isError, isPending } = useQuery({
+    queryKey: ['work-schedule', 'dashboard', workspaceId],
+    queryFn: () => getDashboardWorkSchedule(workspaceId),
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-
-    void getDashboardWorkSchedule(workspaceId)
-      .then((nextData) => {
-        if (!cancelled) {
-          setData(nextData);
-          setHasError(false);
-        }
-      })
-      .catch((error: unknown) => {
-        console.error(error);
-        if (!cancelled) {
-          setHasError(true);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [workspaceId]);
-
-  if (hasError) {
+  if (isError) {
     return (
       <WidgetCard>
         {header}
@@ -112,7 +83,7 @@ export default function WorkScheduleSummary({
     );
   }
 
-  if (!data) {
+  if (isPending || !data) {
     return (
       <WidgetCard>
         {header}

@@ -20,6 +20,17 @@ export async function ensureWeeklyWorkScheduleEntries(
   if (!defaultShift || members.length === 0) return;
 
   const supabase = await createSupabaseServerClient();
+  const weekEndDate = getWorkDateByWeekday(weekStartDate, 'sunday');
+  const { count, error: countError } = await supabase
+    .from('work_schedule_entries')
+    .select('id', { count: 'exact', head: true })
+    .eq('workspace_id', workspaceId)
+    .gte('work_date', weekStartDate)
+    .lte('work_date', weekEndDate);
+
+  if (countError) throw new Error(`근무 스케줄 수 조회에 실패했습니다: ${countError.message}`);
+  if (count === members.length * weekdays.length) return;
+
   const createdBy = await getCurrentUserId();
   const entries = members.flatMap((member) =>
     weekdays.map((weekday) => ({

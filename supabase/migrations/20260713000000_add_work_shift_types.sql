@@ -100,13 +100,6 @@ alter table public.work_schedule_entries
 
 alter table public.work_shift_types enable row level security;
 
--- 인증 연동 전 테스트 유저 검증을 위한 임시 정책. auth 연동 후 제거한다.
-create policy dev_full_access
-on public.work_shift_types
-for all
-using (true)
-with check (true);
-
 create policy work_shift_types_select_member
 on public.work_shift_types
 for select

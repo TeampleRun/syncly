@@ -12,17 +12,18 @@ const weekdayKeys: WeekdayKey[] = [
 ];
 
 export function getWeekdayFromWorkDate(workDate: string): WeekdayKey {
-  return weekdayKeys[new Date(`${workDate}T00:00:00`).getDay()];
+  return weekdayKeys[new Date(`${workDate}T00:00:00Z`).getUTCDay()];
 }
 
 export function getCurrentWeekRange(now = new Date()): { startDate: string; endDate: string } {
-  const mondayOffset = (now.getDay() + 6) % 7;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - mondayOffset);
-  monday.setHours(0, 0, 0, 0);
+  const { year, month, day } = getKstDateParts(now);
+  const currentDate = new Date(Date.UTC(year, month - 1, day));
+  const mondayOffset = (currentDate.getUTCDay() + 6) % 7;
+  const monday = new Date(currentDate);
+  monday.setUTCDate(currentDate.getUTCDate() - mondayOffset);
 
   const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
+  sunday.setUTCDate(monday.getUTCDate() + 6);
 
   return {
     startDate: toDateString(monday),
@@ -40,15 +41,31 @@ export function getWorkDateByWeekday(startDate: string, weekday: WeekdayKey): st
     'saturday',
     'sunday',
   ].indexOf(weekday);
-  const date = new Date(`${startDate}T00:00:00`);
-  date.setDate(date.getDate() + weekdayIndex);
+  const date = new Date(`${startDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + weekdayIndex);
 
   return toDateString(date);
 }
 
 function toDateString(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function getKstDateParts(date: Date): { year: number; month: number; day: number } {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const byType = new Map(parts.map((part) => [part.type, part.value]));
+
+  return {
+    year: Number(byType.get('year')),
+    month: Number(byType.get('month')),
+    day: Number(byType.get('day')),
+  };
 }
