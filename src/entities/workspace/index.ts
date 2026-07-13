@@ -29,3 +29,8 @@ export {
   updateWorkspaceInfo,
   type UpdateWorkspaceInfoInput,
 } from './api/update-workspace-info';
+export { joinWorkspaceByInviteCode } from './api/join-workspace-by-invite-code';
+export {
+  setWorkspaceInviteEnabled,
+  type SetWorkspaceInviteEnabledInput,
+} from './api/set-workspace-invite-enabled';
