@@ -12,5 +12,10 @@ export default async function SprintBoardPage({ params, searchParams }: SprintBo
   const { sprint: sprintParam } = await searchParams;
   const selectedSprintId = typeof sprintParam === 'string' ? sprintParam : undefined;
 
-  return <SprintBoardView workspaceId={workspaceId} selectedSprintId={selectedSprintId} />;
+  return (
+    <SprintBoardView
+      workspaceId={'00000000-0000-0000-0000-000000001002'}
+      selectedSprintId={selectedSprintId}
+    />
+  );
 }
