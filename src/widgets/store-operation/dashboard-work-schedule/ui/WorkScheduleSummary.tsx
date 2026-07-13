@@ -1,18 +1,22 @@
+'use client';
+
 // 업무 스케줄 위젯 — 매장 운영 워크스페이스의 오늘 근무 현황과 요일별 요약을 보여준다.
 //  · sm: 오늘 근무 인원 + 대표 근무 유형
 //  · md: 오늘 근무 유형별 인원
 //  · lg: 오늘 근무 유형별 인원 + 다음 4일 근무 인원
 import { ClipboardList } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import {
   countSchedulesByWeekday,
-  createInitialWorkSchedule,
-  mockWorkScheduleConfig,
   weekdays,
   type WeekdayKey,
+  type WorkScheduleEntry,
   type WorkShiftColor,
+  type WorkShiftOption,
 } from '@/entities/work-schedule';
-import { mockWorkspaceMembers } from '@/entities/workspace-member';
+import { getDashboardWorkSchedule } from '@/entities/work-schedule/api/get-dashboard-work-schedule';
+import type { WorkspaceMember } from '@/entities/workspace-member';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 import { cn } from '@/shared/lib/utils';
@@ -62,23 +66,71 @@ interface WorkScheduleSummaryProps {
   size?: WidgetSize;
 }
 
+interface WorkScheduleData {
+  members: WorkspaceMember[];
+  shifts: WorkShiftOption[];
+  schedule: WorkScheduleEntry[];
+}
+
 export default function WorkScheduleSummary({
   workspaceId,
   size = 'md',
 }: WorkScheduleSummaryProps) {
-  const members = mockWorkspaceMembers.filter((member) => member.workspaceId === workspaceId);
-  const schedule = createInitialWorkSchedule({
-    workspaceId,
-    members,
-    config: mockWorkScheduleConfig,
-  });
+  const [data, setData] = useState<WorkScheduleData | null>(null);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void getDashboardWorkSchedule(workspaceId)
+      .then((nextData) => {
+        if (!cancelled) {
+          setData(nextData);
+          setHasError(false);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error(error);
+        if (!cancelled) {
+          setHasError(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [workspaceId]);
+
+  if (hasError) {
+    return (
+      <WidgetCard>
+        {header}
+        <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
+          업무 스케줄을 불러오지 못했습니다.
+        </div>
+      </WidgetCard>
+    );
+  }
+
+  if (!data) {
+    return (
+      <WidgetCard>
+        {header}
+        <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
+          업무 스케줄을 불러오는 중입니다.
+        </div>
+      </WidgetCard>
+    );
+  }
+
+  const { members, shifts, schedule } = data;
   const today = getTodayWeekday();
   const todayCounts = countSchedulesByWeekday({
     schedule,
-    config: mockWorkScheduleConfig,
+    config: { shifts },
     weekday: today,
   });
-  const workingShifts = mockWorkScheduleConfig.shifts.filter((shift) => !shift.isOff);
+  const workingShifts = shifts.filter((shift) => !shift.isOff);
   const totalWorkingMembers = workingShifts.reduce(
     (total, shift) => total + (todayCounts[shift.id] ?? 0),
     0,
@@ -118,7 +170,7 @@ export default function WorkScheduleSummary({
     );
   }
 
-  const visibleShifts = size === 'md' ? workingShifts : mockWorkScheduleConfig.shifts;
+  const visibleShifts = size === 'md' ? workingShifts : shifts;
   const nextDays = getNextWeekdays(today, 4);
 
   return (
@@ -162,7 +214,7 @@ export default function WorkScheduleSummary({
             {nextDays.map((weekday) => {
               const counts = countSchedulesByWeekday({
                 schedule,
-                config: mockWorkScheduleConfig,
+                config: { shifts },
                 weekday: weekday.key,
               });
               const workingCount = workingShifts.reduce(

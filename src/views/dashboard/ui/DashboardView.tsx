@@ -11,7 +11,7 @@ import {
   EditModeBanner,
   useDashboardLayout,
 } from '@/features/dashboard/edit-layout';
-import type { DashboardLayoutState } from '@/entities/dashboard-layout';
+import type { DashboardLayoutState } from '@/entities/dashboard-layout/model/dashboard-layout.types';
 import type { WorkspacePurpose } from '@/shared/dashboard/model/template.types';
 
 import { TEMPLATE_WIDGETS } from '../config/template-widgets';
@@ -28,7 +28,7 @@ interface DashboardViewProps {
   purpose: WorkspacePurpose;
   /** 서버(RSC)에서 조회한 초기 레이아웃 */
   initialLayout: DashboardLayoutState;
-  /** WORKSPACE_LAYOUTS.page_type — 한 워크스페이스의 여러 페이지를 구분 */
+  /** 향후 페이지별 레이아웃 확장을 위한 구분값 — 현재 DB에는 저장하지 않는다 */
   pageType?: string;
 }
 
