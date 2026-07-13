@@ -171,7 +171,7 @@ export function TaskFormDialog({
               미배정
             </button>
             {members.map((member) => {
-              const selected = values.assignee?.name === member.workspaceNickname;
+              const selected = values.assignee?.userId === member.userId;
               return (
                 <button
                   key={member.userId}
@@ -180,6 +180,7 @@ export function TaskFormDialog({
                     setValues((v) => ({
                       ...v,
                       assignee: {
+                        userId: member.userId,
                         name: member.workspaceNickname,
                         avatarLabel: member.avatarLabel,
                       },

@@ -22,18 +22,12 @@ type DialogState =
 interface SprintBoardProps {
   sprintId: string;
   workspaceId: string;
-  initialTasks: Task[];
-  initialBacklog: Task[];
+  tasks: Task[];
+  backlog: Task[];
   members: WorkspaceMember[];
 }
 
-export function SprintBoard({
-  sprintId,
-  workspaceId,
-  initialTasks,
-  initialBacklog,
-  members,
-}: SprintBoardProps) {
+export function SprintBoard({ sprintId, workspaceId, tasks, backlog, members }: SprintBoardProps) {
   const {
     columns,
     backlogTasks,
@@ -44,7 +38,7 @@ export function SprintBoard({
     dragProps,
     dropProps,
     dragOverStatus,
-  } = useSprintBoard({ sprintId, workspaceId, initialTasks, initialBacklog });
+  } = useSprintBoard({ sprintId, workspaceId, tasks, backlog });
 
   const [dialog, setDialog] = useState<DialogState>(null);
 

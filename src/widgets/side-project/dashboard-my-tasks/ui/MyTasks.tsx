@@ -4,7 +4,12 @@
 //  · lg: 상태별 카운트 요약 + task 리스트
 // 현재 스프린트에 편입된 업무를 셀렉터로 가져온다(백로그는 애초에 포함되지 않음).
 import { currentSprint } from '@/entities/side-project/sprint';
-import { getMockSprintTasks, Task, TASK_STATUS, type TaskStatus } from '@/entities/side-project/task';
+import {
+  getMockSprintTasks,
+  Task,
+  TASK_STATUS,
+  type TaskStatus,
+} from '@/entities/side-project/task';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 

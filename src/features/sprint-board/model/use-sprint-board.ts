@@ -1,15 +1,19 @@
-// 스프린트 보드 상태 훅 — 서버에서 받은 초기 데이터를 로컬 상태로 seed하고,
-// 이후 CRUD/드래그 이동을 낙관적으로 로컬에서 처리한다(재조회 없음).
-// 실 API 전환 시: 각 액션 안에서 서버 저장을 호출하고, 실패 시 이전 상태로 롤백한다.
-//   - 추가: 임시 카드를 먼저 그린 뒤, 서버가 준 실제 id로 교체
-//   - 그 외: setState 뒤 저장 호출, 실패 시 prev로 복원
-// 컴포넌트/DnD는 이 훅이 주는 값만 소비하므로, 위 교체 시에도 UI는 그대로 유지된다.
-import { useCallback, useState } from 'react';
+// 스프린트 보드 상태 훅 — 데이터는 react-query(부모 View)가 소유하고, 이 훅은 쓰기(뮤테이션)와 DnD만 배선한다.
+// CRUD/상태이동은 서버액션·클라 update를 호출하고, 성공 시 쿼리 무효화로 재조회되어 목록이 갱신된다(재조회 방식, B-1).
+// 낙관적 업데이트는 후속 과제(B-2). 실패는 각 뮤테이션 훅의 onError(toast)에서 노출된다.
+import { useCallback } from 'react';
 
-import { type Task, type TaskStatus } from '@/entities/side-project/task';
+import {
+  type Task,
+  type TaskStatus,
+  useCreateTask,
+  useDeleteTask,
+  useUpdateTask,
+  useUpdateTaskStatus,
+} from '@/entities/side-project/task';
 
 import { groupTasksByStatus } from './sprint-board-columns';
-import { applyValuesToTask, createTaskFromValues, type TaskFormValues } from './task-form';
+import { toTaskInput, type TaskFormValues } from './task-form';
 import { useTaskDnd } from './use-task-dnd';
 
 interface UseSprintBoardParams {
@@ -17,67 +21,52 @@ interface UseSprintBoardParams {
   sprintId: string;
   /** 새 업무가 속할 워크스페이스 id */
   workspaceId: string;
-  initialTasks: Task[];
-  initialBacklog: Task[];
+  /** 현재 스프린트 업무(react-query 데이터) */
+  tasks: Task[];
+  /** 백로그 업무(react-query 데이터) */
+  backlog: Task[];
 }
 
-export function useSprintBoard({
-  sprintId,
-  workspaceId,
-  initialTasks,
-  initialBacklog,
-}: UseSprintBoardParams) {
-  // 서버에서 받은 초기 데이터로 seed
-  const [sprintTasks, setSprintTasks] = useState<Task[]>(initialTasks);
-  const [backlogTasks, setBacklogTasks] = useState<Task[]>(initialBacklog);
+export function useSprintBoard({ sprintId, workspaceId, tasks, backlog }: UseSprintBoardParams) {
+  const createMutation = useCreateTask(workspaceId);
+  const updateMutation = useUpdateTask();
+  const deleteMutation = useDeleteTask();
+  const statusMutation = useUpdateTaskStatus();
 
   // 스프린트에 새 업무 추가(기본 상태: 대기)
   const addSprintTask = useCallback(
-    (values: TaskFormValues) => {
-      setSprintTasks((prev) => [
-        ...prev,
-        createTaskFromValues(values, { workspaceId, sprintId, status: 'todo' }),
-      ]);
-    },
-    [workspaceId, sprintId],
+    (values: TaskFormValues) => createMutation.mutate({ input: toTaskInput(values), sprintId }),
+    [createMutation, sprintId],
   );
 
   // 백로그에 새 항목 추가(스프린트 미편입)
   const addBacklogTask = useCallback(
-    (values: TaskFormValues) => {
-      setBacklogTasks((prev) => [
-        ...prev,
-        createTaskFromValues(values, { workspaceId, sprintId: null, status: 'todo' }),
-      ]);
-    },
-    [workspaceId],
+    (values: TaskFormValues) =>
+      createMutation.mutate({ input: toTaskInput(values), sprintId: null }),
+    [createMutation],
   );
 
-  // 수정/삭제는 업무가 어느 목록에 있든 처리(스프린트·백로그 공통)
-  const updateTask = useCallback((id: string, values: TaskFormValues) => {
-    const patch = (list: Task[]) =>
-      list.map((t) => (t.id === id ? applyValuesToTask(t, values) : t));
-    setSprintTasks(patch);
-    setBacklogTasks(patch);
-  }, []);
+  // 수정/삭제는 업무가 어느 목록에 있든 id로 처리(스프린트·백로그 공통)
+  const updateTask = useCallback(
+    (id: string, values: TaskFormValues) =>
+      updateMutation.mutate({ id, input: toTaskInput(values) }),
+    [updateMutation],
+  );
 
-  const deleteTask = useCallback((id: string) => {
-    const remove = (list: Task[]) => list.filter((t) => t.id !== id);
-    setSprintTasks(remove);
-    setBacklogTasks(remove);
-  }, []);
+  const deleteTask = useCallback((id: string) => deleteMutation.mutate(id), [deleteMutation]);
 
   // 드래그로 컬럼(상태) 이동 — 스프린트 업무에만 적용
-  const moveTask = useCallback((id: string, status: TaskStatus) => {
-    setSprintTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
-  }, []);
+  const moveTask = useCallback(
+    (id: string, status: TaskStatus) => statusMutation.mutate({ id, status }),
+    [statusMutation],
+  );
 
   const dnd = useTaskDnd(moveTask);
-  const columns = groupTasksByStatus(sprintTasks);
+  const columns = groupTasksByStatus(tasks);
 
   return {
     columns,
-    backlogTasks,
+    backlogTasks: backlog,
     addSprintTask,
     addBacklogTask,
     updateTask,

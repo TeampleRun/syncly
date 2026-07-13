@@ -44,7 +44,8 @@ export function SprintBoardView({ workspaceId, selectedSprintId }: SprintBoardVi
   const members = getMockWorkspaceMembersByWorkspaceId(workspaceId);
 
   if (sprintsQuery.isPending) return <CenteredMessage>불러오는 중…</CenteredMessage>;
-  if (sprintsQuery.isError) return <CenteredMessage>스프린트를 불러오지 못했습니다.</CenteredMessage>;
+  if (sprintsQuery.isError)
+    return <CenteredMessage>스프린트를 불러오지 못했습니다.</CenteredMessage>;
 
   // 스프린트가 하나도 없는 워크스페이스 — 빈 상태
   if (!sprint) return <CenteredMessage>아직 생성된 스프린트가 없습니다.</CenteredMessage>;
@@ -63,8 +64,8 @@ export function SprintBoardView({ workspaceId, selectedSprintId }: SprintBoardVi
         key={sprint.id}
         sprintId={sprint.id}
         workspaceId={workspaceId}
-        initialTasks={tasksQuery.data}
-        initialBacklog={backlogQuery.data}
+        tasks={tasksQuery.data}
+        backlog={backlogQuery.data}
         members={members}
       />
     </div>

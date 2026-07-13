@@ -20,7 +20,7 @@ export const mockTasks: Task[] = [
     status: 'todo',
     priority: 'medium',
     category: 'design',
-    assignee: { name: '최민준', avatarLabel: '최' },
+    assignee: { userId: 'mock-user-choi', name: '최민준', avatarLabel: '최' },
   },
   {
     id: 'task-2',
@@ -31,7 +31,7 @@ export const mockTasks: Task[] = [
     status: 'todo',
     priority: 'medium',
     category: 'frontend',
-    assignee: { name: '박서준', avatarLabel: '박' },
+    assignee: { userId: 'mock-user-park', name: '박서준', avatarLabel: '박' },
   },
   {
     id: 'task-3',
@@ -42,7 +42,7 @@ export const mockTasks: Task[] = [
     status: 'todo',
     priority: 'medium',
     category: 'planning',
-    assignee: { name: '김지은', avatarLabel: '김' },
+    assignee: { userId: 'mock-user-kim', name: '김지은', avatarLabel: '김' },
   },
   // 스프린트 편입 · 진행 중 (in_progress) — 11pt
   {
@@ -54,7 +54,7 @@ export const mockTasks: Task[] = [
     status: 'in_progress',
     priority: 'medium',
     category: 'frontend',
-    assignee: { name: '박서준', avatarLabel: '박' },
+    assignee: { userId: 'mock-user-park', name: '박서준', avatarLabel: '박' },
   },
   {
     id: 'task-5',
@@ -65,7 +65,7 @@ export const mockTasks: Task[] = [
     status: 'in_progress',
     priority: 'medium',
     category: 'planning',
-    assignee: { name: '김지은', avatarLabel: '김' },
+    assignee: { userId: 'mock-user-kim', name: '김지은', avatarLabel: '김' },
   },
   // 스프린트 편입 · 완료 (done) — 18pt
   {
@@ -77,7 +77,7 @@ export const mockTasks: Task[] = [
     status: 'done',
     priority: 'medium',
     category: 'backend',
-    assignee: { name: '이하은', avatarLabel: '이' },
+    assignee: { userId: 'mock-user-lee', name: '이하은', avatarLabel: '이' },
   },
   {
     id: 'task-7',
@@ -88,7 +88,7 @@ export const mockTasks: Task[] = [
     status: 'done',
     priority: 'medium',
     category: 'backend',
-    assignee: { name: '이하은', avatarLabel: '이' },
+    assignee: { userId: 'mock-user-lee', name: '이하은', avatarLabel: '이' },
   },
   {
     id: 'task-8',
@@ -99,7 +99,7 @@ export const mockTasks: Task[] = [
     status: 'done',
     priority: 'medium',
     category: 'frontend',
-    assignee: { name: '박서준', avatarLabel: '박' },
+    assignee: { userId: 'mock-user-park', name: '박서준', avatarLabel: '박' },
   },
   // 백로그 (sprintId: null) — 카테고리·담당자 미지정, status는 대기(todo)
   {

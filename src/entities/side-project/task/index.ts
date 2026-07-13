@@ -18,3 +18,8 @@ export { getMockBacklogTasks, getMockSprintTasks } from './model/task.mock';
 export { countByStatus } from './model/task.selectors';
 export { toTask } from './model/task.mapper';
 export type { TaskRow, TaskWithAssigneeRow } from './model/task.db.types';
+export { taskInputSchema, type TaskInput } from './model/task.schema';
+export { useCreateTask } from './api/use-create-task';
+export { useUpdateTask } from './api/use-update-task';
+export { useDeleteTask } from './api/use-delete-task';
+export { useUpdateTaskStatus } from './api/use-update-task-status';

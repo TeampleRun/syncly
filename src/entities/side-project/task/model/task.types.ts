@@ -38,6 +38,8 @@ export const TASK_CATEGORY: Record<TaskCategory, { label: string; bg: string; te
 };
 
 export interface TaskAssignee {
+  /** 담당자 신원 — profiles.id(= workspace_members.userId). 쓰기 시 tasks.assignee_id로 매핑된다 */
+  userId: string;
   /** 워크스페이스 멤버 표시명 */
   name: string;
   /** 아바타 이니셜(성 한 글자) */
