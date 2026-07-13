@@ -61,7 +61,7 @@ export function SprintBoardView({ workspaceId, selectedSprintId }: SprintBoardVi
     <div className={`${jakarta.className} bg-brand-surface min-h-full`}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <SprintSelector sprints={sprintsQuery.data} currentSprintId={sprint.id} />
-        <SprintToolbar sprint={sprint} />
+        <SprintToolbar workspaceId={workspaceId} sprint={sprint} />
       </div>
       <SprintSummaryHeader sprint={sprint} />
       {/* key={sprint.id}: 스프린트 전환 시 보드를 리마운트해 초기 데이터로 다시 seed한다 */}

@@ -1,23 +1,47 @@
 'use client';
 
-// 스프린트 액션 버튼(생성/수정/삭제) + 다이얼로그 열림 상태 — UI 전용.
-// 저장/삭제 로직은 아직 미배선(TODO). 현재 스프린트를 대상으로 수정/삭제한다.
+// 스프린트 액션 버튼(생성/수정/삭제) + 다이얼로그 열림 상태.
+// 생성/수정/삭제는 서버액션 뮤테이션에 연결하고, 실패는 각 훅 onError(toast)에서 노출한다.
+// 수정/삭제는 현재 스프린트를 대상으로 한다.
 import { useState } from 'react';
 
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 
-import type { Sprint } from '@/entities/side-project/sprint';
+import {
+  type Sprint,
+  useCreateSprint,
+  useDeleteSprint,
+  useUpdateSprint,
+} from '@/entities/side-project/sprint';
 
 import { SprintDeleteDialog } from './SprintDeleteDialog';
-import { SprintFormDialog } from './SprintFormDialog';
+import { SprintFormDialog, type SprintFormValues } from './SprintFormDialog';
 
 type DialogState = { mode: 'create' } | { mode: 'edit' } | { mode: 'delete' } | null;
 
 const iconButtonClass =
   'border-brand/10 text-brand-muted hover:text-brand-ink flex size-9 items-center justify-center rounded-full border bg-white transition-colors';
 
-export function SprintToolbar({ sprint }: { sprint: Sprint }) {
+interface SprintToolbarProps {
+  workspaceId: string;
+  sprint: Sprint;
+}
+
+export function SprintToolbar({ workspaceId, sprint }: SprintToolbarProps) {
   const [dialog, setDialog] = useState<DialogState>(null);
+
+  const createSprint = useCreateSprint(workspaceId);
+  const updateSprint = useUpdateSprint();
+  const deleteSprint = useDeleteSprint();
+
+  // 폼 값(name/startDate/endDate)은 SprintInput과 형태가 같아 그대로 넘긴다(서버에서 재검증)
+  const handleSubmit = (values: SprintFormValues) => {
+    if (dialog?.mode === 'edit') {
+      updateSprint.mutate({ id: sprint.id, input: values });
+    } else {
+      createSprint.mutate({ input: values });
+    }
+  };
 
   return (
     <div className="flex items-center gap-2">
@@ -50,16 +74,14 @@ export function SprintToolbar({ sprint }: { sprint: Sprint }) {
           mode={dialog.mode}
           initial={dialog.mode === 'edit' ? sprint : undefined}
           onClose={() => setDialog(null)}
-          // TODO(후속): 스프린트 생성/수정 서버액션(useMutation) 연결
-          onSubmit={() => setDialog(null)}
+          onSubmit={handleSubmit}
         />
       )}
       {dialog?.mode === 'delete' && (
         <SprintDeleteDialog
           sprintName={sprint.name}
           onClose={() => setDialog(null)}
-          // TODO(후속): 스프린트 삭제 서버액션(useMutation) 연결
-          onConfirm={() => setDialog(null)}
+          onConfirm={() => deleteSprint.mutate(sprint.id)}
         />
       )}
     </div>

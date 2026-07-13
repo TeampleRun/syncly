@@ -37,8 +37,12 @@ export function SprintFormDialog({ mode, initial, onClose, onSubmit }: SprintFor
       : EMPTY_SPRINT_FORM,
   );
 
+  // 이름 + 양쪽 날짜 + 종료일 ≥ 시작일 (서버에서도 재검증)
   const canSubmit =
-    values.name.trim().length > 0 && values.startDate !== '' && values.endDate !== '';
+    values.name.trim().length > 0 &&
+    values.startDate !== '' &&
+    values.endDate !== '' &&
+    values.startDate <= values.endDate;
 
   useEffect(() => {
     const dialog = dialogRef.current;
