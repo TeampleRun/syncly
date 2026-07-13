@@ -1,7 +1,7 @@
 // 스프린트 보드 상태 훅 — 데이터는 react-query(부모 View)가 소유하고, 이 훅은 쓰기(뮤테이션)와 DnD만 배선한다.
 // CRUD/상태이동은 서버액션·클라 update를 호출하고, 성공 시 쿼리 무효화로 재조회되어 목록이 갱신된다(재조회 방식, B-1).
 // 낙관적 업데이트는 후속 과제(B-2). 실패는 각 뮤테이션 훅의 onError(toast)에서 노출된다.
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import {
   type Task,
@@ -12,7 +12,9 @@ import {
   useUpdateTaskSprint,
   useUpdateTaskStatus,
 } from '@/entities/side-project/task';
+import type { WorkspaceMember } from '@/entities/workspace-member';
 
+import { indexMembersById, toBoardTask } from './board-task';
 import { groupTasksByStatus } from './sprint-board-columns';
 import { toTaskInput, type TaskFormValues } from './task-form';
 import { useTaskDnd } from './use-task-dnd';
@@ -26,9 +28,17 @@ interface UseSprintBoardParams {
   tasks: Task[];
   /** 백로그 업무(react-query 데이터) */
   backlog: Task[];
+  /** 담당자 표시명(닉네임) 해석용 워크스페이스 멤버 */
+  members: WorkspaceMember[];
 }
 
-export function useSprintBoard({ sprintId, workspaceId, tasks, backlog }: UseSprintBoardParams) {
+export function useSprintBoard({
+  sprintId,
+  workspaceId,
+  tasks,
+  backlog,
+  members,
+}: UseSprintBoardParams) {
   const createMutation = useCreateTask(workspaceId);
   const updateMutation = useUpdateTask();
   const deleteMutation = useDeleteTask();
@@ -70,11 +80,21 @@ export function useSprintBoard({ sprintId, workspaceId, tasks, backlog }: UseSpr
   );
 
   const dnd = useTaskDnd(moveTask);
-  const columns = groupTasksByStatus(tasks);
+
+  // 담당자 표시값(닉네임/아바타)을 members에서 해석해 BoardTask로 만든 뒤 그룹핑한다
+  const membersById = useMemo(() => indexMembersById(members), [members]);
+  const columns = useMemo(
+    () => groupTasksByStatus(tasks.map((task) => toBoardTask(task, membersById))),
+    [tasks, membersById],
+  );
+  const backlogTasks = useMemo(
+    () => backlog.map((task) => toBoardTask(task, membersById)),
+    [backlog, membersById],
+  );
 
   return {
     columns,
-    backlogTasks: backlog,
+    backlogTasks,
     addSprintTask,
     addBacklogTask,
     updateTask,

@@ -39,7 +39,7 @@ export function SprintBoard({ sprintId, workspaceId, tasks, backlog, members }: 
     dragProps,
     dropProps,
     dragOverStatus,
-  } = useSprintBoard({ sprintId, workspaceId, tasks, backlog });
+  } = useSprintBoard({ sprintId, workspaceId, tasks, backlog, members });
 
   const [dialog, setDialog] = useState<DialogState>(null);
 

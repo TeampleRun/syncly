@@ -5,12 +5,13 @@ import type { DragEventHandler } from 'react';
 
 import { Pencil, Trash2 } from 'lucide-react';
 
-import { type Task, TASK_CATEGORY } from '@/entities/side-project/task';
+import { TASK_CATEGORY } from '@/entities/side-project/task';
 
+import type { BoardTask } from '../model/board-task';
 import { getAvatarColor } from '../lib/avatar-color';
 
 interface TaskCardProps {
-  task: Task;
+  task: BoardTask;
   onEdit?: () => void;
   onDelete?: () => void;
   draggable?: boolean;

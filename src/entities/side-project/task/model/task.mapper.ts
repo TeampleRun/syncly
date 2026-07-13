@@ -1,29 +1,16 @@
 // DB row ↔ Task 엔티티 매퍼 — snake_case↔camelCase, null 흡수, 담당자 조인/역변환을 한곳에 모은다.
 // DB enum(task_status/priority/category)은 엔티티 유니온과 값이 동일해 캐스팅 없이 대입된다.
 import type { GenericTablesInsert, GenericTablesUpdate } from '@/shared/model/supabase.types';
-import type { Task, TaskAssignee } from './task.types';
-import type { TaskWithAssigneeRow } from './task.db.types';
+import type { Task } from './task.types';
+import type { TaskRow } from './task.db.types';
 import type { TaskInput } from './task.schema';
 
 /**
- * assignee_id + 조인된 profiles row → 화면용 담당자(TaskAssignee).
- * 미배정(assignee_id null 또는 조인 empty)이면 null. avatarLabel은 표시명 첫 글자(성)로, 빈 이름은 '?'로 방어한다.
- */
-function toAssignee(
-  assigneeId: string | null,
-  profile: { real_name: string } | null,
-): TaskAssignee | null {
-  if (!assigneeId || !profile) return null;
-  const name = profile.real_name.trim();
-  return { userId: assigneeId, name, avatarLabel: name.charAt(0) || '?' };
-}
-
-/**
- * tasks row(담당자 조인 포함) → Task 엔티티.
+ * tasks row → Task 엔티티.
  * point는 DB에서 null 허용(미산정)이나 엔티티는 숫자를 보장하므로 0으로 흡수한다.
- * sprintId는 null을 유지한다(null → 백로그).
+ * sprintId는 null을 유지한다(null → 백로그). 담당자는 id만 담고 표시명은 members에서 해석한다.
  */
-export function toTask(row: TaskWithAssigneeRow): Task {
+export function toTask(row: TaskRow): Task {
   return {
     id: row.id,
     workspaceId: row.workspace_id,
@@ -33,7 +20,7 @@ export function toTask(row: TaskWithAssigneeRow): Task {
     status: row.status,
     priority: row.priority,
     category: row.category,
-    assignee: toAssignee(row.assignee_id, row.assignee),
+    assigneeId: row.assignee_id,
   };
 }
 

@@ -1,5 +1,6 @@
 // 스프린트 보드 라우트 — 선택 스프린트를 searchParam(?sprint=id)으로 읽어 client 컨테이너에 넘긴다.
-// 데이터 조회(useQuery)와 스프린트 판정은 컨테이너가 담당하고, 태스크 변경은 보드의 클라이언트 낙관적 업데이트로 처리한다.
+// 스프린트/태스크는 컨테이너가 useQuery로 조회하고, 담당자 표시명 해석용 members만 서버에서 조회해 주입한다.
+import { getWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member/api/get-workspace-members-by-id';
 import { SprintBoardView } from '@/views/side-project/sprint-board';
 
 interface SprintBoardRouteProps {
@@ -12,10 +13,13 @@ export default async function SprintBoardPage({ params, searchParams }: SprintBo
   const { sprint: sprintParam } = await searchParams;
   const selectedSprintId = typeof sprintParam === 'string' ? sprintParam : undefined;
 
+  const members = await getWorkspaceMembersByWorkspaceId(workspaceId);
+
   return (
     <SprintBoardView
-      workspaceId={'00000000-0000-0000-0000-000000001002'}
+      workspaceId={workspaceId}
       selectedSprintId={selectedSprintId}
+      members={members}
     />
   );
 }
