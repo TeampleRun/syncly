@@ -1,10 +1,11 @@
 'use client';
 
-// 목업 UI에서 일정 셀의 로컬 상태와 근무 옵션 교체 동작을 관리합니다.
+// 서버에서 받은 일정의 화면 상태를 관리하고, 셀 클릭 시 다음 근무유형으로 낙관적으로 변경합니다.
 import { useState } from 'react';
 import {
   getDefaultWorkShiftOption,
   getNextWorkShiftOption,
+  getWorkDateByWeekday,
   weekdays,
   type WeekdayKey,
   type WorkScheduleConfig,
@@ -16,109 +17,76 @@ interface UseWorkScheduleStateParams {
   initialSchedule: WorkScheduleEntry[];
   members: WorkspaceMember[];
   config: WorkScheduleConfig;
+  weekStartDate: string;
 }
 
 function completeScheduleEntries({
-  schedule,
-  members,
-  config,
-}: {
-  schedule: WorkScheduleEntry[];
-  members: WorkspaceMember[];
-  config: WorkScheduleConfig;
-}): WorkScheduleEntry[] {
-  const defaultShift = getDefaultWorkShiftOption(config.shifts);
-  const existingEntryIds = new Set(
-    schedule.map((entry) => `${entry.workspaceId}:${entry.userId}:${entry.weekday}`),
-  );
-
-  const missingEntries = members.flatMap((member) =>
-    weekdays.flatMap((weekday) => {
-      const entryId = `${member.workspaceId}:${member.userId}:${weekday.key}`;
-
-      if (existingEntryIds.has(entryId)) {
-        return [];
-      }
-
-      return {
-        workspaceId: member.workspaceId,
-        userId: member.userId,
-        weekday: weekday.key,
-        shiftOptionId: defaultShift.id,
-      };
-    }),
-  );
-
-  if (missingEntries.length === 0) {
-    return schedule;
-  }
-
-  return [...schedule, ...missingEntries];
-}
-
-export function useWorkScheduleState({
   initialSchedule,
   members,
   config,
-}: UseWorkScheduleStateParams) {
-  const [schedule, setSchedule] = useState(() =>
-    completeScheduleEntries({
-      schedule: initialSchedule,
-      members,
-      config,
-    }),
+  weekStartDate,
+}: UseWorkScheduleStateParams): WorkScheduleEntry[] {
+  const defaultShift = getDefaultWorkShiftOption(config.shifts);
+  const existingEntries = new Set(
+    initialSchedule.map((entry) => `${entry.userId}:${entry.weekday}`),
   );
 
-  const cycleCell = (userId: string, weekday: WeekdayKey): void => {
-    setSchedule((current) => {
-      const completedSchedule = completeScheduleEntries({
-        schedule: current,
-        members,
-        config,
-      });
+  return [
+    ...initialSchedule,
+    ...members.flatMap((member) =>
+      weekdays.flatMap((weekday) => {
+        if (existingEntries.has(`${member.userId}:${weekday.key}`) || !defaultShift) return [];
 
-      return completedSchedule.map((entry) => {
+        return {
+          workspaceId: member.workspaceId,
+          userId: member.userId,
+          weekday: weekday.key,
+          workDate: getWorkDateByWeekday(weekStartDate, weekday.key),
+          shiftTypeId: defaultShift.id,
+        };
+      }),
+    ),
+  ];
+}
+
+export function useWorkScheduleState(params: UseWorkScheduleStateParams) {
+  const { config } = params;
+  const [schedule, setSchedule] = useState(() => completeScheduleEntries(params));
+
+  const cycleCell = (userId: string, weekday: WeekdayKey): WorkScheduleEntry | null => {
+    const currentEntry = schedule.find(
+      (entry) => entry.userId === userId && entry.weekday === weekday,
+    );
+    if (!currentEntry) return null;
+
+    const nextShift = getNextWorkShiftOption({
+      shifts: config.shifts,
+      currentShiftTypeId: currentEntry.shiftTypeId,
+    });
+    const nextEntry = { ...currentEntry, shiftTypeId: nextShift.id };
+
+    setSchedule((current) => {
+      return current.map((entry) => {
         if (entry.userId !== userId || entry.weekday !== weekday) {
           return entry;
         }
-
-        const nextShift = getNextWorkShiftOption({
-          shifts: config.shifts,
-          currentShiftOptionId: entry.shiftOptionId,
-        });
-
-        return {
-          ...entry,
-          shiftOptionId: nextShift.id,
-        };
+        return nextEntry;
       });
     });
+
+    return nextEntry;
   };
 
-  const replaceShiftOption = (fromShiftOptionId: string, toShiftOptionId: string): void => {
+  const replaceShiftOption = (fromShiftTypeId: string, toShiftTypeId: string): void => {
     setSchedule((current) => {
-      const completedSchedule = completeScheduleEntries({
-        schedule: current,
-        members,
-        config,
-      });
-
-      return completedSchedule.map((entry) =>
-        entry.shiftOptionId === fromShiftOptionId
-          ? { ...entry, shiftOptionId: toShiftOptionId }
-          : entry,
+      return current.map((entry) =>
+        entry.shiftTypeId === fromShiftTypeId ? { ...entry, shiftTypeId: toShiftTypeId } : entry,
       );
     });
   };
 
-  const completedSchedule = completeScheduleEntries({
-    schedule,
-    members,
-    config,
-  });
-
   return {
-    schedule: completedSchedule,
+    schedule,
     cycleCell,
     replaceShiftOption,
   };

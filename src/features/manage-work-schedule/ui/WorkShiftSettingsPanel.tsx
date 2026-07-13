@@ -1,4 +1,4 @@
-// 근무 옵션을 추가, 제거, 정렬하고 시간을 설정할 수 있는 인라인 편집기입니다.
+// 매장별 근무유형의 이름, 시간, 색상, 휴무 여부와 표시 순서를 편집하는 설정 패널입니다.
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { WorkScheduleConfig, WorkShiftColor, WorkShiftOption } from '@/entities/work-schedule';
 
@@ -10,6 +10,7 @@ interface WorkShiftSettingsPanelProps {
   onDeleteShift: (shiftId: string) => void;
   onMoveShift: (shiftId: string, direction: 'up' | 'down') => void;
   onUpdateShift: (shiftId: string, nextShift: WorkShiftOption) => void;
+  onCommitShift: (shiftId: string) => void;
 }
 
 export function WorkShiftSettingsPanel({
@@ -18,6 +19,7 @@ export function WorkShiftSettingsPanel({
   onDeleteShift,
   onMoveShift,
   onUpdateShift,
+  onCommitShift,
 }: WorkShiftSettingsPanelProps) {
   return (
     <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
@@ -42,7 +44,7 @@ export function WorkShiftSettingsPanel({
         {config.shifts.map((shift, index) => (
           <div
             key={shift.id}
-            className="grid grid-cols-[260px_170px_170px_140px_90px_190px] items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3"
+            className="grid grid-cols-[minmax(180px,1fr)_150px_150px_120px_110px_80px_160px] items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3"
           >
             <label className="space-y-2 text-xs font-semibold text-slate-500">
               이름
@@ -54,6 +56,7 @@ export function WorkShiftSettingsPanel({
                     name: event.target.value,
                   })
                 }
+                onBlur={() => onCommitShift(shift.id)}
                 className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-900 outline-none focus:border-indigo-400"
               />
             </label>
@@ -70,6 +73,7 @@ export function WorkShiftSettingsPanel({
                     startTime: event.target.value || null,
                   })
                 }
+                onBlur={() => onCommitShift(shift.id)}
                 className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-400"
               />
             </label>
@@ -86,6 +90,7 @@ export function WorkShiftSettingsPanel({
                     endTime: event.target.value || null,
                   })
                 }
+                onBlur={() => onCommitShift(shift.id)}
                 className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-indigo-400 disabled:bg-slate-100 disabled:text-slate-400"
               />
             </label>
@@ -100,6 +105,7 @@ export function WorkShiftSettingsPanel({
                     color: event.target.value as WorkShiftColor,
                   })
                 }
+                onBlur={() => onCommitShift(shift.id)}
                 className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-indigo-400"
               >
                 {shiftColors.map((color) => (
@@ -108,6 +114,23 @@ export function WorkShiftSettingsPanel({
                   </option>
                 ))}
               </select>
+            </label>
+
+            <label className="flex items-center gap-2 pt-5 text-sm font-semibold text-slate-600">
+              <input
+                type="checkbox"
+                checked={shift.endsNextDay}
+                disabled={shift.isOff}
+                onChange={(event) =>
+                  onUpdateShift(shift.id, {
+                    ...shift,
+                    endsNextDay: event.target.checked,
+                  })
+                }
+                onBlur={() => onCommitShift(shift.id)}
+                className="h-4 w-4 accent-indigo-600"
+              />
+              익일 종료
             </label>
 
             <label className="flex items-center gap-2 pt-5 text-sm font-semibold text-slate-600">
@@ -122,6 +145,7 @@ export function WorkShiftSettingsPanel({
                     endTime: event.target.checked ? null : (shift.endTime ?? '18:00'),
                   })
                 }
+                onBlur={() => onCommitShift(shift.id)}
                 className="h-4 w-4 accent-indigo-600"
               />
               휴무

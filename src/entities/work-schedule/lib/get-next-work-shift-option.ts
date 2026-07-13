@@ -1,16 +1,16 @@
-// 설정된 배열 순서에 따라 다음 근무 옵션을 반환합니다.
+// 셀을 클릭했을 때 현재 근무유형 다음에 배치된 유형을 순환하여 반환합니다.
 import type { WorkShiftOption } from '../model/work-schedule.types';
 
 interface GetNextWorkShiftOptionParams {
   shifts: WorkShiftOption[];
-  currentShiftOptionId: string;
+  currentShiftTypeId: string;
 }
 
 export function getNextWorkShiftOption({
   shifts,
-  currentShiftOptionId,
+  currentShiftTypeId,
 }: GetNextWorkShiftOptionParams): WorkShiftOption {
-  const currentIndex = shifts.findIndex((shift) => shift.id === currentShiftOptionId);
+  const currentIndex = shifts.findIndex((shift) => shift.id === currentShiftTypeId);
   const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % shifts.length;
 
   return shifts[nextIndex];

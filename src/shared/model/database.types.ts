@@ -509,7 +509,7 @@ export type Database = {
           created_by: string | null
           id: string
           note: string | null
-          shift_type: string
+          shift_type_id: string
           updated_at: string
           user_id: string
           work_date: string
@@ -520,7 +520,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           note?: string | null
-          shift_type: string
+          shift_type_id: string
           updated_at?: string
           user_id: string
           work_date: string
@@ -531,7 +531,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           note?: string | null
-          shift_type?: string
+          shift_type_id?: string
           updated_at?: string
           user_id?: string
           work_date?: string
@@ -553,6 +553,13 @@ export type Database = {
             referencedColumns: ["workspace_id", "user_id"]
           },
           {
+            foreignKeyName: "work_schedule_entries_shift_type_id_fkey"
+            columns: ["shift_type_id"]
+            isOneToOne: false
+            referencedRelation: "work_shift_types"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "work_schedule_entries_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -561,6 +568,59 @@ export type Database = {
           },
           {
             foreignKeyName: "work_schedule_entries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_shift_types: {
+        Row: {
+          code: string
+          color: string
+          created_at: string
+          end_time: string | null
+          ends_next_day: boolean
+          id: string
+          is_off: boolean
+          name: string
+          sort_order: number
+          start_time: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          code: string
+          color: string
+          created_at?: string
+          end_time?: string | null
+          ends_next_day?: boolean
+          id?: string
+          is_off?: boolean
+          name: string
+          sort_order?: number
+          start_time?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          code?: string
+          color?: string
+          created_at?: string
+          end_time?: string | null
+          ends_next_day?: boolean
+          id?: string
+          is_off?: boolean
+          name?: string
+          sort_order?: number
+          start_time?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_shift_types_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -737,6 +797,14 @@ export type Database = {
           task_count: number
           updated_at: string
         }[]
+      }
+      replace_and_delete_work_shift_type: {
+        Args: {
+          p_deleted_shift_type_id: string
+          p_replacement_shift_type_id: string
+          p_workspace_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
