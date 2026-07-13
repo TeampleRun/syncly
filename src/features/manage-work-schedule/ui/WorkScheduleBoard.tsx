@@ -1,7 +1,8 @@
 'use client';
 
-// 수정 가능한 요일별 근무 일정표, 근무 설정, 요일별 요약을 렌더링합니다.
+// 근무표, 근무유형 설정, 삭제 대체 선택 UI를 렌더링하고 서버 액션 저장을 연결하는 핵심 화면입니다.
 import { useState } from 'react';
+import { toast } from 'sonner';
 import {
   countSchedulesByWeekday,
   getWorkMembersByWeekday,
@@ -9,41 +10,61 @@ import {
   type WorkScheduleConfig,
   type WorkScheduleEntry,
 } from '@/entities/work-schedule';
+import {
+  createWorkShiftType,
+  reorderWorkShiftTypes,
+  replaceAndDeleteWorkShiftType,
+  saveWorkScheduleEntry,
+  updateWorkShiftType,
+} from '@/entities/work-schedule/api/work-schedule-actions';
 import type { WorkspaceMember } from '@/entities/workspace-member';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog';
 import { useWorkScheduleState } from '../model/use-work-schedule-state';
 import { WorkScheduleCell } from './WorkScheduleCell';
 import { WorkShiftSettingsPanel } from './WorkShiftSettingsPanel';
 import { WorkShiftLegend } from './WorkShiftLegend';
 
 interface WorkScheduleBoardProps {
+  workspaceId: string;
   members: WorkspaceMember[];
   config: WorkScheduleConfig;
   initialSchedule: WorkScheduleEntry[];
+  weekStartDate: string;
 }
 
-export function WorkScheduleBoard({ members, config, initialSchedule }: WorkScheduleBoardProps) {
+export function WorkScheduleBoard({
+  workspaceId,
+  members,
+  config,
+  initialSchedule,
+  weekStartDate,
+}: WorkScheduleBoardProps) {
   const [scheduleConfig, setScheduleConfig] = useState(config);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [shiftToDeleteId, setShiftToDeleteId] = useState<string | null>(null);
+  const [replacementShiftId, setReplacementShiftId] = useState('');
   const { schedule, cycleCell, replaceShiftOption } = useWorkScheduleState({
     initialSchedule,
     members,
     config: scheduleConfig,
+    weekStartDate,
   });
 
-  const handleAddShift = (): void => {
-    setScheduleConfig((current) => ({
-      shifts: [
-        ...current.shifts,
-        {
-          id: `shift-${crypto.randomUUID()}`,
-          name: '새 근무',
-          startTime: '09:00',
-          endTime: '18:00',
-          color: 'emerald',
-          isOff: false,
-        },
-      ],
-    }));
+  const handleAddShift = async (): Promise<void> => {
+    try {
+      const newShift = await createWorkShiftType(workspaceId);
+      setScheduleConfig((current) => ({ shifts: [...current.shifts, newShift] }));
+    } catch (error) {
+      console.error(error);
+      toast.error('근무 유형을 추가하지 못했습니다.');
+    }
   };
 
   const handleUpdateShift = (
@@ -55,17 +76,47 @@ export function WorkScheduleBoard({ members, config, initialSchedule }: WorkSche
     }));
   };
 
-  const handleDeleteShift = (shiftId: string): void => {
-    if (scheduleConfig.shifts.length <= 1) return;
+  const handleCommitShift = async (shiftId: string): Promise<void> => {
+    const shift = scheduleConfig.shifts.find((item) => item.id === shiftId);
+    if (!shift) return;
 
-    const nextShifts = scheduleConfig.shifts.filter((shift) => shift.id !== shiftId);
-    const fallbackShift = nextShifts.find((shift) => !shift.isOff) ?? nextShifts[0];
-
-    replaceShiftOption(shiftId, fallbackShift.id);
-    setScheduleConfig({ shifts: nextShifts });
+    try {
+      await updateWorkShiftType({ workspaceId, ...shift });
+    } catch (error) {
+      console.error(error);
+      toast.error('근무 유형 저장에 실패했습니다. 입력 값을 확인해주세요.');
+    }
   };
 
-  const handleMoveShift = (shiftId: string, direction: 'up' | 'down'): void => {
+  const handleDeleteShift = (shiftId: string): void => {
+    if (scheduleConfig.shifts.length <= 1) return;
+    const replacement = scheduleConfig.shifts.find((shift) => shift.id !== shiftId);
+    setReplacementShiftId(replacement?.id ?? '');
+    setShiftToDeleteId(shiftId);
+  };
+
+  const confirmDeleteShift = async (): Promise<void> => {
+    if (!shiftToDeleteId || !replacementShiftId) return;
+
+    try {
+      await replaceAndDeleteWorkShiftType({
+        workspaceId,
+        deletedShiftTypeId: shiftToDeleteId,
+        replacementShiftTypeId: replacementShiftId,
+      });
+      replaceShiftOption(shiftToDeleteId, replacementShiftId);
+      setScheduleConfig((current) => ({
+        shifts: current.shifts.filter((shift) => shift.id !== shiftToDeleteId),
+      }));
+      setShiftToDeleteId(null);
+    } catch (error) {
+      console.error(error);
+      toast.error('근무 유형을 삭제하지 못했습니다.');
+    }
+  };
+
+  const handleMoveShift = async (shiftId: string, direction: 'up' | 'down'): Promise<void> => {
+    let nextShiftIds: string[] | null = null;
     setScheduleConfig((current) => {
       const currentIndex = current.shifts.findIndex((shift) => shift.id === shiftId);
       const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
@@ -78,12 +129,43 @@ export function WorkScheduleBoard({ members, config, initialSchedule }: WorkSche
       const currentShift = nextShifts[currentIndex];
       nextShifts[currentIndex] = nextShifts[targetIndex];
       nextShifts[targetIndex] = currentShift;
+      nextShiftIds = nextShifts.map((shift) => shift.id);
 
       return {
         shifts: nextShifts,
       };
     });
+
+    if (!nextShiftIds) return;
+    try {
+      await reorderWorkShiftTypes({ workspaceId, shiftTypeIds: nextShiftIds });
+    } catch (error) {
+      console.error(error);
+      toast.error('근무 유형 순서 저장에 실패했습니다.');
+    }
   };
+
+  const handleCycleCell = async (
+    userId: string,
+    weekday: (typeof weekdays)[number]['key'],
+  ): Promise<void> => {
+    const nextEntry = cycleCell(userId, weekday);
+    if (!nextEntry) return;
+
+    try {
+      await saveWorkScheduleEntry({
+        workspaceId,
+        userId,
+        workDate: nextEntry.workDate,
+        shiftTypeId: nextEntry.shiftTypeId,
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error('근무 스케줄 저장에 실패했습니다.');
+    }
+  };
+
+  const shiftToDelete = scheduleConfig.shifts.find((shift) => shift.id === shiftToDeleteId);
 
   return (
     <section>
@@ -105,6 +187,7 @@ export function WorkScheduleBoard({ members, config, initialSchedule }: WorkSche
           onDeleteShift={handleDeleteShift}
           onMoveShift={handleMoveShift}
           onUpdateShift={handleUpdateShift}
+          onCommitShift={handleCommitShift}
         />
       ) : null}
 
@@ -137,9 +220,7 @@ export function WorkScheduleBoard({ members, config, initialSchedule }: WorkSche
                 const entry = schedule.find(
                   (item) => item.userId === member.userId && item.weekday === weekday.key,
                 );
-                const shift = scheduleConfig.shifts.find(
-                  (item) => item.id === entry?.shiftOptionId,
-                );
+                const shift = scheduleConfig.shifts.find((item) => item.id === entry?.shiftTypeId);
 
                 if (!entry || !shift) return null;
 
@@ -147,7 +228,7 @@ export function WorkScheduleBoard({ members, config, initialSchedule }: WorkSche
                   <WorkScheduleCell
                     key={`${member.userId}-${weekday.key}`}
                     shift={shift}
-                    onCycle={() => cycleCell(member.userId, weekday.key)}
+                    onCycle={() => void handleCycleCell(member.userId, weekday.key)}
                   />
                 );
               })}
@@ -204,6 +285,52 @@ export function WorkScheduleBoard({ members, config, initialSchedule }: WorkSche
           );
         })}
       </div>
+
+      <Dialog
+        open={Boolean(shiftToDelete)}
+        onOpenChange={(open) => !open && setShiftToDeleteId(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{shiftToDelete?.name} 근무 유형을 삭제할까요?</DialogTitle>
+            <DialogDescription>
+              이 유형이 배정된 일정은 아래에서 선택한 대체 근무 유형으로 일괄 변경됩니다.
+            </DialogDescription>
+          </DialogHeader>
+          <label className="grid gap-2 text-sm font-medium text-slate-700">
+            대체 근무 유형
+            <select
+              value={replacementShiftId}
+              onChange={(event) => setReplacementShiftId(event.target.value)}
+              className="h-10 rounded-lg border border-slate-200 bg-white px-3"
+            >
+              {scheduleConfig.shifts
+                .filter((shift) => shift.id !== shiftToDeleteId)
+                .map((shift) => (
+                  <option key={shift.id} value={shift.id}>
+                    {shift.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setShiftToDeleteId(null)}
+              className="h-9 rounded-lg border border-slate-200 px-3 font-semibold"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={() => void confirmDeleteShift()}
+              className="h-9 rounded-lg bg-rose-600 px-3 font-semibold text-white"
+            >
+              대체 후 삭제
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

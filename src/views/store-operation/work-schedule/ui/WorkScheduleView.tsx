@@ -1,22 +1,25 @@
 'use client';
 
-// 워크스페이스의 목업 매장 근무 일정 화면을 구성합니다.
-import { createInitialWorkSchedule, mockWorkScheduleConfig } from '@/entities/work-schedule';
-import { getMockWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
+// 서버에서 조회한 매장 운영 워크스페이스의 근무유형과 일정을 화면 구성 요소에 전달합니다.
+import type { WorkScheduleEntry, WorkShiftOption } from '@/entities/work-schedule';
+import type { WorkspaceMember } from '@/entities/workspace-member';
 import { WorkScheduleBoard } from '@/features/manage-work-schedule';
 
 interface WorkScheduleViewProps {
   workspaceId: string;
+  members: WorkspaceMember[];
+  shifts: WorkShiftOption[];
+  schedule: WorkScheduleEntry[];
+  weekStartDate: string;
 }
 
-export function WorkScheduleView({ workspaceId }: WorkScheduleViewProps) {
-  const members = getMockWorkspaceMembersByWorkspaceId(workspaceId);
-  const initialSchedule = createInitialWorkSchedule({
-    workspaceId,
-    members,
-    config: mockWorkScheduleConfig,
-  });
-
+export function WorkScheduleView({
+  workspaceId,
+  members,
+  shifts,
+  schedule,
+  weekStartDate,
+}: WorkScheduleViewProps) {
   return (
     <section>
       <div className="mb-6">
@@ -26,8 +29,10 @@ export function WorkScheduleView({ workspaceId }: WorkScheduleViewProps) {
 
       <WorkScheduleBoard
         members={members}
-        config={mockWorkScheduleConfig}
-        initialSchedule={initialSchedule}
+        workspaceId={workspaceId}
+        config={{ shifts }}
+        initialSchedule={schedule}
+        weekStartDate={weekStartDate}
       />
     </section>
   );
