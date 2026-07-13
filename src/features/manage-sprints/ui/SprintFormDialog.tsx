@@ -1,8 +1,6 @@
 'use client';
 
-// 스프린트 생성/수정 모달 — UI 전용 셸(저장 로직 미배선).
 // 톤은 TaskFormDialog와 동일(네이티브 <dialog>.showModal, rounded-2xl 패널, 슬레이트 입력).
-// TODO(후속): onSubmit을 스프린트 생성/수정 서버액션(useMutation)에 연결한다.
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { X } from 'lucide-react';

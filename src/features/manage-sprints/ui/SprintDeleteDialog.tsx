@@ -1,7 +1,5 @@
 'use client';
 
-// 스프린트 삭제 확인 모달 — UI 전용 셸(삭제 로직 미배선).
-// TODO(후속): onConfirm을 스프린트 삭제 서버액션(useMutation)에 연결한다.
 import { useEffect, useRef } from 'react';
 
 interface SprintDeleteDialogProps {
