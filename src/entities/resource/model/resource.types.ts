@@ -6,6 +6,7 @@ export type ResourceLinkProvider = 'link' | 'notion' | 'figma' | 'github';
 export interface ResourceItem {
   id: string;
   workspaceId: string;
+  uploadedById?: string | null;
   title: string;
   description: string;
   resourceType: ResourceType;
@@ -28,4 +29,11 @@ export interface ResourceFormValues {
 
 export interface ResourceLibraryData {
   resources: ResourceItem[];
+  viewer: ResourceViewer | null;
+}
+
+// 자료 수정·삭제 메뉴를 현재 로그인한 사용자의 업로드 권한에 맞춰 노출한다.
+export interface ResourceViewer {
+  userId: string;
+  role: 'owner' | 'member';
 }

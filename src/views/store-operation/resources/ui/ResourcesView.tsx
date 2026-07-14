@@ -5,6 +5,7 @@ import { Link, Upload } from 'lucide-react';
 import type { ResourceLibraryData } from '@/entities/resource';
 import {
   ResourceAddDialog,
+  ResourceEditDialog,
   ResourceList,
   useResourceLibraryState,
 } from '@/features/manage-resources';
@@ -23,6 +24,12 @@ export function ResourcesView({ workspaceId, initialData }: ResourcesViewProps) 
     closeDialog,
     addResource,
     openFile,
+    editingResource,
+    openEditDialog,
+    closeEditDialog,
+    updateResource,
+    deleteResource,
+    viewer,
     isSaving,
   } = useResourceLibraryState({ initialData, workspaceId });
 
@@ -51,7 +58,14 @@ export function ResourcesView({ workspaceId, initialData }: ResourcesViewProps) 
       </div>
 
       <div className="max-w-[790px]">
-        <ResourceList resources={resources} onOpenFile={(resource) => void openFile(resource)} />
+        <ResourceList
+          resources={resources}
+          viewer={viewer}
+          isSaving={isSaving}
+          onOpenFile={(resource) => void openFile(resource)}
+          onEditResource={openEditDialog}
+          onDeleteResource={(resourceId) => void deleteResource(resourceId)}
+        />
       </div>
 
       <ResourceAddDialog
@@ -62,6 +76,15 @@ export function ResourcesView({ workspaceId, initialData }: ResourcesViewProps) 
         onClose={closeDialog}
         onSubmit={addResource}
       />
+      {editingResource ? (
+        <ResourceEditDialog
+          key={editingResource.id}
+          resource={editingResource}
+          isSaving={isSaving}
+          onClose={closeEditDialog}
+          onSubmit={updateResource}
+        />
+      ) : null}
     </section>
   );
 }

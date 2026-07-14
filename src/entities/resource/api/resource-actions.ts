@@ -20,7 +20,13 @@ const externalUrlSchema = z
     message: 'http 또는 https 링크만 저장할 수 있습니다.',
   });
 
-type WorkspaceMember = { user_id: string };
+type WorkspaceMember = { user_id: string; role: 'owner' | 'member' };
+type EditableResource = {
+  id: string;
+  uploaded_by: string | null;
+  resource_type: 'file' | 'link';
+  storage_path: string | null;
+};
 
 export type ResourceActionResult<T> = { ok: true; data: T } | { ok: false; message: string };
 
@@ -63,7 +69,7 @@ async function getCurrentWorkspaceMember(workspaceId: string): Promise<{
   const currentUserId = await getCurrentUserId();
   const { data, error } = await supabase
     .from('workspace_members')
-    .select('user_id')
+    .select('user_id, role')
     .eq('workspace_id', workspaceId)
     .eq('user_id', currentUserId)
     .maybeSingle();
@@ -76,6 +82,34 @@ async function getCurrentWorkspaceMember(workspaceId: string): Promise<{
   if (!data) throwResourceActionError('워크스페이스 멤버만 자료를 관리할 수 있습니다.');
 
   return { supabase, member: data };
+}
+
+async function getEditableResource(input: { workspaceId: string; resourceId: string }): Promise<{
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>;
+  resource: EditableResource;
+}> {
+  const { supabase, member } = await getCurrentWorkspaceMember(input.workspaceId);
+  const { data: resource, error } = await supabase
+    .from('resources')
+    .select('id, uploaded_by, resource_type, storage_path')
+    .eq('id', input.resourceId)
+    .eq('workspace_id', input.workspaceId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[resource action] 자료 조회 실패:', error);
+    throwResourceActionError('자료 정보를 확인하지 못했습니다.');
+  }
+
+  if (!resource) throwResourceActionError('자료를 찾을 수 없습니다.');
+
+  if (member.role !== 'owner' && resource.uploaded_by !== member.user_id) {
+    throwResourceActionError(
+      '업로더 또는 워크스페이스 소유자만 자료를 수정하거나 삭제할 수 있습니다.',
+    );
+  }
+
+  return { supabase, resource };
 }
 
 export async function createLinkResource(input: {
@@ -216,5 +250,75 @@ export async function getResourceDownloadUrl(input: {
     return { ok: true, data: { url: data.signedUrl } };
   } catch (error) {
     return toActionFailure(error, '파일 다운로드 링크를 만들지 못했습니다.');
+  }
+}
+
+export async function updateResource(input: {
+  workspaceId: string;
+  resourceId: string;
+  title: string;
+  description: string;
+  url?: string;
+}): Promise<ResourceActionResult<void>> {
+  try {
+    const value = z
+      .object({ workspaceId: uuidSchema, resourceId: uuidSchema, url: z.string().optional() })
+      .merge(resourceContentSchema)
+      .parse(input);
+    const { supabase, resource } = await getEditableResource(value);
+    const updateData = {
+      title: value.title,
+      description: value.description || null,
+      ...(resource.resource_type === 'link' ? { url: externalUrlSchema.parse(value.url) } : {}),
+    };
+    const { error } = await supabase
+      .from('resources')
+      .update(updateData)
+      .eq('id', value.resourceId)
+      .eq('workspace_id', value.workspaceId);
+
+    if (error) {
+      console.error('[resource action] 자료 수정 실패:', error);
+      throwResourceActionError('자료 수정에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+
+    revalidateResourcePages(value.workspaceId);
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionFailure(error, '자료 수정에 실패했습니다. 입력값을 확인해주세요.');
+  }
+}
+
+export async function deleteResource(input: {
+  workspaceId: string;
+  resourceId: string;
+}): Promise<ResourceActionResult<void>> {
+  try {
+    const value = z.object({ workspaceId: uuidSchema, resourceId: uuidSchema }).parse(input);
+    const { supabase, resource } = await getEditableResource(value);
+    const { error } = await supabase
+      .from('resources')
+      .delete()
+      .eq('id', value.resourceId)
+      .eq('workspace_id', value.workspaceId);
+
+    if (error) {
+      console.error('[resource action] 자료 삭제 실패:', error);
+      throwResourceActionError('자료 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+
+    // DB 삭제에 성공한 자료만 Storage에서 지운다. Storage 삭제가 실패해도 화면에 깨진 항목은 남기지 않는다.
+    if (resource.storage_path) {
+      const { error: removeError } = await supabase.storage
+        .from(RESOURCE_STORAGE_BUCKET)
+        .remove([resource.storage_path]);
+
+      if (removeError) console.error('[resource action] 파일 객체 삭제 실패:', removeError);
+    }
+
+    revalidateResourcePages(value.workspaceId);
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return toActionFailure(error, '자료 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
   }
 }

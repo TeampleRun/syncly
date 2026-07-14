@@ -53,4 +53,14 @@ using (
       else null
     end
   )
+  and (
+    owner_id = auth.uid()
+    or private.is_workspace_owner(
+      case
+        when (storage.foldername(name))[1] ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+          then (storage.foldername(name))[1]::uuid
+        else null
+      end
+    )
+  )
 );

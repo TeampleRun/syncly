@@ -1,13 +1,18 @@
 'use client';
 
 // 자료실의 파일과 링크 자료를 카드 목록으로 렌더링합니다.
-import { Archive, ChevronRight, GitBranch, Link } from 'lucide-react';
-import type { ResourceItem } from '@/entities/resource';
+import { Archive, ChevronRight, GitBranch, Link, MoreHorizontal } from 'lucide-react';
+import { useState } from 'react';
+import type { ResourceItem, ResourceViewer } from '@/entities/resource';
 import { cn } from '@/shared/lib/utils';
 
 interface ResourceListProps {
   resources: ResourceItem[];
   onOpenFile: (resource: ResourceItem) => void;
+  onEditResource: (resourceId: string) => void;
+  onDeleteResource: (resourceId: string) => void;
+  viewer: ResourceViewer | null;
+  isSaving: boolean;
 }
 
 function getResourceIcon(resource: ResourceItem) {
@@ -31,12 +36,24 @@ function openResource(resource: ResourceItem, onOpenFile: (resource: ResourceIte
   onOpenFile(resource);
 }
 
-export function ResourceList({ resources, onOpenFile }: ResourceListProps) {
+export function ResourceList({
+  resources,
+  onOpenFile,
+  onEditResource,
+  onDeleteResource,
+  viewer,
+  isSaving,
+}: ResourceListProps) {
+  const [openMenuResourceId, setOpenMenuResourceId] = useState<string | null>(null);
+
   return (
     <div className="space-y-4">
       {resources.map((resource) => {
         const Icon = getResourceIcon(resource);
         const typeLabel = resource.resourceType === 'file' ? '파일' : '링크';
+        const isMenuOpen = openMenuResourceId === resource.id;
+        const canManage =
+          viewer?.role === 'owner' || (viewer?.userId && viewer.userId === resource.uploadedById);
 
         return (
           <article
@@ -74,14 +91,54 @@ export function ResourceList({ resources, onOpenFile }: ResourceListProps) {
               </p>
             </div>
 
-            <button
-              type="button"
-              aria-label={`${resource.title} 열기`}
-              onClick={() => openResource(resource, onOpenFile)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-indigo-400 hover:bg-indigo-50 hover:text-[var(--color-brand)]"
-            >
-              <ChevronRight className="h-5 w-5" aria-hidden="true" />
-            </button>
+            <div className="relative flex shrink-0 items-center gap-1">
+              {canManage ? (
+                <button
+                  type="button"
+                  aria-label={`${resource.title} 메뉴 열기`}
+                  aria-expanded={isMenuOpen}
+                  onClick={() => setOpenMenuResourceId(isMenuOpen ? null : resource.id)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                >
+                  <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+                </button>
+              ) : null}
+              <button
+                type="button"
+                aria-label={`${resource.title} 열기`}
+                onClick={() => openResource(resource, onOpenFile)}
+                className="flex h-10 w-10 items-center justify-center rounded-full text-indigo-400 hover:bg-indigo-50 hover:text-[var(--color-brand)]"
+              >
+                <ChevronRight className="h-5 w-5" aria-hidden="true" />
+              </button>
+
+              {isMenuOpen ? (
+                <div className="absolute top-11 right-10 z-10 w-32 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 text-sm font-bold text-slate-700 shadow-lg">
+                  <button
+                    type="button"
+                    disabled={isSaving}
+                    onClick={() => {
+                      onEditResource(resource.id);
+                      setOpenMenuResourceId(null);
+                    }}
+                    className="block w-full px-4 py-2 text-left hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50"
+                  >
+                    수정
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSaving}
+                    onClick={() => {
+                      void onDeleteResource(resource.id);
+                      setOpenMenuResourceId(null);
+                    }}
+                    className="block w-full px-4 py-2 text-left text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                  >
+                    삭제
+                  </button>
+                </div>
+              ) : null}
+            </div>
           </article>
         );
       })}

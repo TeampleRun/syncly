@@ -2,6 +2,7 @@
 
 // 워크스페이스 범위의 자료 메타데이터와 업로더 이름을 함께 조회합니다.
 import { z } from 'zod';
+import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
 import type {
   ResourceItem,
@@ -34,15 +35,26 @@ function getFileName(storagePath: string | null): string | undefined {
 export async function getResourceLibrary(workspaceId: string): Promise<ResourceLibraryData> {
   const parsedWorkspaceId = workspaceIdSchema.parse(workspaceId);
   const supabase = await createSupabaseServerClient();
-  const { data: resources, error: resourceError } = await supabase
-    .from('resources')
-    .select(
-      'id, workspace_id, uploaded_by, title, description, resource_type, url, storage_path, created_at',
-    )
-    .eq('workspace_id', parsedWorkspaceId)
-    .order('created_at', { ascending: false });
+  const currentUserId = await getCurrentUserId();
+  const [{ data: resources, error: resourceError }, { data: membership, error: memberError }] =
+    await Promise.all([
+      supabase
+        .from('resources')
+        .select(
+          'id, workspace_id, uploaded_by, title, description, resource_type, url, storage_path, created_at',
+        )
+        .eq('workspace_id', parsedWorkspaceId)
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('workspace_members')
+        .select('user_id, role')
+        .eq('workspace_id', parsedWorkspaceId)
+        .eq('user_id', currentUserId)
+        .maybeSingle(),
+    ]);
 
   if (resourceError) throw new Error(`자료 조회에 실패했습니다: ${resourceError.message}`);
+  if (memberError) throw new Error(`현재 멤버 조회에 실패했습니다: ${memberError.message}`);
 
   const uploaderIds = [
     ...new Set(
@@ -63,6 +75,7 @@ export async function getResourceLibrary(workspaceId: string): Promise<ResourceL
     resources: (resources ?? []).map((resource): ResourceItem => ({
       id: resource.id,
       workspaceId: resource.workspace_id,
+      uploadedById: resource.uploaded_by,
       title: resource.title,
       description: resource.description ?? '',
       resourceType: resource.resource_type,
@@ -75,5 +88,11 @@ export async function getResourceLibrary(workspaceId: string): Promise<ResourceL
         : '탈퇴한 사용자',
       createdAt: resource.created_at.slice(0, 10),
     })),
+    viewer: membership
+      ? {
+          userId: membership.user_id,
+          role: membership.role,
+        }
+      : null,
   };
 }

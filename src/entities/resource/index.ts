@@ -5,6 +5,7 @@ export type {
   ResourceLibraryData,
   ResourceLinkProvider,
   ResourceType,
+  ResourceViewer,
 } from './model/resource.types';
 export { mockResources } from './model/mock-resources';
 export { getResourceLibrary } from './api/get-resource-library';

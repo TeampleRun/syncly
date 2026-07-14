@@ -6,7 +6,9 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   createLinkResource,
+  deleteResource,
   getResourceDownloadUrl,
+  updateResource,
   uploadFileResource,
 } from '@/entities/resource/api/resource-actions';
 import { getResourceLibrary } from '@/entities/resource/api/get-resource-library';
@@ -42,9 +44,12 @@ export function useResourceLibraryState({
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogResourceType, setDialogResourceType] = useState<ResourceType>('file');
+  const [editingResourceId, setEditingResourceId] = useState<string | null>(null);
   const createLinkMutation = useMutation({ mutationFn: createLinkResource });
   const uploadFileMutation = useMutation({ mutationFn: uploadFileResource });
   const downloadMutation = useMutation({ mutationFn: getResourceDownloadUrl });
+  const updateMutation = useMutation({ mutationFn: updateResource });
+  const deleteMutation = useMutation({ mutationFn: deleteResource });
 
   useEffect(() => {
     if (!error || (!isError && !isRefetchError)) {
@@ -126,12 +131,62 @@ export function useResourceLibraryState({
     }
   };
 
+  const updateExistingResource = async (values: {
+    title: string;
+    description: string;
+    url?: string;
+  }): Promise<boolean> => {
+    if (!editingResourceId) return false;
+
+    try {
+      const result = await updateMutation.mutateAsync({
+        workspaceId,
+        resourceId: editingResourceId,
+        title: values.title.trim(),
+        description: values.description.trim(),
+        url: values.url?.trim(),
+      });
+
+      if (!result.ok) {
+        toast.error(result.message);
+        return false;
+      }
+
+      await refetch();
+      setEditingResourceId(null);
+      return true;
+    } catch {
+      toast.error('자료 수정에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      return false;
+    }
+  };
+
+  const removeResource = async (resourceId: string): Promise<void> => {
+    try {
+      const result = await deleteMutation.mutateAsync({ workspaceId, resourceId });
+
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+
+      await refetch();
+    } catch {
+      toast.error('자료 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
+
   return {
     resources: data.resources,
     isDialogOpen,
     dialogResourceType,
+    editingResource: data.resources.find((resource) => resource.id === editingResourceId) ?? null,
     isLoading: isPending,
-    isSaving: createLinkMutation.isPending || uploadFileMutation.isPending,
+    isSaving:
+      createLinkMutation.isPending ||
+      uploadFileMutation.isPending ||
+      updateMutation.isPending ||
+      deleteMutation.isPending,
     openDialog: (nextResourceType: ResourceType) => {
       setDialogResourceType(nextResourceType);
       setIsDialogOpen(true);
@@ -139,5 +194,10 @@ export function useResourceLibraryState({
     closeDialog: () => setIsDialogOpen(false),
     addResource,
     openFile,
+    openEditDialog: setEditingResourceId,
+    closeEditDialog: () => setEditingResourceId(null),
+    updateResource: updateExistingResource,
+    deleteResource: removeResource,
+    viewer: data.viewer,
   };
 }
