@@ -6,13 +6,14 @@ import Link from 'next/link';
 import { ChevronRight, LogOut, Menu, Store } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import type { Workspace } from '@/entities/workspace';
-import { mockCurrentWorkspaceMember } from '@/entities/workspace-member';
+import type { WorkspaceMember } from '@/entities/workspace-member';
 import { cn } from '@/shared/lib/utils';
 import type { WorkspaceNavigationItem } from '../model/workspace-navigation';
 
 interface WorkspaceSidebarProps {
   workspace: Workspace;
   workspaceId: string;
+  currentMember: WorkspaceMember;
   isCollapsed: boolean;
   navigationItems: WorkspaceNavigationItem[];
   onToggleCollapsed: () => void;
@@ -21,6 +22,7 @@ interface WorkspaceSidebarProps {
 export function WorkspaceSidebar({
   workspace,
   workspaceId,
+  currentMember,
   isCollapsed,
   navigationItems,
   onToggleCollapsed,
@@ -117,14 +119,14 @@ export function WorkspaceSidebar({
       >
         <div className={cn('flex min-w-0 items-center', !isCollapsed && 'gap-3')}>
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-400 text-sm font-bold text-white">
-            {mockCurrentWorkspaceMember.avatarLabel}
+            {currentMember.avatarLabel}
           </span>
           <span className={cn('min-w-0', isCollapsed && 'sr-only')}>
             <span className="block truncate text-sm font-bold text-slate-950">
-              {mockCurrentWorkspaceMember.workspaceNickname}
+              {currentMember.workspaceNickname}
             </span>
             <span className="block text-xs text-slate-500">
-              {mockCurrentWorkspaceMember.role === 'owner' ? '매니저' : '멤버'}
+              {currentMember.role === 'owner' ? '매니저' : '멤버'}
             </span>
           </span>
         </div>
