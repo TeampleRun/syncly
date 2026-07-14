@@ -32,6 +32,7 @@ export function MemberManagementPanel({
     canInvite,
     isDuplicate,
     inviteByEmail,
+    isSendingInvite,
     isInviteEnabled,
     isTogglingInvite,
     toggleInviteEnabled,
@@ -51,6 +52,7 @@ export function MemberManagementPanel({
         canInvite={canInvite}
         isDuplicate={isDuplicate}
         onInviteByEmail={inviteByEmail}
+        isSendingInvite={isSendingInvite}
         inviteLink={inviteLink}
         isInviteEnabled={isInviteEnabled}
         isTogglingInvite={isTogglingInvite}

@@ -14,6 +14,7 @@ interface MemberInviteSectionProps {
   canInvite: boolean;
   isDuplicate: boolean;
   onInviteByEmail: () => void;
+  isSendingInvite: boolean;
   inviteLink: string;
   isInviteEnabled: boolean;
   isTogglingInvite: boolean;
@@ -34,6 +35,7 @@ export function MemberInviteSection({
   canInvite,
   isDuplicate,
   onInviteByEmail,
+  isSendingInvite,
   inviteLink,
   isInviteEnabled,
   isTogglingInvite,
@@ -110,7 +112,7 @@ export function MemberInviteSection({
             className="flex h-11 shrink-0 items-center gap-2 rounded-2xl bg-[var(--color-brand)] px-5 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <UserRoundPlus className="h-4 w-4" aria-hidden="true" />
-            초대
+            {isSendingInvite ? '보내는 중…' : '초대'}
           </button>
         </form>
       ) : (
@@ -176,11 +178,11 @@ export function MemberInviteSection({
 
       {inviteMode === 'email' ? (
         <p className="mt-3 text-sm text-slate-500">
-          아직 가입하지 않은 사용자는 가입 시 자동으로 연결됩니다.
+          입력한 이메일로 초대 링크를 보내드려요. 초대 링크가 활성화되어 있어야 발송됩니다.
         </p>
       ) : null}
       {inviteMode === 'email' && isDuplicate ? (
-        <p className="mt-1 text-sm font-medium text-rose-500">이미 초대된 이메일이에요.</p>
+        <p className="mt-1 text-sm font-medium text-rose-500">이미 참여 중인 멤버예요.</p>
       ) : null}
     </section>
   );
