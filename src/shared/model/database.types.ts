@@ -781,9 +781,16 @@ export type Database = {
           p_description?: string
           p_name: string
           p_purpose: Database["public"]["Enums"]["workspace_purpose"]
-          p_user_id: string
         }
         Returns: string
+      }
+      get_invite_preview: {
+        Args: { p_code: string }
+        Returns: {
+          member_count: number
+          name: string
+          workspace_id: string
+        }[]
       }
       get_my_workspaces: {
         Args: { p_user_id: string }
@@ -810,6 +817,10 @@ export type Database = {
           total_points: number
           workspace_id: string
         }[]
+      }
+      join_workspace_by_invite_code: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: string
       }
       replace_and_delete_work_shift_type: {
         Args: {

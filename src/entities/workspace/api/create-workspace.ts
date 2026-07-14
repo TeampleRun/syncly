@@ -3,7 +3,6 @@
 // 워크스페이스 생성 서버액션 — create_workspace RPC
 // (RPC가 workspaces + owner 멤버십 + purpose별 기본 모듈 + invite_code 생성을 한 트랜잭션으로 처리)
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
-import { DEV_USER_ID } from '@/shared/config/dev-user';
 import {
   createWorkspaceInputSchema,
   type CreateWorkspaceInput,
@@ -19,7 +18,6 @@ export async function createWorkspace(input: CreateWorkspaceInput): Promise<{ id
 
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.rpc('create_workspace', {
-    p_user_id: DEV_USER_ID,
     p_name: parsed.data.name,
     p_purpose: toDbPurpose(parsed.data.purpose),
     ...(parsed.data.description ? { p_description: parsed.data.description } : {}),
