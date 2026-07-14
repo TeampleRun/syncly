@@ -1,92 +1,203 @@
 'use client';
 
-// 자료실 목록과 파일/링크 추가 모달의 클라이언트 목업 상태를 관리합니다.
-import { useMemo, useState } from 'react';
-import type { ResourceFormValues, ResourceItem, ResourceType } from '@/entities/resource';
+// 자료실의 서버 목록, 링크·파일 저장, signed URL 다운로드를 TanStack Query 상태로 관리합니다.
+import { useEffect, useRef, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import {
+  createLinkResource,
+  deleteResource,
+  getResourceDownloadUrl,
+  updateResource,
+  uploadFileResource,
+} from '@/entities/resource/api/resource-actions';
+import { getResourceLibrary } from '@/entities/resource/api/get-resource-library';
+import { resourceLibraryQueryKey } from '@/entities/resource/model/resource-query';
+import type {
+  ResourceFormValues,
+  ResourceItem,
+  ResourceLibraryData,
+  ResourceType,
+} from '@/entities/resource';
 
 interface UseResourceLibraryStateParams {
-  initialResources: ResourceItem[];
+  initialData: ResourceLibraryData;
   workspaceId: string;
-  uploaderName: string;
-}
-
-function sortResources(resources: ResourceItem[]) {
-  return [...resources].sort((first, second) => second.createdAt.localeCompare(first.createdAt));
-}
-
-function createResourceId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `resource-${crypto.randomUUID()}`;
-  }
-
-  return `resource-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function createTodayLabel() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 export function useResourceLibraryState({
-  initialResources,
+  initialData,
   workspaceId,
-  uploaderName,
 }: UseResourceLibraryStateParams) {
-  const workspaceResources = useMemo(
-    () =>
-      sortResources(initialResources.filter((resource) => resource.workspaceId === workspaceId)),
-    [initialResources, workspaceId],
-  );
-  const [resourcesByWorkspaceId, setResourcesByWorkspaceId] = useState<
-    Record<string, ResourceItem[]>
-  >({});
+  const notifiedQueryError = useRef<Error | null>(null);
+  const {
+    data = initialData,
+    error,
+    isError,
+    isPending,
+    isRefetchError,
+    refetch,
+  } = useQuery({
+    queryKey: resourceLibraryQueryKey(workspaceId),
+    queryFn: () => getResourceLibrary(workspaceId),
+    initialData,
+  });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogResourceType, setDialogResourceType] = useState<ResourceType>('file');
-  const resources = resourcesByWorkspaceId[workspaceId] ?? workspaceResources;
+  const [editingResourceId, setEditingResourceId] = useState<string | null>(null);
+  const createLinkMutation = useMutation({ mutationFn: createLinkResource });
+  const uploadFileMutation = useMutation({ mutationFn: uploadFileResource });
+  const downloadMutation = useMutation({ mutationFn: getResourceDownloadUrl });
+  const updateMutation = useMutation({ mutationFn: updateResource });
+  const deleteMutation = useMutation({ mutationFn: deleteResource });
 
-  const addResource = (values: ResourceFormValues) => {
-    const title = values.title.trim() || values.fileName.trim() || values.url.trim();
+  useEffect(() => {
+    if (!error || (!isError && !isRefetchError)) {
+      notifiedQueryError.current = null;
+      return;
+    }
+
+    if (notifiedQueryError.current === error) return;
+
+    notifiedQueryError.current = error;
+    toast.error('자료 목록을 새로고침하지 못했습니다. 잠시 후 다시 시도해주세요.');
+  }, [error, isError, isRefetchError]);
+
+  const addResource = async (values: ResourceFormValues): Promise<boolean> => {
+    const title = values.title.trim() || values.file?.name.trim() || values.url.trim();
     const description = values.description.trim();
 
-    if (!title) {
-      return;
+    if (!title) return false;
+
+    try {
+      if (values.resourceType === 'file') {
+        if (!values.file) return false;
+
+        const formData = new FormData();
+        formData.set('workspaceId', workspaceId);
+        formData.set('file', values.file);
+        formData.set('title', title);
+        formData.set('description', description);
+        const result = await uploadFileMutation.mutateAsync(formData);
+
+        if (!result.ok) {
+          toast.error(result.message);
+          return false;
+        }
+      } else {
+        const result = await createLinkMutation.mutateAsync({
+          workspaceId,
+          title,
+          description,
+          url: values.url.trim(),
+        });
+
+        if (!result.ok) {
+          toast.error(result.message);
+          return false;
+        }
+      }
+
+      await refetch();
+      setIsDialogOpen(false);
+      return true;
+    } catch {
+      toast.error('자료 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      return false;
     }
+  };
 
-    if (values.resourceType === 'link' && !values.url.trim()) {
-      return;
+  const openFile = async (resource: ResourceItem): Promise<void> => {
+    const downloadWindow = window.open('', '_blank');
+
+    try {
+      const result = await downloadMutation.mutateAsync({ workspaceId, resourceId: resource.id });
+
+      if (!result.ok) {
+        downloadWindow?.close();
+        toast.error(result.message);
+        return;
+      }
+
+      if (downloadWindow) {
+        downloadWindow.opener = null;
+        downloadWindow.location.href = result.data.url;
+      } else {
+        window.location.assign(result.data.url);
+      }
+    } catch {
+      downloadWindow?.close();
+      toast.error('파일 다운로드 링크를 만들지 못했습니다. 잠시 후 다시 시도해주세요.');
     }
+  };
 
-    const nextResource: ResourceItem = {
-      id: createResourceId(),
-      workspaceId,
-      title,
-      description,
-      resourceType: values.resourceType,
-      linkProvider: values.resourceType === 'link' ? values.linkProvider : undefined,
-      url: values.resourceType === 'link' ? values.url.trim() : undefined,
-      fileName: values.resourceType === 'file' ? values.fileName.trim() : undefined,
-      uploadedBy: uploaderName,
-      createdAt: createTodayLabel(),
-    };
+  const updateExistingResource = async (values: {
+    title: string;
+    description: string;
+    url?: string;
+  }): Promise<boolean> => {
+    if (!editingResourceId) return false;
 
-    setResourcesByWorkspaceId((currentResourcesByWorkspaceId) => ({
-      ...currentResourcesByWorkspaceId,
-      [workspaceId]: sortResources([
-        nextResource,
-        ...(currentResourcesByWorkspaceId[workspaceId] ?? workspaceResources),
-      ]),
-    }));
-    setIsDialogOpen(false);
+    try {
+      const result = await updateMutation.mutateAsync({
+        workspaceId,
+        resourceId: editingResourceId,
+        title: values.title.trim(),
+        description: values.description.trim(),
+        url: values.url?.trim(),
+      });
+
+      if (!result.ok) {
+        toast.error(result.message);
+        return false;
+      }
+
+      await refetch();
+      setEditingResourceId(null);
+      return true;
+    } catch {
+      toast.error('자료 수정에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      return false;
+    }
+  };
+
+  const removeResource = async (resourceId: string): Promise<void> => {
+    try {
+      const result = await deleteMutation.mutateAsync({ workspaceId, resourceId });
+
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+
+      await refetch();
+    } catch {
+      toast.error('자료 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
   };
 
   return {
-    resources,
+    resources: data.resources,
     isDialogOpen,
     dialogResourceType,
+    editingResource: data.resources.find((resource) => resource.id === editingResourceId) ?? null,
+    isLoading: isPending,
+    isSaving:
+      createLinkMutation.isPending ||
+      uploadFileMutation.isPending ||
+      updateMutation.isPending ||
+      deleteMutation.isPending,
     openDialog: (nextResourceType: ResourceType) => {
       setDialogResourceType(nextResourceType);
       setIsDialogOpen(true);
     },
     closeDialog: () => setIsDialogOpen(false),
     addResource,
+    openFile,
+    openEditDialog: setEditingResourceId,
+    closeEditDialog: () => setEditingResourceId(null),
+    updateResource: updateExistingResource,
+    deleteResource: removeResource,
+    viewer: data.viewer,
   };
 }
