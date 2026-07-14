@@ -7,6 +7,10 @@ export interface Workspace {
   purpose: WorkspacePurpose;
   // 설정 페이지에서 편집하는 워크스페이스 소개 문구입니다. (선택 값)
   description?: string;
+  // 초대 링크 구성에 사용하는 초대 코드입니다. 생성 시 발급되며 없을 수 있습니다.
+  inviteCode?: string | null;
+  // 초대 링크 활성화 여부입니다. false면 코드가 있어도 참여가 거부됩니다.
+  inviteEnabled?: boolean;
 }
 
 // get_my_workspaces RPC 반환 형태 (내 워크스페이스 목록)

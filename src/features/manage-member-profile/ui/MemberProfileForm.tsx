@@ -1,32 +1,49 @@
 'use client';
 
 // 프로필 탭 — 현재 사용자의 워크스페이스 닉네임을 수정한다.
-// 초기 닉네임은 서버(RSC)에서 주입받고, 저장은 백엔드 연동 전까지 로컬 상태를 확정하는 목업으로 동작한다.
+// 초기 닉네임은 서버(RSC)에서 주입받고, 저장은 updateMyNickname 서버액션을 호출한다.
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { updateMyNickname } from '@/entities/workspace-member';
 
 interface MemberProfileFormProps {
+  workspaceId: string;
   initialNickname: string;
 }
 
-export function MemberProfileForm({ initialNickname }: MemberProfileFormProps) {
+export function MemberProfileForm({ workspaceId, initialNickname }: MemberProfileFormProps) {
   const [committedNickname, setCommittedNickname] = useState(initialNickname);
   const [nickname, setNickname] = useState(initialNickname);
   const [isSaved, setIsSaved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isDirty = nickname !== committedNickname;
-  const canSubmit = nickname.trim().length > 0 && isDirty;
+  const canSubmit = nickname.trim().length > 0 && isDirty && !isSubmitting;
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canSubmit) {
       return;
     }
 
-    // TODO: 백엔드 연동 시 닉네임 저장 API 호출로 교체한다.
     const nextNickname = nickname.trim();
-    setNickname(nextNickname);
-    setCommittedNickname(nextNickname);
-    setIsSaved(true);
+
+    setIsSubmitting(true);
+    try {
+      await updateMyNickname({ workspaceId, nickname: nextNickname });
+      setNickname(nextNickname);
+      setCommittedNickname(nextNickname);
+      setIsSaved(true);
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : '닉네임 저장에 실패했습니다. 잠시 후 다시 시도해주세요.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -56,7 +73,7 @@ export function MemberProfileForm({ initialNickname }: MemberProfileFormProps) {
             disabled={!canSubmit}
             className="h-10 rounded-2xl bg-[var(--color-brand)] px-5 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            저장
+            {isSubmitting ? '저장 중…' : '저장'}
           </button>
           {isSaved && !isDirty ? (
             <span className="text-sm font-medium text-emerald-600">저장되었습니다.</span>

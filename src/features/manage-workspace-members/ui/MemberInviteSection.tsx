@@ -14,7 +14,12 @@ interface MemberInviteSectionProps {
   canInvite: boolean;
   isDuplicate: boolean;
   onInviteByEmail: () => void;
+  isSendingInvite: boolean;
   inviteLink: string;
+  isInviteEnabled: boolean;
+  isTogglingInvite: boolean;
+  onToggleInviteEnabled: () => void;
+  canManageInvite: boolean;
 }
 
 const INVITE_MODES: { key: InviteMode; label: string }[] = [
@@ -30,11 +35,22 @@ export function MemberInviteSection({
   canInvite,
   isDuplicate,
   onInviteByEmail,
+  isSendingInvite,
   inviteLink,
+  isInviteEnabled,
+  isTogglingInvite,
+  onToggleInviteEnabled,
+  canManageInvite,
 }: MemberInviteSectionProps) {
   const [isCopied, setIsCopied] = useState(false);
 
+  const canCopy = isInviteEnabled && inviteLink.length > 0;
+
   const handleCopy = async () => {
+    if (!canCopy) {
+      return;
+    }
+
     try {
       await navigator.clipboard.writeText(inviteLink);
       setIsCopied(true);
@@ -96,37 +112,77 @@ export function MemberInviteSection({
             className="flex h-11 shrink-0 items-center gap-2 rounded-2xl bg-[var(--color-brand)] px-5 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <UserRoundPlus className="h-4 w-4" aria-hidden="true" />
-            초대
+            {isSendingInvite ? '보내는 중…' : '초대'}
           </button>
         </form>
       ) : (
-        <div className="mt-4 flex items-center gap-3">
-          <div className="flex h-11 flex-1 items-center gap-2 rounded-2xl border border-slate-200 px-4 text-sm text-slate-600">
-            <Link2 className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
-            <span className="truncate">{inviteLink}</span>
+        <>
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-slate-900">초대 링크 활성화</p>
+              <p className="text-sm text-slate-500">
+                {canManageInvite
+                  ? '켜면 링크를 아는 사람이 워크스페이스에 참여할 수 있어요.'
+                  : '초대 링크는 워크스페이스 소유자만 변경할 수 있어요.'}
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isInviteEnabled}
+              onClick={onToggleInviteEnabled}
+              disabled={isTogglingInvite || !canManageInvite}
+              className={cn(
+                'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                isInviteEnabled ? 'bg-[var(--color-brand)]' : 'bg-slate-200',
+              )}
+            >
+              <span className="sr-only">초대 링크 활성화</span>
+              <span
+                className={cn(
+                  'inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform',
+                  isInviteEnabled ? 'translate-x-5' : 'translate-x-0.5',
+                )}
+              />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="flex h-11 shrink-0 items-center gap-2 rounded-2xl bg-[var(--color-brand)] px-5 text-sm font-bold text-white hover:bg-indigo-500"
-          >
-            {isCopied ? (
-              <Check className="h-4 w-4" aria-hidden="true" />
-            ) : (
-              <Copy className="h-4 w-4" aria-hidden="true" />
-            )}
-            {isCopied ? '복사됨' : '복사'}
-          </button>
-        </div>
+
+          <div className="mt-4 flex items-center gap-3">
+            <div
+              className={cn(
+                'flex h-11 flex-1 items-center gap-2 rounded-2xl border px-4 text-sm',
+                canCopy ? 'border-slate-200 text-slate-600' : 'border-slate-100 text-slate-300',
+              )}
+            >
+              <Link2 className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+              <span className="truncate">
+                {isInviteEnabled ? inviteLink : '초대 링크가 비활성화되어 있어요.'}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleCopy}
+              disabled={!canCopy}
+              className="flex h-11 shrink-0 items-center gap-2 rounded-2xl bg-[var(--color-brand)] px-5 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isCopied ? (
+                <Check className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Copy className="h-4 w-4" aria-hidden="true" />
+              )}
+              {isCopied ? '복사됨' : '복사'}
+            </button>
+          </div>
+        </>
       )}
 
-      <p className="mt-3 text-sm text-slate-500">
-        {inviteMode === 'email'
-          ? '아직 가입하지 않은 사용자는 가입 시 자동으로 연결됩니다.'
-          : '링크를 아는 사람은 누구나 이 워크스페이스에 참여할 수 있어요.'}
-      </p>
+      {inviteMode === 'email' ? (
+        <p className="mt-3 text-sm text-slate-500">
+          입력한 이메일로 초대 링크를 보내드려요. 초대 링크가 활성화되어 있어야 발송됩니다.
+        </p>
+      ) : null}
       {inviteMode === 'email' && isDuplicate ? (
-        <p className="mt-1 text-sm font-medium text-rose-500">이미 초대된 이메일이에요.</p>
+        <p className="mt-1 text-sm font-medium text-rose-500">이미 참여 중인 멤버예요.</p>
       ) : null}
     </section>
   );

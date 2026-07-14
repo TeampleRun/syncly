@@ -776,20 +776,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_work_shift_type_and_ensure_weekly_entries: {
-        Args: { p_week_start_date: string; p_workspace_id: string }
-        Returns: {
-          code: string
-          color: string
-          default_shift_type_id: string
-          end_time: string
-          ends_next_day: boolean
-          id: string
-          is_off: boolean
-          name: string
-          start_time: string
-        }[]
-      }
       create_workspace: {
         Args: {
           p_description?: string
@@ -833,7 +819,7 @@ export type Database = {
         }[]
       }
       join_workspace_by_invite_code: {
-        Args: { p_code: string; p_user_id: string }
+        Args: { p_code: string }
         Returns: string
       }
       replace_and_delete_work_shift_type: {

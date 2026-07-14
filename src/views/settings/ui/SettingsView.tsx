@@ -29,6 +29,9 @@ export function SettingsView({
   currentUserId,
   currentNickname,
 }: SettingsViewProps) {
+  // 워크스페이스 정보 수정은 RLS상 소유자만 가능하므로, 현재 사용자의 역할로 편집 권한을 판단한다.
+  const isOwner = members.find((member) => member.userId === currentUserId)?.role === 'owner';
+
   return (
     <div className={`${plusJakartaSans.className} mx-auto max-w-3xl`}>
       <h1 className="text-2xl font-bold text-slate-950">설정</h1>
@@ -36,15 +39,21 @@ export function SettingsView({
       <SettingsTabs activeTab={activeTab} />
 
       <div className="mt-6">
-        {activeTab === 'workspace' && <WorkspaceInfoForm workspace={workspace} />}
+        {activeTab === 'workspace' && (
+          <WorkspaceInfoForm workspace={workspace} canEdit={isOwner} />
+        )}
         {activeTab === 'members' && (
           <MemberManagementPanel
             workspaceId={workspaceId}
             initialMembers={members}
             currentUserId={currentUserId}
+            inviteCode={workspace.inviteCode ?? null}
+            inviteEnabled={workspace.inviteEnabled ?? false}
           />
         )}
-        {activeTab === 'profile' && <MemberProfileForm initialNickname={currentNickname} />}
+        {activeTab === 'profile' && (
+          <MemberProfileForm workspaceId={workspaceId} initialNickname={currentNickname} />
+        )}
       </div>
     </div>
   );

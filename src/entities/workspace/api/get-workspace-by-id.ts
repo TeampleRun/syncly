@@ -8,7 +8,7 @@ export const getWorkspaceById = cache(async (workspaceId: string): Promise<Works
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from('workspaces')
-    .select('id, name, description, purpose')
+    .select('id, name, description, purpose, invite_code, invite_enabled')
     .eq('id', workspaceId)
     .maybeSingle();
 
@@ -25,5 +25,7 @@ export const getWorkspaceById = cache(async (workspaceId: string): Promise<Works
     name: data.name,
     description: data.description ?? undefined,
     purpose: toUiPurpose(data.purpose),
+    inviteCode: data.invite_code,
+    inviteEnabled: data.invite_enabled,
   };
 });
