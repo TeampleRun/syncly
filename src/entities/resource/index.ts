@@ -2,7 +2,10 @@
 export type {
   ResourceFormValues,
   ResourceItem,
+  ResourceLibraryData,
   ResourceLinkProvider,
   ResourceType,
 } from './model/resource.types';
 export { mockResources } from './model/mock-resources';
+export { getResourceLibrary } from './api/get-resource-library';
+export { resourceLibraryQueryKey } from './model/resource-query';

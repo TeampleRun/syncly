@@ -11,6 +11,7 @@ export interface ResourceItem {
   resourceType: ResourceType;
   linkProvider?: ResourceLinkProvider;
   url?: string;
+  storagePath?: string;
   fileName?: string;
   uploadedBy: string;
   createdAt: string;
@@ -21,6 +22,10 @@ export interface ResourceFormValues {
   title: string;
   description: string;
   url: string;
-  fileName: string;
+  file: File | null;
   linkProvider: ResourceLinkProvider;
+}
+
+export interface ResourceLibraryData {
+  resources: ResourceItem[];
 }

@@ -2,8 +2,7 @@
 
 // 매장 운영 워크스페이스의 자료실 화면을 공통 자료실 기능으로 조합합니다.
 import { Link, Upload } from 'lucide-react';
-import { mockResources } from '@/entities/resource';
-import { mockCurrentWorkspaceMember } from '@/entities/workspace-member';
+import type { ResourceLibraryData } from '@/entities/resource';
 import {
   ResourceAddDialog,
   ResourceList,
@@ -12,15 +11,20 @@ import {
 
 interface ResourcesViewProps {
   workspaceId: string;
+  initialData: ResourceLibraryData;
 }
 
-export function ResourcesView({ workspaceId }: ResourcesViewProps) {
-  const { resources, isDialogOpen, dialogResourceType, openDialog, closeDialog, addResource } =
-    useResourceLibraryState({
-      initialResources: mockResources,
-      workspaceId,
-      uploaderName: mockCurrentWorkspaceMember.workspaceNickname,
-    });
+export function ResourcesView({ workspaceId, initialData }: ResourcesViewProps) {
+  const {
+    resources,
+    isDialogOpen,
+    dialogResourceType,
+    openDialog,
+    closeDialog,
+    addResource,
+    openFile,
+    isSaving,
+  } = useResourceLibraryState({ initialData, workspaceId });
 
   return (
     <section>
@@ -47,13 +51,14 @@ export function ResourcesView({ workspaceId }: ResourcesViewProps) {
       </div>
 
       <div className="max-w-[790px]">
-        <ResourceList resources={resources} />
+        <ResourceList resources={resources} onOpenFile={(resource) => void openFile(resource)} />
       </div>
 
       <ResourceAddDialog
         key={dialogResourceType}
         isOpen={isDialogOpen}
         initialResourceType={dialogResourceType}
+        isSaving={isSaving}
         onClose={closeDialog}
         onSubmit={addResource}
       />

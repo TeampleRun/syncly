@@ -1,10 +1,17 @@
+'use client';
+
 // 최근 자료 위젯 — 타일 크기에 따라 밀도가 다른 변형을 렌더
 //  · sm: 가장 최근 자료 1건(제목만)
 //  · md: 리스트(제목 + 업로더)
 //  · lg: 총 개수 + 리스트(제목 + 설명 미리보기 + 업로더)
 import { Archive, GitBranch, Link } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
-import { mockResources, type ResourceItem } from '@/entities/resource';
+import {
+  getResourceLibrary,
+  resourceLibraryQueryKey,
+  type ResourceItem,
+} from '@/entities/resource';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 import { cn } from '@/shared/lib/utils';
@@ -44,17 +51,22 @@ interface RecentResourcesProps {
 }
 
 export default function RecentResources({ workspaceId, size = 'md' }: RecentResourcesProps) {
-  // 작성일(내림차순) 정렬 — "최근" 자료를 위로. 원본 배열을 변형하지 않도록 복사 후 정렬한다.
-  const sortedResources = mockResources
-    .filter((resource) => resource.workspaceId === workspaceId)
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const { data, isError, isPending } = useQuery({
+    queryKey: resourceLibraryQueryKey(workspaceId),
+    queryFn: () => getResourceLibrary(workspaceId),
+  });
+  const sortedResources = data?.resources ?? [];
 
-  if (sortedResources.length === 0) {
+  if (isPending || isError || sortedResources.length === 0) {
     return (
       <WidgetCard>
         {header}
         <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
-          등록된 자료가 없습니다.
+          {isPending
+            ? '자료를 불러오는 중입니다.'
+            : isError
+              ? '자료를 불러오지 못했습니다.'
+              : '등록된 자료가 없습니다.'}
         </div>
       </WidgetCard>
     );

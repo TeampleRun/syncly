@@ -7,6 +7,7 @@ import { cn } from '@/shared/lib/utils';
 
 interface ResourceListProps {
   resources: ResourceItem[];
+  onOpenFile: (resource: ResourceItem) => void;
 }
 
 function getResourceIcon(resource: ResourceItem) {
@@ -21,24 +22,16 @@ function getResourceIcon(resource: ResourceItem) {
   return Link;
 }
 
-function openResource(resource: ResourceItem) {
+function openResource(resource: ResourceItem, onOpenFile: (resource: ResourceItem) => void) {
   if (resource.resourceType === 'link' && resource.url) {
     window.open(resource.url, '_blank', 'noopener,noreferrer');
     return;
   }
 
-  const fileContents = `${resource.title}\n\n${resource.description}`;
-  const file = new Blob([fileContents], { type: 'text/plain;charset=utf-8' });
-  const fileUrl = URL.createObjectURL(file);
-  const downloadLink = document.createElement('a');
-
-  downloadLink.href = fileUrl;
-  downloadLink.download = resource.fileName ?? `${resource.title}.txt`;
-  downloadLink.click();
-  URL.revokeObjectURL(fileUrl);
+  onOpenFile(resource);
 }
 
-export function ResourceList({ resources }: ResourceListProps) {
+export function ResourceList({ resources, onOpenFile }: ResourceListProps) {
   return (
     <div className="space-y-4">
       {resources.map((resource) => {
@@ -84,7 +77,7 @@ export function ResourceList({ resources }: ResourceListProps) {
             <button
               type="button"
               aria-label={`${resource.title} 열기`}
-              onClick={() => openResource(resource)}
+              onClick={() => openResource(resource, onOpenFile)}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-indigo-400 hover:bg-indigo-50 hover:text-[var(--color-brand)]"
             >
               <ChevronRight className="h-5 w-5" aria-hidden="true" />

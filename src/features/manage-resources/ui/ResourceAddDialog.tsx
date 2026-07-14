@@ -1,6 +1,6 @@
 'use client';
 
-// 자료실에 파일 목업 또는 외부 링크 목업을 추가하는 모달입니다.
+// 자료실에 실제 파일 또는 외부 링크를 추가하는 모달입니다.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { CloudUpload, GitBranch, Link, X } from 'lucide-react';
 import type { ResourceFormValues, ResourceLinkProvider, ResourceType } from '@/entities/resource';
@@ -9,8 +9,9 @@ import { cn } from '@/shared/lib/utils';
 interface ResourceAddDialogProps {
   isOpen: boolean;
   initialResourceType: ResourceType;
+  isSaving: boolean;
   onClose: () => void;
-  onSubmit: (values: ResourceFormValues) => void;
+  onSubmit: (values: ResourceFormValues) => Promise<boolean>;
 }
 
 const linkProviders: Array<{
@@ -27,6 +28,7 @@ const linkProviders: Array<{
 export function ResourceAddDialog({
   isOpen,
   initialResourceType,
+  isSaving,
   onClose,
   onSubmit,
 }: ResourceAddDialogProps) {
@@ -34,17 +36,17 @@ export function ResourceAddDialog({
   const [resourceType, setResourceType] = useState<ResourceType>(initialResourceType);
   const [linkProvider, setLinkProvider] = useState<ResourceLinkProvider>('link');
   const [url, setUrl] = useState('');
-  const [fileName, setFileName] = useState('');
+  const [file, setFile] = useState<File | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
-  const canSubmit = resourceType === 'file' ? fileName.trim().length > 0 : url.trim().length > 0;
+  const canSubmit = resourceType === 'file' ? Boolean(file) : url.trim().length > 0;
 
   const resetForm = useCallback(() => {
     setResourceType(initialResourceType);
     setLinkProvider('link');
     setUrl('');
-    setFileName('');
+    setFile(null);
     setTitle('');
     setDescription('');
   }, [initialResourceType]);
@@ -54,16 +56,17 @@ export function ResourceAddDialog({
     onClose();
   }, [onClose, resetForm]);
 
-  const submitResource = () => {
-    onSubmit({
+  const submitResource = async () => {
+    const isSaved = await onSubmit({
       resourceType,
       linkProvider,
       url,
-      fileName,
+      file,
       title,
       description,
     });
-    resetForm();
+
+    if (isSaved) resetForm();
   };
 
   const keepFocusInsideDialog = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -170,11 +173,11 @@ export function ResourceAddDialog({
               <input
                 type="file"
                 className="sr-only"
-                onChange={(event) => setFileName(event.target.files?.[0]?.name ?? '')}
+                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
               />
-              {fileName ? (
+              {file ? (
                 <span className="mt-2 max-w-full truncate text-xs font-bold text-[var(--color-brand)]">
-                  {fileName}
+                  {file.name}
                 </span>
               ) : null}
             </label>
@@ -239,11 +242,11 @@ export function ResourceAddDialog({
           </button>
           <button
             type="button"
-            disabled={!canSubmit}
-            onClick={submitResource}
+            disabled={!canSubmit || isSaving}
+            onClick={() => void submitResource()}
             className="h-10 rounded-2xl bg-[var(--color-brand)] px-4 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            저장
+            {isSaving ? '저장 중' : '저장'}
           </button>
         </div>
       </section>
