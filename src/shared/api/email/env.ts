@@ -2,7 +2,7 @@
 export function getEmailEnv() {
   const apiKey = process.env.RESEND_API_KEY;
   // 발신 주소는 Resend에서 인증한 도메인이어야 한다. 미설정 시 테스트용 온보딩 주소로 폴백한다.
-  const from = process.env.INVITE_EMAIL_FROM ?? 'Syncly <onboarding@resend.dev>';
+  const from = process.env.INVITE_EMAIL_FROM?.trim() || 'Syncly <onboarding@resend.dev>';
 
   if (!apiKey) {
     throw new Error(
