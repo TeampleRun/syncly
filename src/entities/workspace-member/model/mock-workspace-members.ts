@@ -120,6 +120,24 @@ export const mockWorkspaceMembers: WorkspaceMember[] = [
     status: 'invited',
   },
   {
+    workspaceId: 'team-workspace',
+    userId: 'user-4',
+    workspaceNickname: '최민준',
+    avatarLabel: '최',
+    email: 'minjun@example.com',
+    role: 'member',
+    status: 'joined',
+  },
+  {
+    workspaceId: 'team-workspace',
+    userId: 'user-5',
+    workspaceNickname: '정우진',
+    avatarLabel: '정',
+    email: 'woojin@example.com',
+    role: 'member',
+    status: 'joined',
+  },
+  {
     workspaceId: 'side-workspace',
     userId: 'user-1',
     workspaceNickname: '김민서',
@@ -148,6 +166,31 @@ export const mockWorkspaceMembers: WorkspaceMember[] = [
   },
 ];
 
-export function getMockWorkspaceMembersByWorkspaceId(workspaceId: string): WorkspaceMember[] {
-  return mockWorkspaceMembers.filter((member) => member.workspaceId === workspaceId);
+const TEAM_PROJECT_WORKSPACE_UUID = '00000000-0000-0000-0000-000000001001';
+const SIDE_PROJECT_WORKSPACE_UUID = '00000000-0000-0000-0000-000000001002';
+const STORE_OPERATION_WORKSPACE_UUID = '00000000-0000-0000-0000-000000001003';
+
+const workspaceMemberAliasById: Record<string, string> = {
+  [TEAM_PROJECT_WORKSPACE_UUID]: 'team-workspace',
+  [SIDE_PROJECT_WORKSPACE_UUID]: 'side-workspace',
+  [STORE_OPERATION_WORKSPACE_UUID]: 'store-workspace',
+};
+
+function resolveWorkspaceMemberKey(workspaceId: string, fallbackWorkspaceId?: string) {
+  return workspaceMemberAliasById[workspaceId] ?? workspaceId ?? fallbackWorkspaceId;
+}
+
+export function getMockWorkspaceMembersByWorkspaceId(
+  workspaceId: string,
+  fallbackWorkspaceId?: string,
+): WorkspaceMember[] {
+  const resolvedWorkspaceId = resolveWorkspaceMemberKey(workspaceId, fallbackWorkspaceId);
+
+  if (!mockWorkspaceMembers.some((member) => member.workspaceId === resolvedWorkspaceId)) {
+    return fallbackWorkspaceId
+      ? mockWorkspaceMembers.filter((member) => member.workspaceId === fallbackWorkspaceId)
+      : [];
+  }
+
+  return mockWorkspaceMembers.filter((member) => member.workspaceId === resolvedWorkspaceId);
 }
