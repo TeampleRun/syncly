@@ -19,7 +19,7 @@ export default async function WorkspaceHomePage({ params }: WorkspaceHomePagePro
     redirect(`/workspaces/${workspaceId}/dashboard`);
   }
   if (workspace.purpose === 'side-project') {
-    redirect(`/workspaces/${workspaceId}/sprint-board`);
+    redirect(`/workspaces/${workspaceId}/dashboard`);
   }
 
   redirect(`/workspaces/${workspaceId}/project-management`);
