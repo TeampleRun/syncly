@@ -2,7 +2,7 @@
 -- join_workspace_by_invite_code: 참여자를 RPC 인자가 아닌 인증 세션(auth.uid())으로 강제한다.
 --   기존 p_user_id 인자를 제거해 호출자가 임의의 사용자를 워크스페이스에 가입시키지 못하게 한다.
 -- 두 함수 모두 security definer + public 스키마이므로 기본 EXECUTE를 회수하고 필요한 롤에만 부여한다.
-begin;
+-- 트랜잭션은 마이그레이션 러너가 감싸므로 파일 내 begin/commit은 두지 않는다.
 
 -- 인자 시그니처가 바뀌므로(uuid 인자 제거) create or replace가 아닌 drop 후 재생성한다.
 drop function if exists public.join_workspace_by_invite_code(uuid, text);
@@ -80,5 +80,3 @@ grant execute on function public.join_workspace_by_invite_code(text) to authenti
 -- 초대 미리보기는 비로그인 사용자도 볼 수 있어야 하므로 anon/authenticated에만 명시적으로 부여한다.
 revoke all on function public.get_invite_preview(text) from public;
 grant execute on function public.get_invite_preview(text) to anon, authenticated;
-
-commit;
