@@ -3,9 +3,9 @@
 // 워크스페이스 페이지에서 공통으로 사용하는 좌측 사이드바입니다.
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight, LogOut, Menu, Store } from 'lucide-react';
+import { ChevronRight, LogOut, Menu } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import type { Workspace } from '@/entities/workspace';
+import { WORKSPACE_PURPOSE_META, type Workspace } from '@/entities/workspace';
 import type { WorkspaceMember } from '@/entities/workspace-member';
 import { cn } from '@/shared/lib/utils';
 import type { WorkspaceNavigationItem } from '../model/workspace-navigation';
@@ -28,6 +28,8 @@ export function WorkspaceSidebar({
   onToggleCollapsed,
 }: WorkspaceSidebarProps) {
   const pathname = usePathname();
+  const purposeMeta = WORKSPACE_PURPOSE_META[workspace.purpose];
+  const PurposeIcon = purposeMeta.icon;
 
   return (
     <aside
@@ -73,8 +75,11 @@ export function WorkspaceSidebar({
           )}
         >
           <span className={cn('flex min-w-0 items-center', !isCollapsed && 'gap-3')}>
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-400 text-white">
-              <Store className="h-4 w-4" aria-hidden="true" />
+            <span
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white"
+              style={{ backgroundImage: purposeMeta.gradient }}
+            >
+              <PurposeIcon className="h-4 w-4" aria-hidden="true" />
             </span>
             <span
               className={cn('truncate text-sm font-bold text-slate-950', isCollapsed && 'sr-only')}
