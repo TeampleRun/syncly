@@ -1,6 +1,8 @@
+'use client';
+
 import { createProgressChartSummary } from '@/entities/progress-chart';
-import { getMockTasksByWorkspaceId } from '@/entities/task';
-import { getMockWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
+import { useTasksByWorkspaceId } from '@/entities/task';
+import { useWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 
 const cardMeta: Record<
@@ -34,7 +36,7 @@ function SummaryCard({
   valueClassName,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   valueClassName: string;
 }) {
   return (
@@ -56,26 +58,30 @@ export default function WorkSummary({
   workspaceId: string;
   size?: WidgetSize;
 }) {
-  const tasks = getMockTasksByWorkspaceId(workspaceId, 'team-workspace');
-  const summary = createProgressChartSummary(tasks);
-  const members = getMockWorkspaceMembersByWorkspaceId(workspaceId, 'team-workspace');
+  const tasksQuery = useTasksByWorkspaceId(workspaceId);
+  const membersQuery = useWorkspaceMembersByWorkspaceId(workspaceId);
+  const summary = createProgressChartSummary(tasksQuery.data ?? []);
+  const taskSummaryValue =
+    tasksQuery.isPending || tasksQuery.isError ? '-' : undefined;
+  const memberCountValue =
+    membersQuery.isPending || membersQuery.isError ? '-' : undefined;
 
   const cards = [
     {
       key: 'total' as const,
-      value: summary.totalTaskCount,
+      value: taskSummaryValue ?? summary.totalTaskCount,
     },
     {
       key: 'done' as const,
-      value: summary.doneTaskCount,
+      value: taskSummaryValue ?? summary.doneTaskCount,
     },
     {
       key: 'in-progress' as const,
-      value: summary.inProgressTaskCount,
+      value: taskSummaryValue ?? summary.inProgressTaskCount,
     },
     {
       key: 'members' as const,
-      value: members.length,
+      value: memberCountValue ?? (membersQuery.data ?? []).length,
     },
   ];
 

@@ -38,6 +38,7 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
     index: number;
   } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isCreatingTaskRef = useRef(false);
   const tasks = tasksQuery.data ?? [];
   const columns = createProjectBoardColumns(tasks);
 
@@ -52,17 +53,23 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
   const createTask = async () => {
     const trimmedTitle = taskTitle.trim();
 
-    if (!trimmedTitle) {
+    if (!trimmedTitle || createTaskMutation.isPending || isCreatingTaskRef.current) {
       return;
     }
 
-    await createTaskMutation.mutateAsync(trimmedTitle);
-    setTaskTitle('');
-    setIsComposerOpen(false);
+    isCreatingTaskRef.current = true;
+
+    try {
+      await createTaskMutation.mutateAsync(trimmedTitle);
+      setTaskTitle('');
+      setIsComposerOpen(false);
+    } finally {
+      isCreatingTaskRef.current = false;
+    }
   };
 
   const handleComposerKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== 'Enter') {
+    if (event.key !== 'Enter' || event.repeat || event.nativeEvent.isComposing) {
       return;
     }
 
@@ -221,6 +228,7 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
               ref={inputRef}
               aria-label="업무 제목 입력"
               className="text-brand-ink placeholder:text-brand-muted min-w-0 flex-1 bg-transparent text-base outline-none"
+              disabled={createTaskMutation.isPending}
               placeholder="업무 제목 입력 후 Enter"
               value={taskTitle}
               onChange={(event) => setTaskTitle(event.target.value)}
@@ -229,10 +237,15 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
             <button
               type="button"
               onClick={() => {
+                if (createTaskMutation.isPending) {
+                  return;
+                }
+
                 setTaskTitle('');
                 setIsComposerOpen(false);
               }}
-              className="text-brand-muted flex size-10 items-center justify-center rounded-full bg-white"
+              disabled={createTaskMutation.isPending}
+              className="text-brand-muted flex size-10 items-center justify-center rounded-full bg-white disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="입력 닫기"
             >
               <X className="size-4" />
