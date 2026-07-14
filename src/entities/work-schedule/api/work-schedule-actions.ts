@@ -105,7 +105,10 @@ export async function saveWorkScheduleEntry(input: {
   revalidateWorkspace(value.workspaceId);
 }
 
-export async function createWorkShiftType(workspaceId: string): Promise<WorkShiftOption> {
+export async function createWorkShiftType(workspaceId: string): Promise<{
+  shift: WorkShiftOption;
+  defaultShiftTypeId: string;
+}> {
   const parsedWorkspaceId = uuidSchema.parse(workspaceId);
   const supabase = await createSupabaseServerClient();
   const { data: lastShift, error: sortOrderError } = await supabase
@@ -137,19 +140,30 @@ export async function createWorkShiftType(workspaceId: string): Promise<WorkShif
 
   if (error) throw new Error(`근무 유형 추가에 실패했습니다: ${error.message}`);
 
-  // 첫 근무유형을 추가한 경우에도 현재 주의 셀을 즉시 기본 근무유형으로 채운다.
-  await ensureWeeklyWorkScheduleEntries(parsedWorkspaceId, getCurrentWeekRange().startDate);
+  // 서버가 실제로 선택한 기본 근무유형을 반환해 화면의 누락 셀도 같은 값으로 채운다.
+  const defaultShift = await ensureWeeklyWorkScheduleEntries(
+    parsedWorkspaceId,
+    getCurrentWeekRange().startDate,
+  );
+
+  if (!defaultShift) {
+    throw new Error('기본 근무유형을 확인하지 못했습니다.');
+  }
+
   revalidateWorkspace(parsedWorkspaceId);
 
   return {
-    id: data.id,
-    code: data.code,
-    name: data.name,
-    startTime: data.start_time?.slice(0, 5) ?? null,
-    endTime: data.end_time?.slice(0, 5) ?? null,
-    endsNextDay: data.ends_next_day,
-    color: data.color as WorkShiftColor,
-    isOff: data.is_off,
+    shift: {
+      id: data.id,
+      code: data.code,
+      name: data.name,
+      startTime: data.start_time?.slice(0, 5) ?? null,
+      endTime: data.end_time?.slice(0, 5) ?? null,
+      endsNextDay: data.ends_next_day,
+      color: data.color as WorkShiftColor,
+      isOff: data.is_off,
+    },
+    defaultShiftTypeId: defaultShift.id,
   };
 }
 

@@ -1,8 +1,8 @@
 'use client';
 
 // 공지 화면의 선택·작성 패널 상태와 서버 저장 후 Query 캐시 갱신을 관리합니다.
-import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   createNotice,
@@ -20,8 +20,15 @@ interface UseNoticeBoardStateParams {
 }
 
 export function useNoticeBoardState({ initialData, workspaceId }: UseNoticeBoardStateParams) {
-  const queryClient = useQueryClient();
-  const { data = initialData, isPending } = useQuery({
+  const notifiedQueryError = useRef<Error | null>(null);
+  const {
+    data = initialData,
+    isPending,
+    isError,
+    isRefetchError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: noticeBoardQueryKey(workspaceId),
     queryFn: () => getNoticeBoard(workspaceId),
     initialData,
@@ -36,8 +43,20 @@ export function useNoticeBoardState({ initialData, workspaceId }: UseNoticeBoard
     data.notices.find((notice) => notice.id === selectedNoticeId) ?? data.notices[0] ?? null;
   const editingNotice = data.notices.find((notice) => notice.id === editingNoticeId) ?? null;
 
+  useEffect(() => {
+    if (!error || (!isError && !isRefetchError)) {
+      notifiedQueryError.current = null;
+      return;
+    }
+
+    if (notifiedQueryError.current === error) return;
+
+    notifiedQueryError.current = error;
+    toast.error('공지 목록을 새로고침하지 못했습니다. 잠시 후 다시 시도해주세요.');
+  }, [error, isError, isRefetchError]);
+
   const refreshNoticeBoard = async () => {
-    await queryClient.invalidateQueries({ queryKey: noticeBoardQueryKey(workspaceId) });
+    await refetch();
   };
 
   const createMutation = useMutation({ mutationFn: createNotice });
@@ -71,20 +90,28 @@ export function useNoticeBoardState({ initialData, workspaceId }: UseNoticeBoard
 
     try {
       if (editingNoticeId) {
-        await updateMutation.mutateAsync({
+        const result = await updateMutation.mutateAsync({
           workspaceId,
           noticeId: editingNoticeId,
           title: trimmedTitle,
           content: trimmedContent,
         });
+        if (!result.ok) {
+          toast.error(result.message);
+          return;
+        }
         setSelectedNoticeId(editingNoticeId);
       } else {
-        const createdNotice = await createMutation.mutateAsync({
+        const result = await createMutation.mutateAsync({
           workspaceId,
           title: trimmedTitle,
           content: trimmedContent,
         });
-        setSelectedNoticeId(createdNotice.id);
+        if (!result.ok) {
+          toast.error(result.message);
+          return;
+        }
+        setSelectedNoticeId(result.data.id);
       }
 
       await refreshNoticeBoard();
@@ -96,7 +123,11 @@ export function useNoticeBoardState({ initialData, workspaceId }: UseNoticeBoard
 
   const removeNotice = async (noticeId: string) => {
     try {
-      await deleteMutation.mutateAsync({ workspaceId, noticeId });
+      const result = await deleteMutation.mutateAsync({ workspaceId, noticeId });
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
       await refreshNoticeBoard();
 
       if (selectedNoticeId === noticeId) {
@@ -117,7 +148,15 @@ export function useNoticeBoardState({ initialData, workspaceId }: UseNoticeBoard
     if (!notice) return;
 
     try {
-      await pinMutation.mutateAsync({ workspaceId, noticeId, isPinned: !notice.isPinned });
+      const result = await pinMutation.mutateAsync({
+        workspaceId,
+        noticeId,
+        isPinned: !notice.isPinned,
+      });
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
       await refreshNoticeBoard();
       setSelectedNoticeId(noticeId);
     } catch (error) {

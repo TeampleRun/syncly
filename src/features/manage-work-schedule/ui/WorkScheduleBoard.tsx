@@ -68,9 +68,9 @@ export function WorkScheduleBoard({
 
   const handleAddShift = async (): Promise<void> => {
     try {
-      const newShift = await createWorkShiftType(workspaceId);
-      setScheduleConfig((current) => ({ shifts: [...current.shifts, newShift] }));
-      completeMissingEntries(newShift.id);
+      const { shift, defaultShiftTypeId } = await createWorkShiftType(workspaceId);
+      setScheduleConfig((current) => ({ shifts: [...current.shifts, shift] }));
+      completeMissingEntries(defaultShiftTypeId);
     } catch (error) {
       console.error(error);
       toast.error('근무 유형을 추가하지 못했습니다.');

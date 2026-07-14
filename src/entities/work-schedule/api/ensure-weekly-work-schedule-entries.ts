@@ -6,18 +6,19 @@ import { getWorkDateByWeekday } from '../lib/work-date';
 import { weekdays } from '../model/weekdays';
 import { getWorkShiftTypesByWorkspaceId } from './get-work-shift-types-by-workspace-id';
 import { getWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member/api/get-workspace-members-by-id';
+import type { WorkShiftOption } from '../model/work-schedule.types';
 
 export async function ensureWeeklyWorkScheduleEntries(
   workspaceId: string,
   weekStartDate: string,
-): Promise<void> {
+): Promise<WorkShiftOption | null> {
   const [members, shifts] = await Promise.all([
     getWorkspaceMembersByWorkspaceId(workspaceId),
     getWorkShiftTypesByWorkspaceId(workspaceId),
   ]);
   const defaultShift = getDefaultWorkShiftOption(shifts);
 
-  if (!defaultShift || members.length === 0) return;
+  if (!defaultShift || members.length === 0) return defaultShift ?? null;
 
   const supabase = await createSupabaseServerClient();
   const weekEndDate = getWorkDateByWeekday(weekStartDate, 'sunday');
@@ -29,7 +30,7 @@ export async function ensureWeeklyWorkScheduleEntries(
     .lte('work_date', weekEndDate);
 
   if (countError) throw new Error(`근무 스케줄 수 조회에 실패했습니다: ${countError.message}`);
-  if (count === members.length * weekdays.length) return;
+  if (count === members.length * weekdays.length) return defaultShift;
 
   const createdBy = await getCurrentUserId();
   const entries = members.flatMap((member) =>
@@ -48,4 +49,6 @@ export async function ensureWeeklyWorkScheduleEntries(
   });
 
   if (error) throw new Error(`기본 근무 스케줄 생성에 실패했습니다: ${error.message}`);
+
+  return defaultShift;
 }

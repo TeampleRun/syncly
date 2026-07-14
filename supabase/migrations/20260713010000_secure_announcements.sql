@@ -51,7 +51,7 @@ using (
   )
 );
 
--- UPDATE RLS만으로는 작성자가 is_pinned 컬럼만 바꾸는 것을 구분할 수 없어 트리거에서 막는다.
+-- INSERT/UPDATE RLS만으로는 고정 상태와 워크스페이스 이동을 구분할 수 없어 트리거에서 막는다.
 create or replace function private.prevent_non_owner_announcement_pin()
 returns trigger
 language plpgsql
@@ -59,8 +59,14 @@ security invoker
 set search_path = ''
 as $$
 begin
-  if new.is_pinned is distinct from old.is_pinned
-    and not private.is_workspace_owner(new.workspace_id) then
+  if tg_op = 'UPDATE' and new.workspace_id is distinct from old.workspace_id then
+    raise exception '공지의 워크스페이스는 변경할 수 없습니다.';
+  end if;
+
+  if (
+    (tg_op = 'INSERT' and new.is_pinned)
+    or (tg_op = 'UPDATE' and new.is_pinned is distinct from old.is_pinned)
+  ) and not private.is_workspace_owner(new.workspace_id) then
     raise exception '워크스페이스 소유자만 공지를 고정할 수 있습니다.';
   end if;
 
@@ -70,7 +76,7 @@ $$;
 
 drop trigger if exists prevent_non_owner_announcement_pin on public.announcements;
 create trigger prevent_non_owner_announcement_pin
-before update on public.announcements
+before insert or update on public.announcements
 for each row
 execute function private.prevent_non_owner_announcement_pin();
 
