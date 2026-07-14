@@ -30,6 +30,7 @@ export {
   type UpdateWorkspaceInfoInput,
 } from './api/update-workspace-info';
 export { joinWorkspaceByInviteCode } from './api/join-workspace-by-invite-code';
+export { sendInviteEmail, type SendInviteEmailInput } from './api/send-invite-email';
 export {
   setWorkspaceInviteEnabled,
   type SetWorkspaceInviteEnabledInput,
