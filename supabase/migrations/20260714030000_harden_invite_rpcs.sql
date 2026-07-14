@@ -38,7 +38,8 @@ begin
       using message = '유효하지 않거나 비활성화된 초대 링크입니다.';
   end if;
 
-  -- 이미 참여한 멤버면 재참여 없이 그대로 입장한다(멱등).
+  -- 이미 참여한 멤버면 재참여 없이 그대로 입장한다(멱등 — 빠른 경로).
+  -- 정합성은 아래 on conflict가 보장하므로 이 체크는 프로필 조회를 아끼는 최적화일 뿐이다.
   if exists (
     select 1 from workspace_members
     where workspace_id = v_workspace_id and user_id = v_user_id
@@ -49,11 +50,15 @@ begin
   -- 프로필 없는 유저면 여기서 실패(no rows 에러).
   select real_name into strict v_nickname from profiles where id = v_user_id;
 
-  -- workspace_members는 (workspace_id, workspace_nickname) 유니크 제약이 있어
-  -- 실명이 기존 멤버와 충돌하면 짧은 접미사를 붙여 한 번 재시도한다.
+  -- 멤버십은 (workspace_id, user_id) 유니크 제약으로 멱등 보장한다.
+  -- 동시 참여 요청(중복 클릭/재시도)이 위 exists 체크를 함께 통과하더라도
+  -- on conflict do nothing으로 두 번째 insert가 조용히 무시된다(TOCTOU 방지).
+  -- 닉네임은 별도 유니크 제약((workspace_id, workspace_nickname))이라, 실명이 기존
+  -- 멤버와 충돌하면 unique_violation으로 잡아 짧은 접미사를 붙여 한 번 재시도한다.
   begin
     insert into workspace_members (workspace_id, user_id, workspace_nickname, role)
-    values (v_workspace_id, v_user_id, v_nickname, 'member');
+    values (v_workspace_id, v_user_id, v_nickname, 'member')
+    on conflict (workspace_id, user_id) do nothing;
   exception when unique_violation then
     insert into workspace_members (workspace_id, user_id, workspace_nickname, role)
     values (
@@ -61,7 +66,8 @@ begin
       v_user_id,
       v_nickname || '-' || substr(encode(extensions.gen_random_bytes(2), 'hex'), 1, 4),
       'member'
-    );
+    )
+    on conflict (workspace_id, user_id) do nothing;
   end;
 
   return v_workspace_id;
