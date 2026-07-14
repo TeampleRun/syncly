@@ -2,25 +2,36 @@
 
 // 매장 운영 워크스페이스의 자료실 화면을 공통 자료실 기능으로 조합합니다.
 import { Link, Upload } from 'lucide-react';
-import { mockResources } from '@/entities/resource';
-import { mockCurrentWorkspaceMember } from '@/entities/workspace-member';
+import type { ResourceLibraryData } from '@/entities/resource';
 import {
   ResourceAddDialog,
+  ResourceEditDialog,
   ResourceList,
   useResourceLibraryState,
 } from '@/features/manage-resources';
 
 interface ResourcesViewProps {
   workspaceId: string;
+  initialData: ResourceLibraryData;
 }
 
-export function ResourcesView({ workspaceId }: ResourcesViewProps) {
-  const { resources, isDialogOpen, dialogResourceType, openDialog, closeDialog, addResource } =
-    useResourceLibraryState({
-      initialResources: mockResources,
-      workspaceId,
-      uploaderName: mockCurrentWorkspaceMember.workspaceNickname,
-    });
+export function ResourcesView({ workspaceId, initialData }: ResourcesViewProps) {
+  const {
+    resources,
+    isDialogOpen,
+    dialogResourceType,
+    openDialog,
+    closeDialog,
+    addResource,
+    openFile,
+    editingResource,
+    openEditDialog,
+    closeEditDialog,
+    updateResource,
+    deleteResource,
+    viewer,
+    isSaving,
+  } = useResourceLibraryState({ initialData, workspaceId });
 
   return (
     <section>
@@ -47,16 +58,33 @@ export function ResourcesView({ workspaceId }: ResourcesViewProps) {
       </div>
 
       <div className="max-w-[790px]">
-        <ResourceList resources={resources} />
+        <ResourceList
+          resources={resources}
+          viewer={viewer}
+          isSaving={isSaving}
+          onOpenFile={(resource) => void openFile(resource)}
+          onEditResource={openEditDialog}
+          onDeleteResource={(resourceId) => void deleteResource(resourceId)}
+        />
       </div>
 
       <ResourceAddDialog
         key={dialogResourceType}
         isOpen={isDialogOpen}
         initialResourceType={dialogResourceType}
+        isSaving={isSaving}
         onClose={closeDialog}
         onSubmit={addResource}
       />
+      {editingResource ? (
+        <ResourceEditDialog
+          key={editingResource.id}
+          resource={editingResource}
+          isSaving={isSaving}
+          onClose={closeEditDialog}
+          onSubmit={updateResource}
+        />
+      ) : null}
     </section>
   );
 }
