@@ -28,6 +28,12 @@ interface CreateWorkspaceDialogProps {
 const INPUT_CLASS =
   'bg-brand-secondary text-brand-ink placeholder:text-brand-ink/50 h-11 w-full rounded-[18px] border-2 border-transparent px-4.5 text-sm transition-colors focus-visible:border-brand focus-visible:ring-0';
 
+const WORKSPACE_NAME_PLACEHOLDERS: Record<WorkspacePurpose, string> = {
+  'team-project': '예: 캡스톤 디자인 팀',
+  'side-project': '예: Syncly 프로젝트 팀',
+  'store-operation': '예: 카페 Syncly 운영',
+};
+
 export default function CreateWorkspaceDialog({
   purpose,
   open,
@@ -124,7 +130,7 @@ export default function CreateWorkspaceDialog({
                 </Label>
                 <Input
                   id="workspace-name"
-                  placeholder="예: 캡스톤 디자인 팀"
+                  placeholder={purpose ? WORKSPACE_NAME_PLACEHOLDERS[purpose] : '워크스페이스 이름'}
                   autoComplete="off"
                   className={INPUT_CLASS}
                   aria-invalid={Boolean(errors.name)}

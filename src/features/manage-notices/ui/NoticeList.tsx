@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { MoreHorizontal, Pin, Star } from 'lucide-react';
-import type { Notice } from '@/entities/notice';
+import type { Notice, NoticeViewer } from '@/entities/notice';
 import { cn } from '@/shared/lib/utils';
 
 interface NoticeListProps {
@@ -12,6 +12,8 @@ interface NoticeListProps {
   onEditNotice: (noticeId: string) => void;
   onDeleteNotice: (noticeId: string) => void;
   onTogglePinned: (noticeId: string) => void;
+  viewer: NoticeViewer | null;
+  isSaving: boolean;
 }
 
 export function NoticeList({
@@ -21,6 +23,8 @@ export function NoticeList({
   onEditNotice,
   onDeleteNotice,
   onTogglePinned,
+  viewer,
+  isSaving,
 }: NoticeListProps) {
   const [openMenuNoticeId, setOpenMenuNoticeId] = useState<string | null>(null);
 
@@ -29,6 +33,9 @@ export function NoticeList({
       {notices.map((notice) => {
         const isSelected = notice.id === selectedNoticeId;
         const isMenuOpen = notice.id === openMenuNoticeId;
+        const canEdit = viewer?.role === 'owner' || viewer?.userId === notice.authorId;
+        const canPin = viewer?.role === 'owner';
+        const canManage = canEdit || canPin;
 
         return (
           <article
@@ -73,56 +80,67 @@ export function NoticeList({
               ) : null}
             </button>
 
-            <div className="absolute top-4 right-4">
-              <button
-                type="button"
-                aria-label={`${notice.title} 메뉴 열기`}
-                aria-expanded={isMenuOpen}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setOpenMenuNoticeId(isMenuOpen ? null : notice.id);
-                }}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-              >
-                <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
-              </button>
+            {canManage ? (
+              <div className="absolute top-4 right-4">
+                <button
+                  type="button"
+                  aria-label={`${notice.title} 메뉴 열기`}
+                  aria-expanded={isMenuOpen}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setOpenMenuNoticeId(isMenuOpen ? null : notice.id);
+                  }}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                >
+                  <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
+                </button>
 
-              {isMenuOpen ? (
-                <div className="absolute right-0 z-10 mt-2 w-36 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 text-sm font-bold text-slate-700 shadow-lg">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onEditNotice(notice.id);
-                      setOpenMenuNoticeId(null);
-                    }}
-                    className="block w-full px-4 py-2 text-left hover:bg-indigo-50 hover:text-indigo-600"
-                  >
-                    수정
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onTogglePinned(notice.id);
-                      setOpenMenuNoticeId(null);
-                    }}
-                    className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-indigo-50 hover:text-indigo-600"
-                  >
-                    <Pin className="h-4 w-4" aria-hidden="true" />
-                    {notice.isPinned ? '고정 해제' : '고정'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onDeleteNotice(notice.id);
-                      setOpenMenuNoticeId(null);
-                    }}
-                    className="block w-full px-4 py-2 text-left text-rose-600 hover:bg-rose-50"
-                  >
-                    삭제
-                  </button>
-                </div>
-              ) : null}
-            </div>
+                {isMenuOpen ? (
+                  <div className="absolute right-0 z-10 mt-2 w-36 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 text-sm font-bold text-slate-700 shadow-lg">
+                    {canEdit ? (
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={() => {
+                          onEditNotice(notice.id);
+                          setOpenMenuNoticeId(null);
+                        }}
+                        className="block w-full px-4 py-2 text-left hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50"
+                      >
+                        수정
+                      </button>
+                    ) : null}
+                    {canPin ? (
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={() => {
+                          void onTogglePinned(notice.id);
+                          setOpenMenuNoticeId(null);
+                        }}
+                        className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50"
+                      >
+                        <Pin className="h-4 w-4" aria-hidden="true" />
+                        {notice.isPinned ? '고정 해제' : '고정'}
+                      </button>
+                    ) : null}
+                    {canEdit ? (
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={() => {
+                          void onDeleteNotice(notice.id);
+                          setOpenMenuNoticeId(null);
+                        }}
+                        className="block w-full px-4 py-2 text-left text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                      >
+                        삭제
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </article>
         );
       })}

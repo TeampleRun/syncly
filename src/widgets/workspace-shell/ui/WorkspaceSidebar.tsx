@@ -3,16 +3,17 @@
 // 워크스페이스 페이지에서 공통으로 사용하는 좌측 사이드바입니다.
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight, LogOut, Menu, Store } from 'lucide-react';
+import { ChevronRight, LogOut, Menu } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import type { Workspace } from '@/entities/workspace';
-import { mockCurrentWorkspaceMember } from '@/entities/workspace-member';
+import { WORKSPACE_PURPOSE_META, type Workspace } from '@/entities/workspace';
+import type { WorkspaceMember } from '@/entities/workspace-member';
 import { cn } from '@/shared/lib/utils';
 import type { WorkspaceNavigationItem } from '../model/workspace-navigation';
 
 interface WorkspaceSidebarProps {
   workspace: Workspace;
   workspaceId: string;
+  currentMember: WorkspaceMember;
   isCollapsed: boolean;
   navigationItems: WorkspaceNavigationItem[];
   onToggleCollapsed: () => void;
@@ -21,11 +22,14 @@ interface WorkspaceSidebarProps {
 export function WorkspaceSidebar({
   workspace,
   workspaceId,
+  currentMember,
   isCollapsed,
   navigationItems,
   onToggleCollapsed,
 }: WorkspaceSidebarProps) {
   const pathname = usePathname();
+  const purposeMeta = WORKSPACE_PURPOSE_META[workspace.purpose];
+  const PurposeIcon = purposeMeta.icon;
 
   return (
     <aside
@@ -62,16 +66,20 @@ export function WorkspaceSidebar({
       </div>
 
       <div className={cn('border-y border-slate-100 py-4', isCollapsed ? 'px-3 pt-12' : 'px-4')}>
-        <button
-          type="button"
+        <Link
+          href="/workspaces"
+          aria-label="워크스페이스 목록으로 이동"
           className={cn(
             'flex w-full items-center rounded-2xl bg-slate-50 text-left',
             isCollapsed ? 'justify-center px-0 py-3' : 'justify-between px-3 py-3',
           )}
         >
           <span className={cn('flex min-w-0 items-center', !isCollapsed && 'gap-3')}>
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-400 text-white">
-              <Store className="h-4 w-4" aria-hidden="true" />
+            <span
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white"
+              style={{ backgroundImage: purposeMeta.gradient }}
+            >
+              <PurposeIcon className="h-4 w-4" aria-hidden="true" />
             </span>
             <span
               className={cn('truncate text-sm font-bold text-slate-950', isCollapsed && 'sr-only')}
@@ -82,7 +90,7 @@ export function WorkspaceSidebar({
           {!isCollapsed ? (
             <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
           ) : null}
-        </button>
+        </Link>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">
@@ -117,14 +125,14 @@ export function WorkspaceSidebar({
       >
         <div className={cn('flex min-w-0 items-center', !isCollapsed && 'gap-3')}>
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-400 text-sm font-bold text-white">
-            {mockCurrentWorkspaceMember.avatarLabel}
+            {currentMember.avatarLabel}
           </span>
           <span className={cn('min-w-0', isCollapsed && 'sr-only')}>
             <span className="block truncate text-sm font-bold text-slate-950">
-              {mockCurrentWorkspaceMember.workspaceNickname}
+              {currentMember.workspaceNickname}
             </span>
             <span className="block text-xs text-slate-500">
-              {mockCurrentWorkspaceMember.role === 'owner' ? '매니저' : '멤버'}
+              {currentMember.role === 'owner' ? '매니저' : '멤버'}
             </span>
           </span>
         </div>

@@ -6,32 +6,23 @@ import { getWorkDateByWeekday } from '../lib/work-date';
 import { weekdays } from '../model/weekdays';
 import { getWorkShiftTypesByWorkspaceId } from './get-work-shift-types-by-workspace-id';
 import { getWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member/api/get-workspace-members-by-id';
+import type { WorkShiftOption } from '../model/work-schedule.types';
 
 export async function ensureWeeklyWorkScheduleEntries(
   workspaceId: string,
   weekStartDate: string,
-): Promise<void> {
+): Promise<WorkShiftOption | null> {
   const [members, shifts] = await Promise.all([
     getWorkspaceMembersByWorkspaceId(workspaceId),
     getWorkShiftTypesByWorkspaceId(workspaceId),
   ]);
   const defaultShift = getDefaultWorkShiftOption(shifts);
 
-  if (!defaultShift || members.length === 0) return;
+  if (!defaultShift || members.length === 0) return defaultShift ?? null;
 
   const supabase = await createSupabaseServerClient();
-  const weekEndDate = getWorkDateByWeekday(weekStartDate, 'sunday');
-  const { count, error: countError } = await supabase
-    .from('work_schedule_entries')
-    .select('id', { count: 'exact', head: true })
-    .eq('workspace_id', workspaceId)
-    .gte('work_date', weekStartDate)
-    .lte('work_date', weekEndDate);
-
-  if (countError) throw new Error(`근무 스케줄 수 조회에 실패했습니다: ${countError.message}`);
-  if (count === members.length * weekdays.length) return;
-
   const createdBy = await getCurrentUserId();
+  // 현재 멤버와 이번 주의 모든 조합을 멱등적으로 넣어 탈퇴 멤버의 기존 행 때문에 누락을 놓치지 않는다.
   const entries = members.flatMap((member) =>
     weekdays.map((weekday) => ({
       workspace_id: workspaceId,
@@ -48,4 +39,6 @@ export async function ensureWeeklyWorkScheduleEntries(
   });
 
   if (error) throw new Error(`기본 근무 스케줄 생성에 실패했습니다: ${error.message}`);
+
+  return defaultShift;
 }

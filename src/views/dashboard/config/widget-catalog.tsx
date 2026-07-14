@@ -48,7 +48,7 @@ export const WIDGET_CATALOG = {
   'recent-notices': {
     layout: { i: 'recent-notices', x: 0, y: 5, w: 6, h: 5, minW: 2, minH: 3 },
     title: '최근 공지',
-    render: (size) => <RecentNotices size={size} />,
+    render: (size, { workspaceId }) => <RecentNotices workspaceId={workspaceId} size={size} />,
   },
   'recent-resources': {
     layout: { i: 'recent-resources', x: 0, y: 10, w: 6, h: 5, minW: 2, minH: 3 },
