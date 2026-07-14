@@ -21,18 +21,8 @@ export async function ensureWeeklyWorkScheduleEntries(
   if (!defaultShift || members.length === 0) return defaultShift ?? null;
 
   const supabase = await createSupabaseServerClient();
-  const weekEndDate = getWorkDateByWeekday(weekStartDate, 'sunday');
-  const { count, error: countError } = await supabase
-    .from('work_schedule_entries')
-    .select('id', { count: 'exact', head: true })
-    .eq('workspace_id', workspaceId)
-    .gte('work_date', weekStartDate)
-    .lte('work_date', weekEndDate);
-
-  if (countError) throw new Error(`근무 스케줄 수 조회에 실패했습니다: ${countError.message}`);
-  if (count === members.length * weekdays.length) return defaultShift;
-
   const createdBy = await getCurrentUserId();
+  // 현재 멤버와 이번 주의 모든 조합을 멱등적으로 넣어 탈퇴 멤버의 기존 행 때문에 누락을 놓치지 않는다.
   const entries = members.flatMap((member) =>
     weekdays.map((weekday) => ({
       workspace_id: workspaceId,

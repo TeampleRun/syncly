@@ -7,7 +7,6 @@ import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
 import { getCurrentWeekRange } from '../lib/work-date';
 import type { WorkShiftColor, WorkShiftOption } from '../model/work-schedule.types';
-import { ensureWeeklyWorkScheduleEntries } from './ensure-weekly-work-schedule-entries';
 
 const colorSchema = z.enum(['sky', 'violet', 'amber', 'slate', 'emerald', 'rose']);
 // 개발 시드 UUID처럼 RFC 버전 비트가 0인 GUID도 허용한다.
@@ -111,59 +110,32 @@ export async function createWorkShiftType(workspaceId: string): Promise<{
 }> {
   const parsedWorkspaceId = uuidSchema.parse(workspaceId);
   const supabase = await createSupabaseServerClient();
-  const { data: lastShift, error: sortOrderError } = await supabase
-    .from('work_shift_types')
-    .select('sort_order')
-    .eq('workspace_id', parsedWorkspaceId)
-    .order('sort_order', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (sortOrderError)
-    throw new Error(`근무 유형 순서 조회에 실패했습니다: ${sortOrderError.message}`);
-
-  const { data, error } = await supabase
-    .from('work_shift_types')
-    .insert({
-      workspace_id: parsedWorkspaceId,
-      code: `custom-${crypto.randomUUID()}`,
-      name: '새 근무',
-      start_time: '09:00',
-      end_time: '18:00',
-      ends_next_day: false,
-      color: 'emerald',
-      is_off: false,
-      sort_order: (lastShift?.sort_order ?? -1) + 1,
-    })
-    .select('id, code, name, start_time, end_time, ends_next_day, color, is_off')
-    .single();
+  const { data, error } = await supabase.rpc('create_work_shift_type_and_ensure_weekly_entries', {
+    p_workspace_id: parsedWorkspaceId,
+    p_week_start_date: getCurrentWeekRange().startDate,
+  });
 
   if (error) throw new Error(`근무 유형 추가에 실패했습니다: ${error.message}`);
 
-  // 서버가 실제로 선택한 기본 근무유형을 반환해 화면의 누락 셀도 같은 값으로 채운다.
-  const defaultShift = await ensureWeeklyWorkScheduleEntries(
-    parsedWorkspaceId,
-    getCurrentWeekRange().startDate,
-  );
-
-  if (!defaultShift) {
-    throw new Error('기본 근무유형을 확인하지 못했습니다.');
+  const createdShift = data?.[0];
+  if (!createdShift) {
+    throw new Error('근무 유형 추가 결과를 확인하지 못했습니다.');
   }
 
   revalidateWorkspace(parsedWorkspaceId);
 
   return {
     shift: {
-      id: data.id,
-      code: data.code,
-      name: data.name,
-      startTime: data.start_time?.slice(0, 5) ?? null,
-      endTime: data.end_time?.slice(0, 5) ?? null,
-      endsNextDay: data.ends_next_day,
-      color: data.color as WorkShiftColor,
-      isOff: data.is_off,
+      id: createdShift.id,
+      code: createdShift.code,
+      name: createdShift.name,
+      startTime: createdShift.start_time?.slice(0, 5) ?? null,
+      endTime: createdShift.end_time?.slice(0, 5) ?? null,
+      endsNextDay: createdShift.ends_next_day,
+      color: createdShift.color as WorkShiftColor,
+      isOff: createdShift.is_off,
     },
-    defaultShiftTypeId: defaultShift.id,
+    defaultShiftTypeId: createdShift.default_shift_type_id,
   };
 }
 

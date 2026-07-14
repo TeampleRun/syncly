@@ -63,6 +63,14 @@ begin
     raise exception '공지의 워크스페이스는 변경할 수 없습니다.';
   end if;
 
+  if tg_op = 'UPDATE' and new.author_id is distinct from old.author_id then
+    raise exception '공지의 작성자는 변경할 수 없습니다.';
+  end if;
+
+  if tg_op = 'UPDATE' and new.created_at is distinct from old.created_at then
+    raise exception '공지의 생성 시각은 변경할 수 없습니다.';
+  end if;
+
   if (
     (tg_op = 'INSERT' and new.is_pinned)
     or (tg_op = 'UPDATE' and new.is_pinned is distinct from old.is_pinned)
