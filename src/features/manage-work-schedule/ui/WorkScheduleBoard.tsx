@@ -9,6 +9,7 @@ import {
   weekdays,
   type WorkScheduleConfig,
   type WorkScheduleEntry,
+  type WorkShiftOption,
 } from '@/entities/work-schedule';
 import {
   createWorkShiftType,
@@ -39,6 +40,14 @@ interface WorkScheduleBoardProps {
   weekStartDate: string;
 }
 
+function canPersistShift(shift: WorkShiftOption): boolean {
+  if (shift.isOff) return true;
+
+  if (!shift.startTime || !shift.endTime) return false;
+
+  return shift.endsNextDay || shift.endTime > shift.startTime;
+}
+
 export function WorkScheduleBoard({
   workspaceId,
   members,
@@ -50,7 +59,7 @@ export function WorkScheduleBoard({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [shiftToDeleteId, setShiftToDeleteId] = useState<string | null>(null);
   const [replacementShiftId, setReplacementShiftId] = useState('');
-  const { schedule, cycleCell, replaceShiftOption } = useWorkScheduleState({
+  const { schedule, cycleCell, completeMissingEntries, replaceShiftOption } = useWorkScheduleState({
     initialSchedule,
     members,
     config: scheduleConfig,
@@ -61,6 +70,7 @@ export function WorkScheduleBoard({
     try {
       const newShift = await createWorkShiftType(workspaceId);
       setScheduleConfig((current) => ({ shifts: [...current.shifts, newShift] }));
+      completeMissingEntries(newShift.id);
     } catch (error) {
       console.error(error);
       toast.error('근무 유형을 추가하지 못했습니다.');
@@ -78,7 +88,8 @@ export function WorkScheduleBoard({
 
   const handleCommitShift = async (shiftId: string): Promise<void> => {
     const shift = scheduleConfig.shifts.find((item) => item.id === shiftId);
-    if (!shift) return;
+    // 시작·종료 시간을 순서대로 고치는 동안의 임시 시간값은 저장하지 않는다.
+    if (!shift || !canPersistShift(shift)) return;
 
     try {
       await updateWorkShiftType({ workspaceId, ...shift });

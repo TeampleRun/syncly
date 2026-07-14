@@ -50,7 +50,7 @@ function completeScheduleEntries({
 }
 
 export function useWorkScheduleState(params: UseWorkScheduleStateParams) {
-  const { config } = params;
+  const { config, members, weekStartDate } = params;
   const [schedule, setSchedule] = useState(() => completeScheduleEntries(params));
 
   const cycleCell = (userId: string, weekday: WeekdayKey): WorkScheduleEntry | null => {
@@ -77,6 +77,29 @@ export function useWorkScheduleState(params: UseWorkScheduleStateParams) {
     return nextEntry;
   };
 
+  const completeMissingEntries = (shiftTypeId: string): void => {
+    setSchedule((current) => {
+      const existingEntries = new Set(current.map((entry) => `${entry.userId}:${entry.weekday}`));
+
+      return [
+        ...current,
+        ...members.flatMap((member) =>
+          weekdays.flatMap((weekday) => {
+            if (existingEntries.has(`${member.userId}:${weekday.key}`)) return [];
+
+            return {
+              workspaceId: member.workspaceId,
+              userId: member.userId,
+              weekday: weekday.key,
+              workDate: getWorkDateByWeekday(weekStartDate, weekday.key),
+              shiftTypeId,
+            };
+          }),
+        ),
+      ];
+    });
+  };
+
   const replaceShiftOption = (fromShiftTypeId: string, toShiftTypeId: string): void => {
     setSchedule((current) => {
       return current.map((entry) =>
@@ -88,6 +111,7 @@ export function useWorkScheduleState(params: UseWorkScheduleStateParams) {
   return {
     schedule,
     cycleCell,
+    completeMissingEntries,
     replaceShiftOption,
   };
 }

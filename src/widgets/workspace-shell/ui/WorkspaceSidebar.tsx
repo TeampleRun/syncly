@@ -64,8 +64,9 @@ export function WorkspaceSidebar({
       </div>
 
       <div className={cn('border-y border-slate-100 py-4', isCollapsed ? 'px-3 pt-12' : 'px-4')}>
-        <button
-          type="button"
+        <Link
+          href="/workspaces"
+          aria-label="워크스페이스 목록으로 이동"
           className={cn(
             'flex w-full items-center rounded-2xl bg-slate-50 text-left',
             isCollapsed ? 'justify-center px-0 py-3' : 'justify-between px-3 py-3',
@@ -84,7 +85,7 @@ export function WorkspaceSidebar({
           {!isCollapsed ? (
             <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
           ) : null}
-        </button>
+        </Link>
       </div>
 
       <nav className="flex-1 space-y-1 px-3 py-4">

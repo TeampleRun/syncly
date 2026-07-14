@@ -5,7 +5,9 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
+import { getCurrentWeekRange } from '../lib/work-date';
 import type { WorkShiftColor, WorkShiftOption } from '../model/work-schedule.types';
+import { ensureWeeklyWorkScheduleEntries } from './ensure-weekly-work-schedule-entries';
 
 const colorSchema = z.enum(['sky', 'violet', 'amber', 'slate', 'emerald', 'rose']);
 // 개발 시드 UUID처럼 RFC 버전 비트가 0인 GUID도 허용한다.
@@ -134,6 +136,9 @@ export async function createWorkShiftType(workspaceId: string): Promise<WorkShif
     .single();
 
   if (error) throw new Error(`근무 유형 추가에 실패했습니다: ${error.message}`);
+
+  // 첫 근무유형을 추가한 경우에도 현재 주의 셀을 즉시 기본 근무유형으로 채운다.
+  await ensureWeeklyWorkScheduleEntries(parsedWorkspaceId, getCurrentWeekRange().startDate);
   revalidateWorkspace(parsedWorkspaceId);
 
   return {
