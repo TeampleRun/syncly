@@ -13,6 +13,8 @@ import { Velocity } from '@/widgets/side-project/dashboard-velocity';
 import { RecentNotices } from '@/widgets/store-operation/dashboard-recent-notices';
 import { RecentResources } from '@/widgets/store-operation/dashboard-recent-resources';
 import { WorkScheduleSummary } from '@/widgets/store-operation/dashboard-work-schedule';
+import { OverallProgress } from '@/widgets/team-project/dashboard-overall-progress';
+import { WorkSummary } from '@/widgets/team-project/dashboard-work-summary';
 
 // layout의 x/y는 "추가될 때의 기본 위치"이며, 그리드가 충돌 시 자동 정렬한다.
 // key는 layout.i(위젯 id)와 일치해야 한다.
@@ -24,29 +26,29 @@ export const WIDGET_CATALOG = {
     render: () => <SprintSummary />,
   },
   'my-tasks': {
-    layout: { i: 'my-tasks', x: 0, y: 0, w: 6, h: 5, minW: 2, minH: 3 },
+    layout: { i: 'my-tasks', x: 0, y: 4, w: 6, h: 5, minW: 2, minH: 3 },
     title: '내 업무',
     render: (size) => <MyTasks size={size} />,
   },
   velocity: {
-    layout: { i: 'velocity', x: 6, y: 0, w: 6, h: 5, minW: 4, minH: 4 },
+    layout: { i: 'velocity', x: 6, y: 4, w: 6, h: 5, minW: 4, minH: 4 },
     title: '벨로시티',
     render: () => <Velocity />,
   },
   backlog: {
-    layout: { i: 'backlog', x: 0, y: 5, w: 6, h: 5, minW: 2, minH: 3 },
+    layout: { i: 'backlog', x: 0, y: 9, w: 6, h: 5, minW: 2, minH: 3 },
     title: '백로그',
     render: (size) => <Backlog size={size} />,
   },
   'recent-notes': {
-    layout: { i: 'recent-notes', x: 6, y: 5, w: 6, h: 5, minW: 2, minH: 3 },
+    layout: { i: 'recent-notes', x: 0, y: 14, w: 6, h: 5, minW: 2, minH: 3 },
     title: '최근 회의록',
     render: (size) => <RecentNotes size={size} />,
   },
   'recent-notices': {
-    layout: { i: 'recent-notices', x: 6, y: 5, w: 6, h: 5, minW: 2, minH: 3 },
+    layout: { i: 'recent-notices', x: 0, y: 5, w: 6, h: 5, minW: 2, minH: 3 },
     title: '최근 공지',
-    render: (size) => <RecentNotices size={size} />,
+    render: (size, { workspaceId }) => <RecentNotices workspaceId={workspaceId} size={size} />,
   },
   'recent-resources': {
     layout: { i: 'recent-resources', x: 0, y: 10, w: 6, h: 5, minW: 2, minH: 3 },
@@ -61,12 +63,22 @@ export const WIDGET_CATALOG = {
     ),
   },
   'today-schedule': {
-    layout: { i: 'today-schedule', x: 0, y: 10, w: 6, h: 4, minW: 2, minH: 3 },
+    layout: { i: 'today-schedule', x: 6, y: 9, w: 6, h: 4, minW: 2, minH: 3 },
     title: '오늘 일정',
     render: (size) => <TodaySchedule size={size} />,
   },
+  'overall-progress': {
+    layout: { i: 'overall-progress', x: 9, y: 10, w: 3, h: 5, minW: 3, minH: 4 },
+    title: '전체 진행률',
+    render: (size, { workspaceId }) => <OverallProgress workspaceId={workspaceId} size={size} />,
+  },
+  'work-summary': {
+    layout: { i: 'work-summary', x: 0, y: 15, w: 12, h: 5, minW: 6, minH: 4 },
+    title: '업무 요약',
+    render: (size, { workspaceId }) => <WorkSummary workspaceId={workspaceId} size={size} />,
+  },
   calendar: {
-    layout: { i: 'calendar', x: 0, y: 14, w: 6, h: 8, minW: 4, minH: 6 },
+    layout: { i: 'calendar', x: 6, y: 13, w: 6, h: 8, minW: 4, minH: 6 },
     title: '캘린더',
     render: (size) => <Calendar size={size} />,
   },

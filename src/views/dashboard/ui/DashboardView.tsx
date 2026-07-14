@@ -1,7 +1,7 @@
 // 대시보드 — 카탈로그(위젯 전체)와 훅이 관리하는 배치(layout)를 id로 조인해 그린다.
 //   · 배치 상태·추가/삭제·영속화 → edit-layout 훅 (레이아웃은 user_id+workspace_id로 조회/저장)
-//   · 위젯 렌더 + 추가 기본 배치  → WIDGET_CATALOG (전역)
-//   · 추가 메뉴 스코프            → TEMPLATE_WIDGETS[purpose] (템플릿별 허용 위젯)
+//   · 위젯 렌더                   → WIDGET_CATALOG (전역)
+//   · 추가 메뉴/기본 배치         → 템플릿별 widget config (purpose 기준)
 //   · AppShell(사이드바/탑바)·폰트 → 상위 워크스페이스 layout 담당
 // 빈 상태로 시작하고, 편집 모드에서 이 템플릿이 허용하는 위젯을 추가해 구성한다.
 'use client';
@@ -14,7 +14,7 @@ import {
 import type { DashboardLayoutState } from '@/entities/dashboard-layout/model/dashboard-layout.types';
 import type { WorkspacePurpose } from '@/shared/dashboard/model/template.types';
 
-import { TEMPLATE_WIDGETS } from '../config/template-widgets';
+import { getTemplateWidgetLayout, TEMPLATE_WIDGETS } from '../config/template-widgets';
 import { WIDGET_CATALOG, type WidgetId } from '../config/widget-catalog';
 import AddWidgetBar from './AddWidgetBar';
 import DashboardGrid from './DashboardGrid';
@@ -50,7 +50,11 @@ export default function DashboardView({
 
   const handleAdd = (id: string) => {
     if (!(id in WIDGET_CATALOG)) return;
-    addWidget(WIDGET_CATALOG[id as WidgetId].layout);
+
+    const defaultLayout = getTemplateWidgetLayout(purpose, id as WidgetId);
+
+    if (!defaultLayout) return;
+    addWidget(defaultLayout);
   };
 
   return (

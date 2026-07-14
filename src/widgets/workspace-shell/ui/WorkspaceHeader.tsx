@@ -3,11 +3,12 @@
 // 하나의 워크스페이스 내부 페이지에서 공통으로 사용하는 상단 헤더입니다.
 import { Bell, Search, UserRoundPlus } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { mockCurrentWorkspaceMember } from '@/entities/workspace-member';
+import type { WorkspaceMember } from '@/entities/workspace-member';
 import type { WorkspaceNavigationItem } from '../model/workspace-navigation';
 
 interface WorkspaceHeaderProps {
   navigationItems: WorkspaceNavigationItem[];
+  currentMember: WorkspaceMember;
 }
 
 function getCurrentPageTitle(pathname: string, navigationItems: WorkspaceNavigationItem[]): string {
@@ -16,7 +17,7 @@ function getCurrentPageTitle(pathname: string, navigationItems: WorkspaceNavigat
   return currentNavigationItem?.label ?? '대시보드';
 }
 
-export function WorkspaceHeader({ navigationItems }: WorkspaceHeaderProps) {
+export function WorkspaceHeader({ navigationItems, currentMember }: WorkspaceHeaderProps) {
   const pathname = usePathname();
   const title = getCurrentPageTitle(pathname, navigationItems);
 
@@ -52,7 +53,7 @@ export function WorkspaceHeader({ navigationItems }: WorkspaceHeaderProps) {
         </button>
 
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-400 text-sm font-bold text-white">
-          {mockCurrentWorkspaceMember.avatarLabel}
+          {currentMember.avatarLabel}
         </div>
       </div>
     </header>

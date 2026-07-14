@@ -1,51 +1,68 @@
 'use client';
 
-// 워크스페이스 공지사항 게시판의 목록 정렬, 선택, 작성/수정, 삭제, 고정 상태를 관리합니다.
-import { useState } from 'react';
-import type { Notice, NoticeFormValues } from '@/entities/notice';
+// 공지 화면의 선택·작성 패널 상태와 서버 저장 후 Query 캐시 갱신을 관리합니다.
+import { useEffect, useRef, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import {
+  createNotice,
+  deleteNotice,
+  setNoticePinned,
+  updateNotice,
+} from '@/entities/notice/api/notice-actions';
+import { getNoticeBoard } from '@/entities/notice/api/get-notice-board';
+import { noticeBoardQueryKey } from '@/entities/notice/model/notice-query';
+import type { NoticeBoardData, NoticeFormValues } from '@/entities/notice';
 
 interface UseNoticeBoardStateParams {
-  initialNotices: Notice[];
+  initialData: NoticeBoardData;
   workspaceId: string;
-  authorName: string;
 }
 
-function sortNotices(notices: Notice[]) {
-  return [...notices].sort((first, second) => {
-    if (first.isPinned !== second.isPinned) {
-      return first.isPinned ? -1 : 1;
-    }
-
-    return second.createdAt.localeCompare(first.createdAt);
+export function useNoticeBoardState({ initialData, workspaceId }: UseNoticeBoardStateParams) {
+  const notifiedQueryError = useRef<Error | null>(null);
+  const {
+    data = initialData,
+    isPending,
+    isError,
+    isRefetchError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: noticeBoardQueryKey(workspaceId),
+    queryFn: () => getNoticeBoard(workspaceId),
+    initialData,
   });
-}
-
-function createNoticeId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `notice-${crypto.randomUUID()}`;
-  }
-
-  return `notice-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function createTodayLabel() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-export function useNoticeBoardState({
-  initialNotices,
-  workspaceId,
-  authorName,
-}: UseNoticeBoardStateParams) {
-  const [notices, setNotices] = useState(() => sortNotices(initialNotices));
-  const [selectedNoticeId, setSelectedNoticeId] = useState(
-    () => sortNotices(initialNotices)[0]?.id ?? null,
+  const [selectedNoticeId, setSelectedNoticeId] = useState<string | null>(
+    () => initialData.notices[0]?.id ?? null,
   );
   const [editingNoticeId, setEditingNoticeId] = useState<string | null>(null);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
 
-  const selectedNotice = notices.find((notice) => notice.id === selectedNoticeId) ?? null;
-  const editingNotice = notices.find((notice) => notice.id === editingNoticeId) ?? null;
+  const selectedNotice =
+    data.notices.find((notice) => notice.id === selectedNoticeId) ?? data.notices[0] ?? null;
+  const editingNotice = data.notices.find((notice) => notice.id === editingNoticeId) ?? null;
+
+  useEffect(() => {
+    if (!error || (!isError && !isRefetchError)) {
+      notifiedQueryError.current = null;
+      return;
+    }
+
+    if (notifiedQueryError.current === error) return;
+
+    notifiedQueryError.current = error;
+    toast.error('공지 목록을 새로고침하지 못했습니다. 잠시 후 다시 시도해주세요.');
+  }, [error, isError, isRefetchError]);
+
+  const refreshNoticeBoard = async () => {
+    await refetch();
+  };
+
+  const createMutation = useMutation({ mutationFn: createNotice });
+  const updateMutation = useMutation({ mutationFn: updateNotice });
+  const deleteMutation = useMutation({ mutationFn: deleteNotice });
+  const pinMutation = useMutation({ mutationFn: setNoticePinned });
 
   const openCreateComposer = () => {
     setEditingNoticeId(null);
@@ -63,7 +80,7 @@ export function useNoticeBoardState({
     setIsComposerOpen(false);
   };
 
-  const submitNotice = (values: NoticeFormValues) => {
+  const submitNotice = async (values: NoticeFormValues) => {
     const trimmedTitle = values.title.trim();
     const trimmedContent = values.content.trim();
 
@@ -71,61 +88,85 @@ export function useNoticeBoardState({
       return;
     }
 
-    if (editingNoticeId) {
-      setNotices((currentNotices) =>
-        currentNotices.map((notice) =>
-          notice.id === editingNoticeId
-            ? { ...notice, title: trimmedTitle, content: trimmedContent }
-            : notice,
-        ),
-      );
-      setSelectedNoticeId(editingNoticeId);
+    try {
+      if (editingNoticeId) {
+        const result = await updateMutation.mutateAsync({
+          workspaceId,
+          noticeId: editingNoticeId,
+          title: trimmedTitle,
+          content: trimmedContent,
+        });
+        if (!result.ok) {
+          toast.error(result.message);
+          return;
+        }
+        setSelectedNoticeId(editingNoticeId);
+      } else {
+        const result = await createMutation.mutateAsync({
+          workspaceId,
+          title: trimmedTitle,
+          content: trimmedContent,
+        });
+        if (!result.ok) {
+          toast.error(result.message);
+          return;
+        }
+        setSelectedNoticeId(result.data.id);
+      }
+
+      await refreshNoticeBoard();
       closeComposer();
-      return;
-    }
-
-    const nextNotice: Notice = {
-      id: createNoticeId(),
-      workspaceId,
-      title: trimmedTitle,
-      content: trimmedContent,
-      authorName,
-      createdAt: createTodayLabel(),
-      isPinned: false,
-    };
-
-    setNotices((currentNotices) => sortNotices([nextNotice, ...currentNotices]));
-    setSelectedNoticeId(nextNotice.id);
-    closeComposer();
-  };
-
-  const deleteNotice = (noticeId: string) => {
-    const nextNotices = sortNotices(notices.filter((notice) => notice.id !== noticeId));
-
-    setNotices(nextNotices);
-
-    if (selectedNoticeId === noticeId) {
-      setSelectedNoticeId(nextNotices[0]?.id ?? null);
-    }
-
-    if (editingNoticeId === noticeId) {
-      closeComposer();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '공지 저장에 실패했습니다.');
     }
   };
 
-  const togglePinned = (noticeId: string) => {
-    setNotices((currentNotices) =>
-      sortNotices(
-        currentNotices.map((notice) =>
-          notice.id === noticeId ? { ...notice, isPinned: !notice.isPinned } : notice,
-        ),
-      ),
-    );
-    setSelectedNoticeId(noticeId);
+  const removeNotice = async (noticeId: string) => {
+    try {
+      const result = await deleteMutation.mutateAsync({ workspaceId, noticeId });
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+      await refreshNoticeBoard();
+
+      if (selectedNoticeId === noticeId) {
+        setSelectedNoticeId(null);
+      }
+
+      if (editingNoticeId === noticeId) {
+        closeComposer();
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '공지 삭제에 실패했습니다.');
+    }
+  };
+
+  const togglePinned = async (noticeId: string) => {
+    const notice = data.notices.find((item) => item.id === noticeId);
+
+    if (!notice) return;
+
+    try {
+      const result = await pinMutation.mutateAsync({
+        workspaceId,
+        noticeId,
+        isPinned: !notice.isPinned,
+      });
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
+      await refreshNoticeBoard();
+      setSelectedNoticeId(noticeId);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '공지 고정 상태 변경에 실패했습니다.');
+    }
   };
 
   return {
-    notices,
+    notices: data.notices,
+    viewer: data.viewer,
     selectedNotice,
     editingNotice,
     isComposerOpen,
@@ -134,7 +175,13 @@ export function useNoticeBoardState({
     closeComposer,
     selectNotice: setSelectedNoticeId,
     submitNotice,
-    deleteNotice,
+    deleteNotice: removeNotice,
     togglePinned,
+    isPending,
+    isSaving:
+      createMutation.isPending ||
+      updateMutation.isPending ||
+      deleteMutation.isPending ||
+      pinMutation.isPending,
   };
 }
