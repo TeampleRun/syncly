@@ -49,7 +49,7 @@ function formatTimer(seconds: number) {
 }
 
 export default function SignupView() {
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
   const router = useRouter();
 
   const [step, setStep] = useState<Step>('email');
@@ -68,7 +68,9 @@ export default function SignupView() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         setCheckingSession(false);
         return;
@@ -86,7 +88,7 @@ export default function SignupView() {
       }
     };
     checkSession();
-  }, []);
+  }, [router, supabase]);
 
   const startTimer = () => {
     setTimer(OTP_SECONDS);
@@ -171,7 +173,10 @@ export default function SignupView() {
     if (error) {
       setError(toKoreanError(error.message));
     } else {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
       if (userError || !user) {
         setError('가입 정보를 확인하지 못했어요. 다시 시도해주세요');
       } else {
@@ -378,7 +383,9 @@ export default function SignupView() {
         )}
 
         {step !== 'done' && (
-          <div className={`flex items-center ${step === 'email' ? 'justify-between' : 'justify-center'}`}>
+          <div
+            className={`flex items-center ${step === 'email' ? 'justify-between' : 'justify-center'}`}
+          >
             {step === 'email' && (
               <Link
                 href="/"
