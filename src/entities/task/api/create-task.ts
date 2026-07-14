@@ -4,13 +4,26 @@ import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
 
 import { taskTitleSchema } from '../model/task.schema';
+import type { UntypedRpcClient } from './rpc-client';
 
-type UntypedRpcClient = {
-  rpc: (
-    fn: string,
-    args?: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message: string } | null }>;
-};
+function getTodayIsoDateInKst() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === 'year')?.value;
+  const month = parts.find((part) => part.type === 'month')?.value;
+  const day = parts.find((part) => part.type === 'day')?.value;
+
+  if (!year || !month || !day) {
+    throw new Error('현재 날짜를 계산하지 못했습니다.');
+  }
+
+  return `${year}-${month}-${day}`;
+}
 
 export async function createTask(params: { workspaceId: string; title: string }): Promise<void> {
   const parsedTitle = taskTitleSchema.safeParse(params.title);
@@ -21,8 +34,7 @@ export async function createTask(params: { workspaceId: string; title: string })
 
   const supabase = await createSupabaseServerClient();
   const currentUserId = await getCurrentUserId();
-  const today = new Date();
-  const dueDate = today.toISOString().slice(0, 10);
+  const dueDate = getTodayIsoDateInKst();
 
   const { error } = await (supabase as unknown as UntypedRpcClient).rpc('create_task', {
     p_workspace_id: params.workspaceId,

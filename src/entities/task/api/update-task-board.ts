@@ -4,13 +4,7 @@ import { createSupabaseServerClient } from '@/shared/api/supabase/server';
 
 import type { TaskStatus } from '../model/task.types';
 import { updateTaskBoardSchema } from '../model/task.schema';
-
-type UntypedRpcClient = {
-  rpc: (
-    fn: string,
-    args?: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message: string } | null }>;
-};
+import type { UntypedRpcClient } from './rpc-client';
 
 export async function updateTaskBoard(params: {
   workspaceId: string;

@@ -1,9 +1,20 @@
 -- task 생성/보드 갱신 RPC + 브라우저 직접 조회에 필요한 RLS 정리
 
--- 브라우저에서 직접 읽는 테이블은 dev_full_access를 제거하고 실제 멤버십 정책만 남긴다.
-drop policy if exists dev_full_access on public.tasks;
-drop policy if exists dev_full_access on public.workspace_members;
+-- 실 RLS 정책이 있는 모든 초기 public 테이블에서 permissive dev policy를 제거한다.
 drop policy if exists dev_full_access on public.profiles;
+drop policy if exists dev_full_access on public.module_registry;
+drop policy if exists dev_full_access on public.workspaces;
+drop policy if exists dev_full_access on public.workspace_members;
+drop policy if exists dev_full_access on public.workspace_modules;
+drop policy if exists dev_full_access on public.user_dashboard_layouts;
+drop policy if exists dev_full_access on public.sprints;
+drop policy if exists dev_full_access on public.tasks;
+drop policy if exists dev_full_access on public.calendar_events;
+drop policy if exists dev_full_access on public.announcements;
+drop policy if exists dev_full_access on public.meeting_notes;
+drop policy if exists dev_full_access on public.resources;
+drop policy if exists dev_full_access on public.chat_messages;
+drop policy if exists dev_full_access on public.work_schedule_entries;
 
 -- profiles는 본인 또는 같은 워크스페이스 멤버의 프로필만 조회 가능하게 좁힌다.
 drop policy if exists profiles_select on public.profiles;
@@ -72,6 +83,9 @@ begin
 end;
 $$;
 
+revoke all on function public.create_task(uuid, text, uuid, date) from public;
+grant execute on function public.create_task(uuid, text, uuid, date) to authenticated;
+
 -- 보드 갱신: 여러 task 상태/정렬 변경을 단일 트랜잭션으로 반영한다.
 create or replace function public.update_task_board(
   p_workspace_id uuid,
@@ -113,3 +127,6 @@ begin
   end if;
 end;
 $$;
+
+revoke all on function public.update_task_board(uuid, jsonb) from public;
+grant execute on function public.update_task_board(uuid, jsonb) to authenticated;
