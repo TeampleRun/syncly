@@ -2,14 +2,21 @@
 
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
 
-import { toTaskBoardUpdate } from '../model/task.mapper';
+import type { TaskStatus } from '../model/task.types';
 import { updateTaskBoardSchema } from '../model/task.schema';
+
+type UntypedRpcClient = {
+  rpc: (
+    fn: string,
+    args?: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
+};
 
 export async function updateTaskBoard(params: {
   workspaceId: string;
   tasks: Array<{
     id: string;
-    status: 'todo' | 'in-progress' | 'done';
+    status: TaskStatus;
     sortOrder: number;
   }>;
 }): Promise<void> {
@@ -20,21 +27,13 @@ export async function updateTaskBoard(params: {
   }
 
   const supabase = await createSupabaseServerClient();
+  const { error } = await (supabase as unknown as UntypedRpcClient).rpc('update_task_board', {
+    p_workspace_id: parsed.data.workspaceId,
+    p_tasks: parsed.data.tasks,
+  });
 
-  const results = await Promise.all(
-    parsed.data.tasks.map((task) =>
-      supabase
-        .from('tasks')
-        .update(toTaskBoardUpdate(task))
-        .eq('id', task.id)
-        .eq('workspace_id', parsed.data.workspaceId),
-    ),
-  );
-
-  const failed = results.find((result) => result.error);
-
-  if (failed?.error) {
-    console.error('[task/updateTaskBoard] update 실패:', failed.error);
+  if (error) {
+    console.error('[task/updateTaskBoard] RPC 실패:', error);
     throw new Error('업무 정렬 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
   }
 }

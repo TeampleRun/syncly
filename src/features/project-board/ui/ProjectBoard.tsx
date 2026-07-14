@@ -39,6 +39,7 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
   } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isCreatingTaskRef = useRef(false);
+  const boardMutationQueueRef = useRef(Promise.resolve());
   const tasks = tasksQuery.data ?? [];
   const columns = createProjectBoardColumns(tasks);
 
@@ -63,6 +64,8 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
       await createTaskMutation.mutateAsync(trimmedTitle);
       setTaskTitle('');
       setIsComposerOpen(false);
+    } catch {
+      return;
     } finally {
       isCreatingTaskRef.current = false;
     }
@@ -160,23 +163,23 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
       sortOrder: index,
     }));
 
-    const previousTasks = tasks;
     queryClient.setQueryData(tasksByWorkspaceQueryKey(workspaceId), nextTasks);
-    updateTaskBoardMutation.mutate(
-      {
-        workspaceId,
-        tasks: nextTasks.map((task) => ({
-          id: task.id,
-          status: task.status,
-          sortOrder: task.sortOrder,
-        })),
-      },
-      {
-        onError: () => {
-          queryClient.setQueryData(tasksByWorkspaceQueryKey(workspaceId), previousTasks);
-        },
-      },
-    );
+    boardMutationQueueRef.current = boardMutationQueueRef.current
+      .catch(() => undefined)
+      .then(() =>
+        updateTaskBoardMutation.mutateAsync({
+          workspaceId,
+          tasks: nextTasks.map((task) => ({
+            id: task.id,
+            status: task.status,
+            sortOrder: task.sortOrder,
+          })),
+        }),
+      )
+      .catch(() => {
+        queryClient.invalidateQueries({ queryKey: tasksByWorkspaceQueryKey(workspaceId) });
+      });
+
     setDraggingTaskId(null);
     setDragOverState(null);
   };

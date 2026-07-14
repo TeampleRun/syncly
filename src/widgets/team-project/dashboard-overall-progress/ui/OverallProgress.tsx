@@ -36,8 +36,15 @@ export default function OverallProgress({
           title="전체 진행률"
           action={<WidgetCardAction className="text-[15px] font-bold">차트</WidgetCardAction>}
         />
-        <div className="flex flex-1 items-center text-[14px] font-medium text-[#8b90ba]">
-          진행률을 불러오지 못했습니다.
+        <div className="flex flex-1 flex-col items-start justify-center gap-3 text-[14px] font-medium text-[#8b90ba]">
+          <p>진행률을 불러오지 못했습니다.</p>
+          <button
+            type="button"
+            onClick={() => void tasksQuery.refetch()}
+            className="text-brand rounded-full border border-[#d8dcff] px-3 py-1.5 text-[13px] font-semibold"
+          >
+            다시 시도
+          </button>
         </div>
       </WidgetCard>
     );

@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import type { TaskStatus } from '../model/task.types';
 import { updateTaskBoard } from './update-task-board';
 import { tasksByWorkspaceQueryKey } from './use-tasks-by-workspace-id';
 
@@ -10,7 +11,7 @@ interface UpdateTaskBoardParams {
   workspaceId: string;
   tasks: Array<{
     id: string;
-    status: 'todo' | 'in-progress' | 'done';
+    status: TaskStatus;
     sortOrder: number;
   }>;
 }
