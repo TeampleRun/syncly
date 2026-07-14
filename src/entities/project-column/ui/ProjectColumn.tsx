@@ -90,9 +90,25 @@ export function ProjectColumn({
           </div>
         ))}
 
-        {dragOverIndex === column.tasks.length ? (
-          <div className="bg-brand h-1 w-full rounded-full" />
-        ) : null}
+        <div
+          className={cn(
+            'mt-1 rounded-[16px] px-3 transition-all',
+            column.tasks.length === 0 ? 'min-h-[96px]' : 'min-h-[72px]',
+            dragOverIndex === column.tasks.length
+              ? 'bg-brand/6'
+              : 'bg-transparent',
+          )}
+          onDragOver={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onDragOverTask(column.id, column.tasks.length);
+          }}
+          onDrop={(event) => handleDrop(event, column.tasks.length)}
+        >
+          {dragOverIndex === column.tasks.length ? (
+            <div className="bg-brand mt-2 h-1 w-full rounded-full" />
+          ) : null}
+        </div>
       </div>
     </section>
   );

@@ -21,7 +21,7 @@ export default async function ProgressChartPage({ workspaceId }: ProgressChartPa
   }
   return (
     <div className={`${plusJakartaSans.className} bg-brand-surface min-h-full`}>
-      <ProgressChartView workspaceId={'test'} />
+      <ProgressChartView workspaceId={workspaceId} />
     </div>
   );
 }

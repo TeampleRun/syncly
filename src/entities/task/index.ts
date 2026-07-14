@@ -1,3 +1,10 @@
-export { getMockTasksByWorkspaceId } from './model/mock-tasks-by-workspace';
 export type { Task, TaskStatus } from './model/task.types';
+export type { TaskRow, TaskStatusDb } from './model/task.db.types';
+export { toTask, toDbTaskStatus, toUiTaskStatus } from './model/task.mapper';
+export { taskTitleSchema, taskBoardItemSchema, updateTaskBoardSchema } from './model/task.schema';
+export { getTasksByWorkspaceId } from './api/get-tasks-by-workspace-id';
+export { useTasksByWorkspaceId, tasksByWorkspaceQueryKey } from './api/use-tasks-by-workspace-id';
+export { useCreateTask } from './api/use-create-task';
+export { useDeleteTask } from './api/use-delete-task';
+export { useUpdateTaskBoard } from './api/use-update-task-board';
 export { TaskCard } from './ui/TaskCard';

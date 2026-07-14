@@ -5,6 +5,11 @@ export type {
   WorkspaceMemberStatus,
 } from './model/workspace-member.types';
 export { mockCurrentWorkspaceMember } from './model/mock-current-workspace-member';
+// 서버 전용 getWorkspaceMembersByWorkspaceId는 next/headers 의존이 있어 배럴로 재노출하지 않는다.
+export {
+  useWorkspaceMembersByWorkspaceId,
+  workspaceMembersByWorkspaceQueryKey,
+} from './api/use-workspace-members-by-id';
 export {
   getMockWorkspaceMembersByWorkspaceId,
   mockWorkspaceMembers,

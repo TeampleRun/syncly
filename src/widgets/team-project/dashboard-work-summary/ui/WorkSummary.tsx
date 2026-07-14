@@ -1,6 +1,8 @@
+'use client';
+
 import { createProgressChartSummary } from '@/entities/progress-chart';
-import { getMockTasksByWorkspaceId } from '@/entities/task';
-import { getMockWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
+import { useTasksByWorkspaceId } from '@/entities/task';
+import { useWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 
 const cardMeta: Record<
@@ -34,7 +36,7 @@ function SummaryCard({
   valueClassName,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   valueClassName: string;
 }) {
   return (
@@ -56,26 +58,47 @@ export default function WorkSummary({
   workspaceId: string;
   size?: WidgetSize;
 }) {
-  const tasks = getMockTasksByWorkspaceId(workspaceId, 'team-workspace');
-  const summary = createProgressChartSummary(tasks);
-  const members = getMockWorkspaceMembersByWorkspaceId(workspaceId, 'team-workspace');
+  const tasksQuery = useTasksByWorkspaceId(workspaceId);
+  const membersQuery = useWorkspaceMembersByWorkspaceId(workspaceId);
+
+  if (tasksQuery.isError || membersQuery.isError) {
+    return (
+      <div className="border-brand/10 flex h-full min-h-[236px] flex-col items-start justify-center rounded-2xl border bg-white px-6 py-5">
+        <p className="text-brand-ink text-[16px] font-semibold">업무 요약을 불러오지 못했습니다.</p>
+        <button
+          type="button"
+          onClick={() => {
+            void tasksQuery.refetch();
+            void membersQuery.refetch();
+          }}
+          className="text-brand mt-4 rounded-full border border-[#d8dcff] px-3 py-1.5 text-[13px] font-semibold"
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
+
+  const summary = createProgressChartSummary(tasksQuery.data ?? []);
+  const taskSummaryValue = tasksQuery.isPending ? '-' : undefined;
+  const memberCountValue = membersQuery.isPending ? '-' : undefined;
 
   const cards = [
     {
       key: 'total' as const,
-      value: summary.totalTaskCount,
+      value: taskSummaryValue ?? summary.totalTaskCount,
     },
     {
       key: 'done' as const,
-      value: summary.doneTaskCount,
+      value: taskSummaryValue ?? summary.doneTaskCount,
     },
     {
       key: 'in-progress' as const,
-      value: summary.inProgressTaskCount,
+      value: taskSummaryValue ?? summary.inProgressTaskCount,
     },
     {
       key: 'members' as const,
-      value: members.length,
+      value: memberCountValue ?? (membersQuery.data ?? []).length,
     },
   ];
 

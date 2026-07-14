@@ -1,7 +1,7 @@
 'use client';
 
 import type { ProgressChartAssigneeItem, ProgressChartStatusItem } from '@/entities/progress-chart';
-import { getMockTasksByWorkspaceId } from '@/entities/task';
+import { useTasksByWorkspaceId } from '@/entities/task';
 import { cn } from '@/shared/lib/utils';
 import { createProgressChartSummary } from '../model/progress-chart';
 
@@ -173,8 +173,21 @@ function StatusDistributionCard({ items }: { items: ProgressChartStatusItem[] })
 }
 
 export function ProgressChartView({ workspaceId }: ProgressChartViewProps) {
-  const tasks = getMockTasksByWorkspaceId(workspaceId);
-  const summary = createProgressChartSummary(tasks);
+  const tasksQuery = useTasksByWorkspaceId(workspaceId);
+
+  if (tasksQuery.isPending) {
+    return <section className="text-brand-muted w-full max-w-[1280px]">불러오는 중…</section>;
+  }
+
+  if (tasksQuery.isError) {
+    return (
+      <section className="text-brand-muted w-full max-w-[1280px]">
+        진행률 차트를 불러오지 못했습니다.
+      </section>
+    );
+  }
+
+  const summary = createProgressChartSummary(tasksQuery.data);
 
   return (
     <section className="w-full max-w-[1280px]">

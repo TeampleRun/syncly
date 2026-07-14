@@ -2,37 +2,45 @@
 
 import type { DragEvent, KeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Plus, X } from 'lucide-react';
 import { ProjectColumn } from '@/entities/project-column';
 import type { ProjectBoardColumn } from '@/entities/project-column';
-import { getMockTasksByWorkspaceId } from '@/entities/task';
-import type { Task, TaskStatus } from '@/entities/task';
+import {
+  tasksByWorkspaceQueryKey,
+  useCreateTask,
+  useDeleteTask,
+  useTasksByWorkspaceId,
+  useUpdateTaskBoard,
+  type Task,
+  type TaskStatus,
+} from '@/entities/task';
 import {
   createProjectBoardColumns,
   flattenProjectBoardColumns,
 } from '../model/project-board-columns';
-
-const DEFAULT_ASSIGNEE = {
-  name: '김지은',
-  initial: '김',
-  color: '#1BB6DB',
-};
 
 type ProjectBoardProps = {
   workspaceId: string;
 };
 
 export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
+  const queryClient = useQueryClient();
+  const tasksQuery = useTasksByWorkspaceId(workspaceId);
+  const createTaskMutation = useCreateTask(workspaceId);
+  const deleteTaskMutation = useDeleteTask(workspaceId);
+  const updateTaskBoardMutation = useUpdateTaskBoard(workspaceId);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [taskTitle, setTaskTitle] = useState('');
-  const [tasks, setTasks] = useState(() => getMockTasksByWorkspaceId(workspaceId));
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [dragOverState, setDragOverState] = useState<{
     columnId: TaskStatus;
     index: number;
   } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const taskCount = tasks.length;
+  const isCreatingTaskRef = useRef(false);
+  const boardMutationQueueRef = useRef(Promise.resolve());
+  const tasks = tasksQuery.data ?? [];
   const columns = createProjectBoardColumns(tasks);
 
   useEffect(() => {
@@ -43,43 +51,46 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
     inputRef.current?.focus();
   }, [isComposerOpen]);
 
-  const createTask = () => {
+  const createTask = async () => {
     const trimmedTitle = taskTitle.trim();
 
-    if (!trimmedTitle) {
+    if (!trimmedTitle || createTaskMutation.isPending || isCreatingTaskRef.current) {
       return;
     }
 
-    const today = new Date();
-    const formattedDate = `${today.getMonth() + 1}/${today.getDate()}`;
+    isCreatingTaskRef.current = true;
 
-    const newTask: Task = {
-      id: `task-${taskCount + 1}-${Date.now()}`,
-      workspaceId,
-      title: trimmedTitle,
-      assignee: DEFAULT_ASSIGNEE.name,
-      assigneeInitial: DEFAULT_ASSIGNEE.initial,
-      assigneeColor: DEFAULT_ASSIGNEE.color,
-      dueDate: formattedDate,
-      status: 'todo',
-    };
-
-    setTasks((currentTasks) => [...currentTasks, newTask]);
-    setTaskTitle('');
-    setIsComposerOpen(false);
+    try {
+      await createTaskMutation.mutateAsync(trimmedTitle);
+      setTaskTitle('');
+      setIsComposerOpen(false);
+    } catch {
+      return;
+    } finally {
+      isCreatingTaskRef.current = false;
+    }
   };
 
-  const handleComposerKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key !== 'Enter') {
+  const handleComposerKeyDown = async (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' || event.repeat || event.nativeEvent.isComposing) {
       return;
     }
 
     event.preventDefault();
-    createTask();
+    await createTask();
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    setTasks((currentTasks) => currentTasks.filter((task) => task.id !== taskId));
+  const handleDeleteTask = async (taskId: string) => {
+    const previousTasks = tasks;
+    queryClient.setQueryData<Task[]>(tasksByWorkspaceQueryKey(workspaceId), (currentTasks) =>
+      (currentTasks ?? []).filter((task) => task.id !== taskId),
+    );
+
+    try {
+      await deleteTaskMutation.mutateAsync(taskId);
+    } catch {
+      queryClient.setQueryData(tasksByWorkspaceQueryKey(workspaceId), previousTasks);
+    }
   };
 
   const handleDropTask = (
@@ -147,7 +158,28 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
       };
     });
 
-    setTasks(flattenProjectBoardColumns(reorderedColumns));
+    const nextTasks = flattenProjectBoardColumns(reorderedColumns).map((task, index) => ({
+      ...task,
+      sortOrder: index,
+    }));
+
+    queryClient.setQueryData(tasksByWorkspaceQueryKey(workspaceId), nextTasks);
+    boardMutationQueueRef.current = boardMutationQueueRef.current
+      .catch(() => undefined)
+      .then(() =>
+        updateTaskBoardMutation.mutateAsync({
+          workspaceId,
+          tasks: nextTasks.map((task) => ({
+            id: task.id,
+            status: task.status,
+            sortOrder: task.sortOrder,
+          })),
+        }),
+      )
+      .catch(() => {
+        queryClient.invalidateQueries({ queryKey: tasksByWorkspaceQueryKey(workspaceId) });
+      });
+
     setDraggingTaskId(null);
     setDragOverState(null);
   };
@@ -162,6 +194,20 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
     setDraggingTaskId(null);
     setDragOverState(null);
   };
+
+  if (tasksQuery.isPending) {
+    return (
+      <section className="text-brand-muted mx-auto max-w-[1284px]">업무를 불러오는 중…</section>
+    );
+  }
+
+  if (tasksQuery.isError) {
+    return (
+      <section className="text-brand-muted mx-auto max-w-[1284px]">
+        프로젝트 업무를 불러오지 못했습니다.
+      </section>
+    );
+  }
 
   return (
     <section className="mx-auto flex max-w-[1284px] flex-col gap-6">
@@ -185,6 +231,7 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
               ref={inputRef}
               aria-label="업무 제목 입력"
               className="text-brand-ink placeholder:text-brand-muted min-w-0 flex-1 bg-transparent text-base outline-none"
+              disabled={createTaskMutation.isPending}
               placeholder="업무 제목 입력 후 Enter"
               value={taskTitle}
               onChange={(event) => setTaskTitle(event.target.value)}
@@ -193,10 +240,15 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
             <button
               type="button"
               onClick={() => {
+                if (createTaskMutation.isPending) {
+                  return;
+                }
+
                 setTaskTitle('');
                 setIsComposerOpen(false);
               }}
-              className="text-brand-muted flex size-10 items-center justify-center rounded-full bg-white"
+              disabled={createTaskMutation.isPending}
+              className="text-brand-muted flex size-10 items-center justify-center rounded-full bg-white disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="입력 닫기"
             >
               <X className="size-4" />

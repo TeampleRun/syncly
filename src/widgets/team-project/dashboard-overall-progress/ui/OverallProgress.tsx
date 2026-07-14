@@ -1,5 +1,7 @@
+'use client';
+
 import { createProgressChartSummary } from '@/entities/progress-chart';
-import { getMockTasksByWorkspaceId } from '@/entities/task';
+import { useTasksByWorkspaceId } from '@/entities/task';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
@@ -10,9 +12,45 @@ export default function OverallProgress({
   workspaceId: string;
   size?: WidgetSize;
 }) {
-  const tasks = getMockTasksByWorkspaceId(workspaceId, 'team-workspace');
-  const summary = createProgressChartSummary(tasks);
+  const tasksQuery = useTasksByWorkspaceId(workspaceId);
   const isCompact = size === 'sm';
+
+  if (tasksQuery.isPending) {
+    return (
+      <WidgetCard className={isCompact ? 'p-4' : 'px-6 py-5'}>
+        <WidgetCardHeader
+          title="전체 진행률"
+          action={<WidgetCardAction className="text-[15px] font-bold">차트</WidgetCardAction>}
+        />
+        <div className="flex flex-1 items-center text-[14px] font-medium text-[#8b90ba]">
+          진행률을 불러오는 중...
+        </div>
+      </WidgetCard>
+    );
+  }
+
+  if (tasksQuery.isError) {
+    return (
+      <WidgetCard className={isCompact ? 'p-4' : 'px-6 py-5'}>
+        <WidgetCardHeader
+          title="전체 진행률"
+          action={<WidgetCardAction className="text-[15px] font-bold">차트</WidgetCardAction>}
+        />
+        <div className="flex flex-1 flex-col items-start justify-center gap-3 text-[14px] font-medium text-[#8b90ba]">
+          <p>진행률을 불러오지 못했습니다.</p>
+          <button
+            type="button"
+            onClick={() => void tasksQuery.refetch()}
+            className="text-brand rounded-full border border-[#d8dcff] px-3 py-1.5 text-[13px] font-semibold"
+          >
+            다시 시도
+          </button>
+        </div>
+      </WidgetCard>
+    );
+  }
+
+  const summary = createProgressChartSummary(tasksQuery.data);
 
   return (
     <WidgetCard className={isCompact ? 'p-4' : 'px-6 py-5'}>
