@@ -14,6 +14,7 @@ export interface TemplateItem {
   tagBg: string;
   tagText: string;
   tags: string[];
+  previewImage: string;
 }
 
 export const templateItems: TemplateItem[] = [
@@ -30,6 +31,7 @@ export const templateItems: TemplateItem[] = [
     tagBg: '#ede9fe',
     tagText: '#7008e7',
     tags: ['업무 분담 보드', '회의록', '자료실', '캘린더', '그룹 채팅'],
+    previewImage: '/images/landing/팀플 - 대시보드.png',
   },
   {
     id: 'side_project',
@@ -44,6 +46,7 @@ export const templateItems: TemplateItem[] = [
     tagBg: '#dbeafe',
     tagText: '#1447e6',
     tags: ['칸반 보드', '스프린트 관리', '회의록', '채팅', '진행률 차트'],
+    previewImage: '/images/landing/사이드 프로젝트 대시보드.png',
   },
   {
     id: 'store',
@@ -58,5 +61,6 @@ export const templateItems: TemplateItem[] = [
     tagBg: '#fef3c6',
     tagText: '#bb4d00',
     tags: ['공지 게시판', '업무 스케줄', '자료실', '채팅', '캘린더'],
+    previewImage: '/images/landing/매장 대시보드.png',
   },
 ];
