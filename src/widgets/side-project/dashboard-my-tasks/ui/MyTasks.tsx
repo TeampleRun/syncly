@@ -15,21 +15,11 @@ import { useTasksByWorkspaceId, type TaskStatus as TeamTaskStatus } from '@/enti
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import type { WorkspacePurpose } from '@/shared/dashboard/model/template.types';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
+import { WidgetStateMessage } from '@/shared/dashboard/ui/widget-state-message';
 
 const header = (
   <WidgetCardHeader title="내 업무" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />
 );
-
-function StateMessage({ message }: { message: string }) {
-  return (
-    <WidgetCard>
-      {header}
-      <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
-        {message}
-      </div>
-    </WidgetCard>
-  );
-}
 
 interface MyTasksProps {
   workspaceId: string;
@@ -58,14 +48,14 @@ function SideMyTasks({ workspaceId, currentUserId, size }: BranchProps) {
   const tasksQuery = useSprintTasks(currentSprint?.id);
 
   if (sprintsQuery.isError || tasksQuery.isError) {
-    return <StateMessage message="내 업무를 불러오지 못했습니다." />;
+    return <WidgetStateMessage header={header} message="내 업무를 불러오지 못했습니다." />;
   }
-  if (sprintsQuery.isPending) return <StateMessage message="내 업무를 불러오는 중입니다." />;
-  if (!currentSprint) return <StateMessage message="진행 중인 스프린트가 없습니다." />;
-  if (tasksQuery.isPending) return <StateMessage message="내 업무를 불러오는 중입니다." />;
+  if (sprintsQuery.isPending) return <WidgetStateMessage header={header} message="내 업무를 불러오는 중입니다." />;
+  if (!currentSprint) return <WidgetStateMessage header={header} message="진행 중인 스프린트가 없습니다." />;
+  if (tasksQuery.isPending) return <WidgetStateMessage header={header} message="내 업무를 불러오는 중입니다." />;
 
   const myTasks = tasksQuery.data.filter((task) => task.assigneeId === currentUserId);
-  if (myTasks.length === 0) return <StateMessage message="이번 스프린트에 배정된 업무가 없습니다." />;
+  if (myTasks.length === 0) return <WidgetStateMessage header={header} message="이번 스프린트에 배정된 업무가 없습니다." />;
 
   const countBy = (status: SprintTaskStatus) =>
     myTasks.filter((task) => task.status === status).length;
@@ -154,11 +144,11 @@ const TEAM_STATUS: Record<TeamTaskStatus, TeamStatusStyle> = {
 function TeamMyTasks({ workspaceId, currentUserId, size }: BranchProps) {
   const { data, isError, isPending } = useTasksByWorkspaceId(workspaceId);
 
-  if (isError) return <StateMessage message="내 업무를 불러오지 못했습니다." />;
-  if (isPending) return <StateMessage message="내 업무를 불러오는 중입니다." />;
+  if (isError) return <WidgetStateMessage header={header} message="내 업무를 불러오지 못했습니다." />;
+  if (isPending) return <WidgetStateMessage header={header} message="내 업무를 불러오는 중입니다." />;
 
   const myTasks = data.filter((task) => task.assigneeId === currentUserId);
-  if (myTasks.length === 0) return <StateMessage message="배정된 업무가 없습니다." />;
+  if (myTasks.length === 0) return <WidgetStateMessage header={header} message="배정된 업무가 없습니다." />;
 
   const countBy = (status: TeamTaskStatus) =>
     myTasks.filter((task) => task.status === status).length;

@@ -7,21 +7,11 @@
 import { TASK_PRIORITY, useBacklogTasks } from '@/entities/side-project/task';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
+import { WidgetStateMessage } from '@/shared/dashboard/ui/widget-state-message';
 
 const header = (
   <WidgetCardHeader title="백로그" action={<WidgetCardAction>보드</WidgetCardAction>} />
 );
-
-function StateMessage({ message }: { message: string }) {
-  return (
-    <WidgetCard>
-      {header}
-      <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
-        {message}
-      </div>
-    </WidgetCard>
-  );
-}
 
 interface BacklogProps {
   workspaceId: string;
@@ -31,9 +21,10 @@ interface BacklogProps {
 export default function Backlog({ workspaceId, size = 'md' }: BacklogProps) {
   const { data: backlogItems, isError, isPending } = useBacklogTasks(workspaceId);
 
-  if (isError) return <StateMessage message="백로그를 불러오지 못했습니다." />;
-  if (isPending) return <StateMessage message="백로그를 불러오는 중입니다." />;
-  if (backlogItems.length === 0) return <StateMessage message="백로그가 비어 있습니다." />;
+  if (isError) return <WidgetStateMessage header={header} message="백로그를 불러오지 못했습니다." />;
+  if (isPending) return <WidgetStateMessage header={header} message="백로그를 불러오는 중입니다." />;
+  if (backlogItems.length === 0)
+    return <WidgetStateMessage header={header} message="백로그가 비어 있습니다." />;
 
   if (size === 'sm') {
     const [top, ...rest] = backlogItems;

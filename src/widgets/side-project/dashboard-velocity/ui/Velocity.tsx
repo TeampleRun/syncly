@@ -9,28 +9,19 @@ import {
   useSprints,
 } from '@/entities/side-project/sprint';
 import { WidgetCard, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
+import { WidgetStateMessage } from '@/shared/dashboard/ui/widget-state-message';
 
 const header = <WidgetCardHeader title="벨로시티" />;
-
-function StateMessage({ message }: { message: string }) {
-  return (
-    <WidgetCard>
-      {header}
-      <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
-        {message}
-      </div>
-    </WidgetCard>
-  );
-}
 
 export default function Velocity({ workspaceId }: { workspaceId: string }) {
   const { data: sprints, isError, isPending } = useSprints(workspaceId);
 
-  if (isError) return <StateMessage message="벨로시티를 불러오지 못했습니다." />;
-  if (isPending) return <StateMessage message="벨로시티를 불러오는 중입니다." />;
+  if (isError) return <WidgetStateMessage header={header} message="벨로시티를 불러오지 못했습니다." />;
+  if (isPending) return <WidgetStateMessage header={header} message="벨로시티를 불러오는 중입니다." />;
 
   const sprintVelocity = selectVelocity(sprints);
-  if (sprintVelocity.length === 0) return <StateMessage message="스프린트 데이터가 없습니다." />;
+  if (sprintVelocity.length === 0)
+    return <WidgetStateMessage header={header} message="스프린트 데이터가 없습니다." />;
 
   const velocityMax = selectVelocityMax(sprintVelocity);
 
