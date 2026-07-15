@@ -5,4 +5,7 @@ export {
   type ScheduleEventType,
   type CalendarMonth,
 } from './model/schedule-event.types';
-export { mockTodaySchedule, mockCalendar } from './model/schedule-event.mock';
+export {
+  buildCalendarMonthFromEvents,
+  selectTodayScheduleEvents,
+} from './model/schedule-event.selectors';

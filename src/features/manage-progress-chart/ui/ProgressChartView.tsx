@@ -71,7 +71,9 @@ function OverallProgressCard({
 
 function AssigneeBarChartCard({ items }: { items: ProgressChartAssigneeItem[] }) {
   const maxValue = Math.max(...items.map((item) => item.count), 0);
-  const gridValues = [0, 2, 4, 6, 8];
+  const gridStep = maxValue <= 4 ? 1 : Math.ceil(maxValue / 4);
+  const gridMaxValue = Math.max(gridStep * 4, 4);
+  const gridValues = Array.from({ length: 5 }, (_, index) => index * gridStep);
 
   return (
     <div className="row-span-2 rounded-[22px] border border-[#e7eaff] bg-white px-6 pt-6 pb-5 shadow-[0_6px_20px_rgba(91,78,232,0.03)]">
@@ -106,7 +108,7 @@ function AssigneeBarChartCard({ items }: { items: ProgressChartAssigneeItem[] })
                 <div
                   className="w-full max-w-[18px] rounded-t-[7px] bg-[#ddd9ff]"
                   style={{
-                    height: `${maxValue === 0 ? 0 : (item.count / maxValue) * 214}px`,
+                    height: `${gridMaxValue === 0 ? 0 : (item.count / gridMaxValue) * 214}px`,
                   }}
                 />
                 <span className="mt-3 text-[13px] font-medium tracking-[-0.03em] text-[#8f97bf]">

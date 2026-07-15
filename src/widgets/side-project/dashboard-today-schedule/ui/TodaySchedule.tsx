@@ -1,18 +1,46 @@
+'use client';
+
 // 오늘 일정 위젯 — 타일 크기에 따라 밀도가 다른 변형을 렌더
 //  · sm: 다음 일정 1건(액센트 바 + 제목 + 시간 + 외 N건)
 //  · md: 3건 리스트
 //  · lg: 전체 리스트 (일정 유형별 액센트 바 색상 — 마감=빨강)
-import { mockTodaySchedule, SCHEDULE_TYPE_COLOR } from '@/entities/side-project/schedule-event';
+import { useCalendarEventsByWorkspaceId } from '@/entities/calendar-event';
+import {
+  selectTodayScheduleEvents,
+  SCHEDULE_TYPE_COLOR,
+} from '@/entities/side-project/schedule-event';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
+import { WidgetStateMessage } from '@/shared/dashboard/ui/widget-state-message';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
 const header = (
   <WidgetCardHeader title="오늘 일정" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />
 );
 
-export default function TodaySchedule({ size = 'md' }: { size?: WidgetSize }) {
+export default function TodaySchedule({
+  workspaceId,
+  size = 'md',
+}: {
+  workspaceId: string;
+  size?: WidgetSize;
+}) {
+  const calendarEventsQuery = useCalendarEventsByWorkspaceId(workspaceId);
+  const todaySchedule = selectTodayScheduleEvents(calendarEventsQuery.data ?? []);
+
+  if (calendarEventsQuery.isPending) {
+    return <WidgetStateMessage header={header} message="오늘 일정을 불러오는 중..." />;
+  }
+
+  if (calendarEventsQuery.isError) {
+    return <WidgetStateMessage header={header} message="오늘 일정을 불러오지 못했습니다." />;
+  }
+
+  if (todaySchedule.length === 0) {
+    return <WidgetStateMessage header={header} message="오늘 등록된 일정이 없습니다." />;
+  }
+
   if (size === 'sm') {
-    const [next, ...rest] = mockTodaySchedule;
+    const [next, ...rest] = todaySchedule;
     return (
       <WidgetCard>
         {header}
@@ -35,7 +63,7 @@ export default function TodaySchedule({ size = 'md' }: { size?: WidgetSize }) {
   }
 
   // md: 3건, lg: 전체
-  const events = size === 'md' ? mockTodaySchedule.slice(0, 3) : mockTodaySchedule;
+  const events = size === 'md' ? todaySchedule.slice(0, 3) : todaySchedule;
   return (
     <WidgetCard>
       {header}
