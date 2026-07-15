@@ -3,6 +3,7 @@
 // 프로필 탭 — 닉네임 수정 및 팀 탈퇴
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { leaveWorkspace, updateMyNickname } from '@/entities/workspace-member';
 import {
@@ -150,9 +151,9 @@ export function MemberProfileForm({
                 type="button"
                 onClick={handleLeave}
                 disabled={isLeaving}
-                className="h-10 rounded-2xl bg-red-500 px-5 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-50"
+                className="flex h-10 items-center justify-center rounded-2xl bg-red-500 px-5 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-50"
               >
-                {isLeaving ? '탈퇴 중…' : '탈퇴하기'}
+                {isLeaving ? <Loader2 size={18} className="animate-spin" /> : '탈퇴하기'}
               </button>
             </DialogFooter>
           </DialogContent>
