@@ -5,6 +5,7 @@ import { getDashboardLayout } from '@/entities/dashboard-layout/api/get-dashboar
 import { DashboardView } from '@/views/dashboard';
 import { notFound } from 'next/navigation';
 import { getWorkspaceById } from '@/entities/workspace/api/get-workspace-by-id';
+import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 
 interface DashboardPageProps {
   params: Promise<{ workspaceId: string }>;
@@ -19,12 +20,16 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     notFound();
   }
 
-  const initialLayout = await getDashboardLayout(workspaceId, 'dashboard');
+  const [initialLayout, currentUserId] = await Promise.all([
+    getDashboardLayout(workspaceId, 'dashboard'),
+    getCurrentUserId(),
+  ]);
   return (
     <DashboardView
       key={workspaceId}
       workspaceId={workspaceId}
       purpose={workspace.purpose}
+      currentUserId={currentUserId}
       initialLayout={initialLayout}
     />
   );

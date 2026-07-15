@@ -26,6 +26,8 @@ interface DashboardViewProps {
   workspaceId: string;
   /** 워크스페이스 용도 — 추가 가능한 위젯을 템플릿별로 거른다(레이아웃 조회와는 무관) */
   purpose: WorkspacePurpose;
+  /** 현재 로그인 사용자 id — "내 업무"처럼 본인 기준 필터가 필요한 위젯에 전달 */
+  currentUserId: string;
   /** 서버(RSC)에서 조회한 초기 레이아웃 */
   initialLayout: DashboardLayoutState;
   /** 향후 페이지별 레이아웃 확장을 위한 구분값 — 현재 DB에는 저장하지 않는다 */
@@ -35,6 +37,7 @@ interface DashboardViewProps {
 export default function DashboardView({
   workspaceId,
   purpose,
+  currentUserId,
   initialLayout,
   pageType = 'dashboard',
 }: DashboardViewProps) {
@@ -62,6 +65,8 @@ export default function DashboardView({
       {editMode && <EditModeBanner />}
       <DashboardGrid
         workspaceId={workspaceId}
+        purpose={purpose}
+        currentUserId={currentUserId}
         widgets={CATALOG_WIDGETS}
         layout={layout}
         editMode={editMode}

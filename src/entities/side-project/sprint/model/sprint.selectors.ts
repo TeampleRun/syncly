@@ -15,6 +15,17 @@ export function selectVelocity(sprints: Sprint[]): VelocityPoint[] {
   }));
 }
 
+/**
+ * 벨로시티 차트 Y축 최댓값을 데이터에서 파생한다 — 실 포인트에 맞춰 축을 스케일한다.
+ * 가장 큰 계획/완료 포인트를 10 단위로 올림하고, 데이터가 없으면 기본 눈금(10)을 쓴다.
+ * 이렇게 하면 포인트가 상수보다 크면 막대가 잘리고, 작으면 차트가 납작해지는 문제를 막는다.
+ */
+export function selectVelocityMax(points: VelocityPoint[]): number {
+  const peak = points.reduce((max, point) => Math.max(max, point.planned, point.completed), 0);
+  if (peak <= 0) return 10;
+  return Math.ceil(peak / 10) * 10;
+}
+
 export function resolveCurrentSprint(sprints: Sprint[]): Sprint | undefined {
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
