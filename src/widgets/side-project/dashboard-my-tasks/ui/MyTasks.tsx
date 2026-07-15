@@ -11,7 +11,11 @@ import {
   useSprintTasks,
   type TaskStatus as SprintTaskStatus,
 } from '@/entities/side-project/task';
-import { useTasksByWorkspaceId, type TaskStatus as TeamTaskStatus } from '@/entities/task';
+import {
+  TASK_STATUS as TEAM_TASK_STATUS,
+  useTasksByWorkspaceId,
+  type TaskStatus as TeamTaskStatus,
+} from '@/entities/task';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import type { WorkspacePurpose } from '@/shared/dashboard/model/template.types';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
@@ -128,19 +132,6 @@ function SideMyTasks({ workspaceId, currentUserId, size }: BranchProps) {
 }
 
 // ── team-project: 워크스페이스 × 나에게 배정된 보드 업무 (마감일/상태) ──────────
-interface TeamStatusStyle {
-  label: string;
-  dot: string;
-  bg: string;
-  text: string;
-}
-
-const TEAM_STATUS: Record<TeamTaskStatus, TeamStatusStyle> = {
-  todo: { label: '대기', dot: '#d1d5dc', bg: '#f3f4f6', text: '#6a7282' },
-  'in-progress': { label: '진행 중', dot: '#2b7fff', bg: '#e0e7ff', text: '#432dd7' },
-  done: { label: '완료', dot: '#22c55e', bg: '#dcfce7', text: '#16a34a' },
-};
-
 function TeamMyTasks({ workspaceId, currentUserId, size }: BranchProps) {
   const { data, isError, isPending } = useTasksByWorkspaceId(workspaceId);
 
@@ -168,7 +159,7 @@ function TeamMyTasks({ workspaceId, currentUserId, size }: BranchProps) {
   const list = (
     <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
       {myTasks.map((task) => {
-        const status = TEAM_STATUS[task.status];
+        const status = TEAM_TASK_STATUS[task.status];
         return (
           <li key={task.id} className="flex items-center gap-2">
             <span
@@ -196,15 +187,15 @@ function TeamMyTasks({ workspaceId, currentUserId, size }: BranchProps) {
         <div className="text-brand-muted border-brand/10 mb-3 flex gap-4 border-b pb-2 text-xs">
           <span>
             진행 중{' '}
-            <strong style={{ color: TEAM_STATUS['in-progress'].text }}>
+            <strong style={{ color: TEAM_TASK_STATUS['in-progress'].text }}>
               {countBy('in-progress')}
             </strong>
           </span>
           <span>
-            대기 <strong style={{ color: TEAM_STATUS.todo.text }}>{countBy('todo')}</strong>
+            대기 <strong style={{ color: TEAM_TASK_STATUS.todo.text }}>{countBy('todo')}</strong>
           </span>
           <span>
-            완료 <strong style={{ color: TEAM_STATUS.done.text }}>{countBy('done')}</strong>
+            완료 <strong style={{ color: TEAM_TASK_STATUS.done.text }}>{countBy('done')}</strong>
           </span>
         </div>
         {list}
