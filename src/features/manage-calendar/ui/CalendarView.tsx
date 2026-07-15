@@ -325,7 +325,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                           </button>
                           <button
                             type="button"
-                            onClick={() => void deleteCalendarEventMutation.mutateAsync(calendarEvent.id)}
+                            onClick={() => deleteCalendarEventMutation.mutate(calendarEvent.id)}
                             disabled={isSubmitting}
                             className="text-brand-muted hover:bg-brand-soft hover:text-brand-ink inline-flex size-6 items-center justify-center rounded-full transition disabled:opacity-50"
                             aria-label={`${calendarEvent.title} 일정 삭제`}
