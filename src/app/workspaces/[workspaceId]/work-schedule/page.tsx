@@ -25,7 +25,7 @@ export default async function WorkSchedulePage({ params }: WorkSchedulePageProps
   return (
     <WorkScheduleView
       workspaceId={workspaceId}
-      members={members}
+      initialMembers={members}
       shifts={shifts}
       schedule={schedule}
       weekStartDate={startDate}

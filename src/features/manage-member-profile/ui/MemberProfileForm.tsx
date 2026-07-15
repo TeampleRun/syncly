@@ -3,8 +3,9 @@
 // 프로필 탭 — 현재 사용자의 워크스페이스 닉네임을 수정한다.
 // 초기 닉네임은 서버(RSC)에서 주입받고, 저장은 updateMyNickname 서버액션을 호출한다.
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { updateMyNickname } from '@/entities/workspace-member';
+import { updateMyNickname, workspaceMembersByWorkspaceQueryKey } from '@/entities/workspace-member';
 
 interface MemberProfileFormProps {
   workspaceId: string;
@@ -12,38 +13,43 @@ interface MemberProfileFormProps {
 }
 
 export function MemberProfileForm({ workspaceId, initialNickname }: MemberProfileFormProps) {
+  const queryClient = useQueryClient();
   const [committedNickname, setCommittedNickname] = useState(initialNickname);
   const [nickname, setNickname] = useState(initialNickname);
   const [isSaved, setIsSaved] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isDirty = nickname !== committedNickname;
-  const canSubmit = nickname.trim().length > 0 && isDirty && !isSubmitting;
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!canSubmit) {
-      return;
-    }
-
-    const nextNickname = nickname.trim();
-
-    setIsSubmitting(true);
-    try {
-      await updateMyNickname({ workspaceId, nickname: nextNickname });
-      setNickname(nextNickname);
-      setCommittedNickname(nextNickname);
+  // updateMyNickname은 실패 시 throw 하므로 onSuccess/onError로 깔끔하게 분기할 수 있다.
+  const updateMutation = useMutation({
+    mutationFn: updateMyNickname,
+    onSuccess: async (_data, { nickname: savedNickname }) => {
+      // 멤버 목록·스프린트·워크스케줄 등 공유 캐시를 쓰는 화면이 변경된 닉네임을 반영하도록 무효화한다.
+      await queryClient.invalidateQueries({
+        queryKey: workspaceMembersByWorkspaceQueryKey(workspaceId),
+      });
+      setNickname(savedNickname);
+      setCommittedNickname(savedNickname);
       setIsSaved(true);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error(error);
       toast.error(
         error instanceof Error
           ? error.message
           : '닉네임 저장에 실패했습니다. 잠시 후 다시 시도해주세요.',
       );
-    } finally {
-      setIsSubmitting(false);
+    },
+  });
+
+  const isDirty = nickname !== committedNickname;
+  const canSubmit = nickname.trim().length > 0 && isDirty && !updateMutation.isPending;
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!canSubmit) {
+      return;
     }
+
+    updateMutation.mutate({ workspaceId, nickname: nickname.trim() });
   };
 
   return (
@@ -73,7 +79,7 @@ export function MemberProfileForm({ workspaceId, initialNickname }: MemberProfil
             disabled={!canSubmit}
             className="h-10 rounded-2xl bg-[var(--color-brand)] px-5 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSubmitting ? '저장 중…' : '저장'}
+            {updateMutation.isPending ? '저장 중…' : '저장'}
           </button>
           {isSaved && !isDirty ? (
             <span className="text-sm font-medium text-emerald-600">저장되었습니다.</span>
