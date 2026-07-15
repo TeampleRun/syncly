@@ -72,7 +72,7 @@ export const WIDGET_CATALOG = {
   'today-schedule': {
     layout: { i: 'today-schedule', x: 6, y: 9, w: 6, h: 4, minW: 2, minH: 3 },
     title: '오늘 일정',
-    render: (size) => <TodaySchedule size={size} />,
+    render: (size, { workspaceId }) => <TodaySchedule workspaceId={workspaceId} size={size} />,
   },
   'overall-progress': {
     layout: { i: 'overall-progress', x: 9, y: 10, w: 3, h: 5, minW: 3, minH: 4 },
@@ -87,7 +87,7 @@ export const WIDGET_CATALOG = {
   calendar: {
     layout: { i: 'calendar', x: 6, y: 13, w: 6, h: 8, minW: 4, minH: 6 },
     title: '캘린더',
-    render: (size) => <Calendar size={size} />,
+    render: (size, { workspaceId }) => <Calendar workspaceId={workspaceId} size={size} />,
   },
 } satisfies Record<string, WidgetDefinition>;
 

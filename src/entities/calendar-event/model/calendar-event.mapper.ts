@@ -6,6 +6,7 @@ export interface CalendarEventRow {
   title: string;
   starts_at: string;
   description: string | null;
+  event_type: 'meeting' | 'deadline';
 }
 
 interface CalendarEventMetadata {
@@ -119,6 +120,7 @@ export function toCalendarEvent(row: CalendarEventRow): CalendarEvent {
     date: formatIsoDateInKst(row.starts_at),
     time: normalizeCalendarEventTime(metadata.time),
     color: isCalendarEventColor(metadata.color) ? metadata.color : defaultColor,
+    eventType: row.event_type,
   };
 }
 

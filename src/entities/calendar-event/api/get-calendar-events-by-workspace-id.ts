@@ -7,7 +7,7 @@ export async function getCalendarEventsByWorkspaceId(workspaceId: string): Promi
   const supabase = getSupabaseBrowserClient();
   const { data, error } = await supabase
     .from('calendar_events')
-    .select('id, workspace_id, title, starts_at, description')
+    .select('id, workspace_id, title, starts_at, description, event_type')
     .eq('workspace_id', workspaceId)
     .order('starts_at');
 
