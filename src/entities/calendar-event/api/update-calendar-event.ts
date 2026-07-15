@@ -23,7 +23,7 @@ export async function updateCalendarEvent(params: {
     createdBy: '',
   });
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('calendar_events')
     .update({
       title: payload.title,
@@ -33,10 +33,15 @@ export async function updateCalendarEvent(params: {
       ends_at: payload.ends_at,
     })
     .eq('workspace_id', params.workspaceId)
-    .eq('id', params.eventId);
+    .eq('id', params.eventId)
+    .select('id');
 
   if (error) {
     console.error('[calendar/updateCalendarEvent] update 실패:', error);
     throw new Error('일정 수정에 실패했습니다. 잠시 후 다시 시도해주세요.');
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error('수정할 일정을 찾을 수 없습니다.');
   }
 }
