@@ -1,17 +1,30 @@
-import { ArrowRight, Check } from 'lucide-react';
-import type { KeyboardEvent } from 'react';
+import { ArrowRight, Check, MoreHorizontal } from 'lucide-react';
+import type { KeyboardEvent, MouseEvent } from 'react';
 import type { MeetingNote } from '../model/meeting-note.types';
 
 interface MeetingNoteCardProps {
   meetingNote: MeetingNote;
   isExpanded?: boolean;
   onClick?: () => void;
+  // 수정·삭제 메뉴 관련 (권한이 있을 때만 노출). 메뉴 열림 상태는 목록이 소유한다.
+  canManage?: boolean;
+  isMenuOpen?: boolean;
+  onToggleMenu?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  isDeleting?: boolean;
 }
 
 export function MeetingNoteCard({
   meetingNote,
   isExpanded = false,
   onClick,
+  canManage = false,
+  isMenuOpen = false,
+  onToggleMenu,
+  onEdit,
+  onDelete,
+  isDeleting = false,
 }: MeetingNoteCardProps) {
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!onClick) {
@@ -22,6 +35,11 @@ export function MeetingNoteCard({
       event.preventDefault();
       onClick();
     }
+  };
+
+  // 메뉴 관련 클릭은 카드 펼침(onClick)으로 전파되지 않도록 막는다.
+  const stopCardToggle = (event: MouseEvent) => {
+    event.stopPropagation();
   };
 
   return (
@@ -57,6 +75,53 @@ export function MeetingNoteCard({
                 {participant.initial}
               </div>
             ))}
+
+            {canManage ? (
+              <div className="relative ml-1">
+                <button
+                  type="button"
+                  aria-label={`${meetingNote.title} 메뉴 열기`}
+                  aria-expanded={isMenuOpen}
+                  onClick={(event) => {
+                    stopCardToggle(event);
+                    onToggleMenu?.();
+                  }}
+                  className="text-brand-muted hover:bg-brand-soft hover:text-brand-ink flex size-8 items-center justify-center rounded-full transition"
+                >
+                  <MoreHorizontal className="size-5" aria-hidden="true" />
+                </button>
+
+                {isMenuOpen ? (
+                  <div
+                    onClick={stopCardToggle}
+                    className="absolute top-9 right-0 z-10 w-28 overflow-hidden rounded-xl border border-[#ebeef7] bg-white py-2 text-[14px] font-bold text-brand-ink shadow-[0_18px_40px_rgba(91,78,232,0.14)]"
+                  >
+                    <button
+                      type="button"
+                      disabled={isDeleting}
+                      onClick={(event) => {
+                        stopCardToggle(event);
+                        onEdit?.();
+                      }}
+                      className="hover:bg-brand-soft hover:text-brand block w-full px-4 py-2 text-left disabled:opacity-50"
+                    >
+                      수정
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isDeleting}
+                      onClick={(event) => {
+                        stopCardToggle(event);
+                        onDelete?.();
+                      }}
+                      className="block w-full px-4 py-2 text-left text-rose-600 hover:bg-rose-50 disabled:opacity-50"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
 

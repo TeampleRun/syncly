@@ -7,11 +7,11 @@ interface MeetingNotesPageProps {
 }
 
 export default async function MeetingNotesPage({ workspaceId }: MeetingNotesPageProps) {
-  const { meetingNotes } = await getMeetingNotes(workspaceId);
+  const { meetingNotes, viewer } = await getMeetingNotes(workspaceId);
 
   return (
     <div className={`${plusJakartaSans.className} bg-brand-surface min-h-full`}>
-      <MeetingNotesList workspaceId={workspaceId} meetingNotes={meetingNotes} />
+      <MeetingNotesList workspaceId={workspaceId} meetingNotes={meetingNotes} viewer={viewer} />
     </div>
   );
 }
