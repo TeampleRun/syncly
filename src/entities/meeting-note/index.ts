@@ -1,4 +1,3 @@
-export { getMockMeetingNotesByWorkspaceId } from './model/mock-meeting-notes-by-workspace';
 export type {
   MeetingNote,
   MeetingNoteFormValues,
