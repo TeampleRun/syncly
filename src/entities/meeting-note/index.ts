@@ -3,6 +3,8 @@ export type {
   MeetingNote,
   MeetingNoteFormValues,
   MeetingNoteParticipant,
+  MeetingNoteViewer,
+  MeetingNoteBoardData,
 } from './model/meeting-note.types';
 export type { MeetingNoteRow } from './model/meeting-note.db.types';
 export {
@@ -12,7 +14,11 @@ export {
   toMeetingDate,
   toMeetingAt,
   getParticipantColor,
+  MEETING_NOTE_SELECT_QUERY,
+  type MeetingNoteQueryRow,
 } from './model/meeting-note.mapper';
+export { meetingNotesQueryKey } from './model/meeting-note-query';
+export { getMeetingNotes } from './api/get-meeting-notes';
 export {
   meetingNoteContentSchema,
   meetingNoteTitleSchema,

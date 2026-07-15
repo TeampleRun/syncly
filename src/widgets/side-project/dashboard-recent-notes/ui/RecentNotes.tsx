@@ -1,23 +1,46 @@
+'use client';
+
 // 최근 회의록 위젯 — 타일 크기에 따라 밀도가 다른 변형을 렌더
 //  · sm: 가장 최근 회의록 1건(제목만)
 //  · md: 리스트(제목 + 작성일)
 //  · lg: 총 개수 + 리스트(제목 + 본문 미리보기 + 작성일)
 import { FileText } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
+import { getMeetingNotes, meetingNotesQueryKey } from '@/entities/meeting-note';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
-import { getMockMeetingNotesByWorkspaceId } from '@/entities/meeting-note';
 
 const header = (
   <WidgetCardHeader title="최근 회의록" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />
 );
 interface RecentNotesProps {
-  workspaceId?: string;
+  workspaceId: string;
   size?: WidgetSize;
 }
 
-export default function RecentNotes({ workspaceId = 'test', size = 'md' }: RecentNotesProps) {
-  const meetingNotes = getMockMeetingNotesByWorkspaceId(workspaceId);
+export default function RecentNotes({ workspaceId, size = 'md' }: RecentNotesProps) {
+  const { data, isError, isPending } = useQuery({
+    queryKey: meetingNotesQueryKey(workspaceId),
+    queryFn: () => getMeetingNotes(workspaceId),
+  });
+  const meetingNotes = data?.meetingNotes ?? [];
+
+  if (isPending || isError || meetingNotes.length === 0) {
+    return (
+      <WidgetCard>
+        {header}
+        <div className="text-brand-muted flex min-h-0 flex-1 items-center justify-center text-center text-sm">
+          {isPending
+            ? '회의록을 불러오는 중입니다.'
+            : isError
+              ? '회의록을 불러오지 못했습니다.'
+              : '작성된 회의록이 없습니다.'}
+        </div>
+      </WidgetCard>
+    );
+  }
+
   if (size === 'sm') {
     const latest = meetingNotes[0];
     return (

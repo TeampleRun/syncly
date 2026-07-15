@@ -3,6 +3,22 @@ import type { GenericTablesInsert, GenericTablesUpdate } from '@/shared/model/su
 import type { MeetingNoteRow } from './meeting-note.db.types';
 import type { MeetingNote, MeetingNoteParticipant } from './meeting-note.types';
 
+// 조회 시 실제로 select 하는 컬럼만 담는 서브셋 타입 (task 도메인 TaskQueryRow와 동일 패턴)
+export type MeetingNoteQueryRow = Pick<
+  MeetingNoteRow,
+  | 'id'
+  | 'workspace_id'
+  | 'author_id'
+  | 'title'
+  | 'meeting_at'
+  | 'participants'
+  | 'decisions'
+  | 'follow_up_actions'
+>;
+
+export const MEETING_NOTE_SELECT_QUERY =
+  'id, workspace_id, author_id, title, meeting_at, participants, decisions, follow_up_actions';
+
 // 참석자 아바타 색상은 DB에 저장하지 않고 userId 해시로 결정론적으로 재생성한다.
 // 같은 참석자는 어느 카드에서든 항상 같은 색으로 보인다.
 const PARTICIPANT_PALETTE = [
@@ -62,7 +78,7 @@ function toParticipant(userId: string, profileNameById: Map<string, string>): Me
 }
 
 export function toMeetingNote(
-  row: MeetingNoteRow,
+  row: MeetingNoteQueryRow,
   profileNameById: Map<string, string>,
 ): MeetingNote {
   return {

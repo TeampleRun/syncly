@@ -24,3 +24,14 @@ export interface MeetingNoteFormValues {
   decisions: string;
   followUpActions: string;
 }
+
+// 회의록 수정·삭제 메뉴를 현재 로그인한 사용자의 권한에 맞춰 노출하기 위한 정보다.
+export interface MeetingNoteViewer {
+  userId: string;
+  role: 'owner' | 'member';
+}
+
+export interface MeetingNoteBoardData {
+  meetingNotes: MeetingNote[];
+  viewer: MeetingNoteViewer | null;
+}
