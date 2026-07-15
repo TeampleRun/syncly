@@ -5,6 +5,7 @@ const mockMeetingNotesByWorkspaceId: Record<string, MeetingNote[]> = {
     {
       id: 'meeting-note-1',
       workspaceId: 'test',
+      authorId: null,
       title: '스프린트 1 킥오프',
       meetingDate: '2025-06-25',
       participants: [
@@ -19,6 +20,7 @@ const mockMeetingNotesByWorkspaceId: Record<string, MeetingNote[]> = {
     {
       id: 'meeting-note-2',
       workspaceId: 'test',
+      authorId: null,
       title: '디자인 시스템 논의',
       meetingDate: '2025-06-20',
       participants: [

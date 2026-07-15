@@ -133,6 +133,7 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
     addMeetingNote(workspaceId, {
       id: createMeetingNoteId(),
       workspaceId,
+      authorId: null,
       title: formValues.title.trim(),
       meetingDate: formValues.meetingDate,
       participants,
