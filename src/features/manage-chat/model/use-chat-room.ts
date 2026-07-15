@@ -4,37 +4,31 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { sendChatMessage } from '@/entities/chat/api/chat-actions';
-import { getChatRoom } from '@/entities/chat/api/get-chat-room';
-import { chatRoomQueryKey } from '@/entities/chat/model/chat-query';
-import type { ChatMessage, ChatRoomData } from '@/entities/chat';
+import {
+  chatRoomQueryKey,
+  getChatRoom,
+  sendChatMessage,
+  type ChatMessage,
+  type ChatRoomData,
+} from '@/entities/chat';
 import { getSupabaseBrowserClient } from '@/shared/api/supabase/client';
 import type { GenericTables } from '@/shared/model/supabase.types';
 
 type ChatMessageRow = GenericTables<'chat_messages'>;
+const CHAT_MESSAGE_LIMIT = 50;
 
-function appendMessage(
+function mergeMessage(
   data: ChatRoomData | undefined,
-  message: ChatMessage,
-): ChatRoomData | undefined {
-  if (!data || data.messages.some((item) => item.id === message.id)) return data;
-
-  return { ...data, messages: [...data.messages, message] };
-}
-
-function replaceMessage(
-  data: ChatRoomData | undefined,
-  temporaryMessageId: string,
   message: ChatMessage,
 ): ChatRoomData | undefined {
   if (!data) return data;
 
-  const messagesWithoutTemporary = data.messages.filter((item) => item.id !== temporaryMessageId);
-  if (messagesWithoutTemporary.some((item) => item.id === message.id)) {
-    return { ...data, messages: messagesWithoutTemporary };
-  }
+  // 같은 UUID의 낙관적 메시지는 실제 DB 행으로 교체하고, 캐시는 시간순 최근 50개만 유지합니다.
+  const messages = [...data.messages.filter((item) => item.id !== message.id), message]
+    .sort((left, right) => new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime())
+    .slice(-CHAT_MESSAGE_LIMIT);
 
-  return { ...data, messages: [...messagesWithoutTemporary, message] };
+  return { ...data, messages };
 }
 
 function toRealtimeMessage(row: ChatMessageRow, data: ChatRoomData): ChatMessage {
@@ -62,6 +56,8 @@ export function useChatRoom({ workspaceId, initialData }: UseChatRoomParams) {
   const notifiedQueryError = useRef<Error | null>(null);
   // 사용자가 입력 중인 메시지 내용입니다.
   const [draft, setDraft] = useState('');
+  // 비동기 전송 중 새로 입력한 draft를 보존하기 위한 최신 입력값 참조입니다.
+  const draftRef = useRef('');
   // Supabase Realtime 채널의 실제 구독 상태를 UI에 전달합니다.
   const [connectionStatus, setConnectionStatus] = useState('CONNECTING');
   // React 상태 갱신 전 연속 Enter·클릭 이벤트가 중복 전송되는 것을 즉시 막는 잠금값입니다.
@@ -78,6 +74,11 @@ export function useChatRoom({ workspaceId, initialData }: UseChatRoomParams) {
     initialData,
   });
   const sendMutation = useMutation({ mutationFn: sendChatMessage });
+
+  const updateDraft = (value: string) => {
+    draftRef.current = value;
+    setDraft(value);
+  };
 
   useEffect(() => {
     if (!error || (!isError && !isRefetchError)) {
@@ -107,7 +108,7 @@ export function useChatRoom({ workspaceId, initialData }: UseChatRoomParams) {
         (payload) => {
           queryClient.setQueryData<ChatRoomData>(chatRoomQueryKey(workspaceId), (currentData) => {
             if (!currentData) return currentData;
-            return appendMessage(
+            return mergeMessage(
               currentData,
               toRealtimeMessage(payload.new as ChatMessageRow, currentData),
             );
@@ -124,14 +125,14 @@ export function useChatRoom({ workspaceId, initialData }: UseChatRoomParams) {
   }, [queryClient, workspaceId]);
 
   const sendMessage = async () => {
-    const content = draft.trim();
+    const content = draftRef.current.trim();
     if (!content || isSendingRef.current) return;
 
     isSendingRef.current = true;
-    // 서버 왕복 전에 내 화면에 바로 표시할 임시 메시지입니다.
-    const temporaryMessageId = `pending-${crypto.randomUUID()}`;
+    // 서버·Realtime·낙관적 캐시가 같은 행으로 식별할 클라이언트 생성 UUID입니다.
+    const messageId = crypto.randomUUID();
     const temporaryMessage: ChatMessage = {
-      id: temporaryMessageId,
+      id: messageId,
       workspaceId,
       senderId: data.viewer?.userId ?? null,
       senderName:
@@ -142,38 +143,38 @@ export function useChatRoom({ workspaceId, initialData }: UseChatRoomParams) {
     };
 
     queryClient.setQueryData<ChatRoomData>(chatRoomQueryKey(workspaceId), (currentData) =>
-      appendMessage(currentData, temporaryMessage),
+      mergeMessage(currentData, temporaryMessage),
     );
-    setDraft('');
+    updateDraft('');
 
-    try {
-      const result = await sendMutation.mutateAsync({ workspaceId, content });
-      if (!result.ok) {
-        queryClient.setQueryData<ChatRoomData>(chatRoomQueryKey(workspaceId), (currentData) =>
-          currentData
-            ? {
-                ...currentData,
-                messages: currentData.messages.filter((item) => item.id !== temporaryMessageId),
-              }
-            : currentData,
-        );
-        toast.error(result.message);
-        return;
-      }
-
-      // Realtime이 먼저 도착해도 id 중복 없이 임시 메시지만 실제 DB 행으로 교체한다.
-      queryClient.setQueryData<ChatRoomData>(chatRoomQueryKey(workspaceId), (currentData) =>
-        replaceMessage(currentData, temporaryMessageId, result.data),
-      );
-    } catch {
+    const removeOptimisticMessage = () => {
       queryClient.setQueryData<ChatRoomData>(chatRoomQueryKey(workspaceId), (currentData) =>
         currentData
           ? {
               ...currentData,
-              messages: currentData.messages.filter((item) => item.id !== temporaryMessageId),
+              messages: currentData.messages.filter((item) => item.id !== messageId),
             }
           : currentData,
       );
+
+      // 전송 뒤 새 입력이 없을 때만 실패한 내용을 복원해 사용자의 새 입력을 덮어쓰지 않습니다.
+      if (draftRef.current === '') updateDraft(content);
+    };
+
+    try {
+      const result = await sendMutation.mutateAsync({ messageId, workspaceId, content });
+      if (!result.ok) {
+        removeOptimisticMessage();
+        toast.error(result.message);
+        return;
+      }
+
+      // Realtime이 먼저 도착해도 같은 UUID의 낙관적 메시지를 실제 DB 행으로 교체합니다.
+      queryClient.setQueryData<ChatRoomData>(chatRoomQueryKey(workspaceId), (currentData) =>
+        mergeMessage(currentData, result.data),
+      );
+    } catch {
+      removeOptimisticMessage();
       toast.error('메시지 전송에 실패했습니다. 잠시 후 다시 시도해주세요.');
     } finally {
       isSendingRef.current = false;
@@ -185,7 +186,7 @@ export function useChatRoom({ workspaceId, initialData }: UseChatRoomParams) {
     participants: data.participants,
     viewer: data.viewer,
     draft,
-    setDraft,
+    setDraft: updateDraft,
     sendMessage,
     isSending: sendMutation.isPending,
     isLoading: isPending,

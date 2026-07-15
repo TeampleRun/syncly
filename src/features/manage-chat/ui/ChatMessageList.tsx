@@ -27,12 +27,28 @@ function getAvatarLabel(name: string): string {
 }
 
 export function ChatMessageList({ messages, viewerId, isLoading }: ChatMessageListProps) {
+  // 메시지 영역 자체의 스크롤 위치를 판단해 과거 메시지 열람 중 자동 이동을 막습니다.
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   // 새 메시지 전송·수신 뒤 최근 대화를 보이게 하는 스크롤 기준 요소입니다.
   const bottomRef = useRef<HTMLDivElement>(null);
+  // 최초 진입 또는 하단 근처일 때만 자동 스크롤하도록 기억하는 상태입니다.
+  const shouldScrollToBottomRef = useRef(true);
 
   useEffect(() => {
+    if (!shouldScrollToBottomRef.current) return;
+
     bottomRef.current?.scrollIntoView({ block: 'end' });
+    shouldScrollToBottomRef.current = true;
   }, [messages.length]);
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // 48px 이내면 사용자가 대화 하단을 보고 있다고 판단합니다.
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    shouldScrollToBottomRef.current = distanceFromBottom < 48;
+  };
 
   if (isLoading) {
     return (
@@ -52,7 +68,11 @@ export function ChatMessageList({ messages, viewerId, isLoading }: ChatMessageLi
   }
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-7">
+    <div
+      ref={scrollContainerRef}
+      onScroll={handleScroll}
+      className="min-h-0 flex-1 overflow-y-auto px-5 py-6 sm:px-7"
+    >
       <div className="space-y-5">
         {messages.map((message) => {
           const isOwnMessage = message.senderId === viewerId;

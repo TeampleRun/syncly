@@ -8,6 +8,8 @@ import type { ChatMessage } from '../model/chat.types';
 
 const uuidSchema = z.guid();
 const chatMessageSchema = z.object({
+  // 낙관적 메시지와 DB·Realtime 메시지를 같은 행으로 식별하기 위한 클라이언트 생성 UUID입니다.
+  messageId: uuidSchema,
   workspaceId: uuidSchema,
   content: z.string().trim().min(1, '메시지를 입력해주세요.').max(2_000),
 });
@@ -48,6 +50,7 @@ async function getCurrentWorkspaceMember(workspaceId: string) {
 }
 
 export async function sendChatMessage(input: {
+  messageId: string;
   workspaceId: string;
   content: string;
 }): Promise<ChatActionResult<ChatMessage>> {
@@ -57,6 +60,7 @@ export async function sendChatMessage(input: {
     const { data, error } = await supabase
       .from('chat_messages')
       .insert({
+        id: value.messageId,
         workspace_id: value.workspaceId,
         sender_id: member.user_id,
         content: value.content,
