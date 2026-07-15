@@ -19,7 +19,9 @@ export {
 } from './model/meeting-note.mapper';
 export { meetingNotesQueryKey } from './model/meeting-note-query';
 export { getMeetingNotes } from './api/get-meeting-notes';
+export { getMeetingNote } from './api/get-meeting-note';
 export { createMeetingNote, type MeetingNoteActionResult } from './api/create-meeting-note';
+export { updateMeetingNote } from './api/update-meeting-note';
 export {
   meetingNoteContentSchema,
   meetingNoteTitleSchema,
