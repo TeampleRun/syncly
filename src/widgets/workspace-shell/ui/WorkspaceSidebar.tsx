@@ -7,6 +7,7 @@ import { ChevronRight, LogOut, Menu } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { WORKSPACE_PURPOSE_META, type Workspace } from '@/entities/workspace';
 import type { WorkspaceMember } from '@/entities/workspace-member';
+import { useLogout } from '@/shared/lib/use-logout';
 import { cn } from '@/shared/lib/utils';
 import type { WorkspaceNavigationItem } from '../model/workspace-navigation';
 
@@ -29,6 +30,8 @@ export function WorkspaceSidebar({
 }: WorkspaceSidebarProps) {
   const pathname = usePathname();
   const purposeMeta = WORKSPACE_PURPOSE_META[workspace.purpose];
+
+  const { handleLogout } = useLogout();
   const PurposeIcon = purposeMeta.icon;
 
   return (
@@ -141,6 +144,7 @@ export function WorkspaceSidebar({
           <button
             type="button"
             aria-label="로그아웃"
+            onClick={handleLogout}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />

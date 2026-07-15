@@ -53,9 +53,23 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && AUTH_PAGES.includes(request.nextUrl.pathname)) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/workspaces';
-    return NextResponse.redirect(url);
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('real_name')
+      .eq('id', user.sub)
+      .maybeSingle();
+
+    if (profile?.real_name) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/workspaces';
+      return NextResponse.redirect(url);
+    }
+
+    if (request.nextUrl.pathname === '/login') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/signup';
+      return NextResponse.redirect(url);
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

@@ -36,7 +36,11 @@ export function WorkspaceShell({
       />
 
       <div className="flex h-screen min-w-0 flex-1 flex-col">
-        <WorkspaceHeader navigationItems={navigationItems} currentMember={currentMember} />
+        <WorkspaceHeader
+          navigationItems={navigationItems}
+          currentMember={currentMember}
+          workspaceId={workspaceId}
+        />
         <main className="min-h-0 flex-1 overflow-y-auto px-8 py-8">{children}</main>
       </div>
     </div>
