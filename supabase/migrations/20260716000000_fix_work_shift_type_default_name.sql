@@ -1,7 +1,7 @@
--- 근무유형 생성과 이번 주 기본 배정을 하나의 DB 트랜잭션으로 처리한다.
+-- 기존 배포 환경의 근무유형 생성 RPC가 이름 중복 없이 유형을 추가하도록 보정한다.
 begin;
 
-create function public.create_work_shift_type_and_ensure_weekly_entries(
+create or replace function public.create_work_shift_type_and_ensure_weekly_entries(
   p_workspace_id uuid,
   p_week_start_date date
 )
@@ -38,7 +38,6 @@ begin
       using errcode = '42501';
   end if;
 
-  -- 동일 워크스페이스의 동시 추가 요청은 정렬 순서가 충돌하지 않도록 직렬화한다.
   perform 1
   from public.workspaces
   where id = p_workspace_id
@@ -48,7 +47,7 @@ begin
     raise exception '워크스페이스를 찾을 수 없습니다.';
   end if;
 
-  -- 워크스페이스 내 이름 중복 제약을 지키며 사용자가 바로 구분할 수 있는 기본 이름을 만든다.
+  -- 워크스페이스 행 잠금 안에서 후보 이름을 정해 동시 추가에도 중복 이름을 만들지 않는다.
   while exists (
     select 1
     from public.work_shift_types shift

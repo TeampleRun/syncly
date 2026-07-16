@@ -115,7 +115,13 @@ export async function createWorkShiftType(workspaceId: string): Promise<{
     p_week_start_date: getCurrentWeekRange().startDate,
   });
 
-  if (error) throw new Error(`근무 유형 추가에 실패했습니다: ${error.message}`);
+  if (error) {
+    const message =
+      error.code === '23505'
+        ? '같은 이름의 근무 유형이 이미 있습니다. 이름을 바꾼 뒤 다시 시도해주세요.'
+        : error.message;
+    throw new Error(`근무 유형 추가에 실패했습니다: ${message}`);
+  }
 
   const createdShift = data?.[0];
   if (!createdShift) {
@@ -155,7 +161,13 @@ export async function updateWorkShiftType(input: z.infer<typeof shiftTypeSchema>
     .eq('id', value.id)
     .eq('workspace_id', value.workspaceId);
 
-  if (error) throw new Error(`근무 유형 저장에 실패했습니다: ${error.message}`);
+  if (error) {
+    const message =
+      error.code === '23505'
+        ? '같은 이름의 근무 유형이 이미 있습니다. 다른 이름을 입력해주세요.'
+        : error.message;
+    throw new Error(`근무 유형 저장에 실패했습니다: ${message}`);
+  }
   revalidateWorkspace(value.workspaceId);
 }
 
