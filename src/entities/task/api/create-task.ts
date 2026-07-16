@@ -1,6 +1,5 @@
 'use server';
 
-import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
 
 import { taskTitleSchema } from '../model/task.schema';
@@ -33,13 +32,11 @@ export async function createTask(params: { workspaceId: string; title: string })
   }
 
   const supabase = await createSupabaseServerClient();
-  const currentUserId = await getCurrentUserId();
   const dueDate = getTodayIsoDateInKst();
 
   const { error } = await (supabase as unknown as UntypedRpcClient).rpc('create_task', {
     p_workspace_id: params.workspaceId,
     p_title: parsedTitle.data,
-    p_user_id: currentUserId,
     p_due_date: dueDate,
   });
 

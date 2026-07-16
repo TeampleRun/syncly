@@ -1,47 +1,16 @@
--- task 생성/보드 갱신 RPC + 브라우저 직접 조회에 필요한 RLS 정리
+-- 원격 DB에 누락된 태스크 RPC를 추가하고, 생성자 식별을 auth.uid() 기준으로 고정한다.
 
--- 실 RLS 정책이 있는 모든 초기 public 테이블에서 permissive dev policy를 제거한다.
-drop policy if exists dev_full_access on public.profiles;
-drop policy if exists dev_full_access on public.module_registry;
-drop policy if exists dev_full_access on public.workspaces;
-drop policy if exists dev_full_access on public.workspace_members;
-drop policy if exists dev_full_access on public.workspace_modules;
-drop policy if exists dev_full_access on public.user_dashboard_layouts;
-drop policy if exists dev_full_access on public.sprints;
-drop policy if exists dev_full_access on public.tasks;
-drop policy if exists dev_full_access on public.calendar_events;
-drop policy if exists dev_full_access on public.announcements;
-drop policy if exists dev_full_access on public.meeting_notes;
-drop policy if exists dev_full_access on public.resources;
-drop policy if exists dev_full_access on public.chat_messages;
-drop policy if exists dev_full_access on public.work_schedule_entries;
-
--- profiles는 본인 또는 같은 워크스페이스 멤버의 프로필만 조회 가능하게 좁힌다.
-drop policy if exists profiles_select on public.profiles;
-create policy profiles_select_self_or_shared_workspace_member on public.profiles
-  for select to authenticated
-  using (
-    id = auth.uid()
-    or exists (
-      select 1
-      from public.workspace_members current_member
-      join public.workspace_members target_member
-        on target_member.workspace_id = current_member.workspace_id
-      where current_member.user_id = auth.uid()
-        and target_member.user_id = profiles.id
-    )
-  );
-
--- 업무 생성: 로그인 세션의 auth.uid()를 사용하고, 같은 워크스페이스 안에서 정렬 경쟁을 직렬화한다.
 drop function if exists public.create_task(uuid, text, uuid, date);
+drop function if exists public.create_task(uuid, text, date);
 
-create or replace function public.create_task(
+create function public.create_task(
   p_workspace_id uuid,
   p_title text,
   p_due_date date default null
 )
 returns uuid
 language plpgsql
+security invoker
 set search_path = public, pg_temp
 as $$
 declare
@@ -98,13 +67,13 @@ $$;
 revoke all on function public.create_task(uuid, text, date) from public;
 grant execute on function public.create_task(uuid, text, date) to authenticated;
 
--- 보드 갱신: 여러 task 상태/정렬 변경을 단일 트랜잭션으로 반영한다.
 create or replace function public.update_task_board(
   p_workspace_id uuid,
   p_tasks jsonb
 )
 returns void
 language plpgsql
+security invoker
 set search_path = public, pg_temp
 as $$
 declare
