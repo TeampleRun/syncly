@@ -67,14 +67,15 @@ export function WorkScheduleBoard({
   });
 
   const handleAddShift = async (): Promise<void> => {
-    try {
-      const { shift, defaultShiftTypeId } = await createWorkShiftType(workspaceId);
-      setScheduleConfig((current) => ({ shifts: [...current.shifts, shift] }));
-      completeMissingEntries(defaultShiftTypeId);
-    } catch (error) {
-      console.error(error);
-      toast.error('근무 유형을 추가하지 못했습니다.');
+    const result = await createWorkShiftType(workspaceId);
+    if (!result.ok) {
+      toast.error(result.message);
+      return;
     }
+
+    const { shift, defaultShiftTypeId } = result.data;
+    setScheduleConfig((current) => ({ shifts: [...current.shifts, shift] }));
+    completeMissingEntries(defaultShiftTypeId);
   };
 
   const handleUpdateShift = (
@@ -91,11 +92,9 @@ export function WorkScheduleBoard({
     // 시작·종료 시간을 순서대로 고치는 동안의 임시 시간값은 저장하지 않는다.
     if (!shift || !canPersistShift(shift)) return;
 
-    try {
-      await updateWorkShiftType({ workspaceId, ...shift });
-    } catch (error) {
-      console.error(error);
-      toast.error('근무 유형 저장에 실패했습니다. 입력 값을 확인해주세요.');
+    const result = await updateWorkShiftType({ workspaceId, ...shift });
+    if (!result.ok) {
+      toast.error(result.message);
     }
   };
 

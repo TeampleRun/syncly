@@ -15,6 +15,8 @@ const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, {
   message: '시간은 00:00부터 23:59 사이여야 합니다.',
 });
 
+type WorkShiftTypeActionResult<T> = { ok: true; data: T } | { ok: false; message: string };
+
 const shiftTypeSchema = z
   .object({
     id: uuidSchema,
@@ -49,6 +51,21 @@ const shiftTypeSchema = z
 
 function revalidateWorkspace(workspaceId: string): void {
   revalidatePath(`/workspaces/${workspaceId}/work-schedule`);
+}
+
+function getWorkShiftTypeErrorMessage(error: unknown, fallbackMessage: string): string {
+  console.error('[work schedule] 근무 유형 저장 실패:', error);
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === '23505'
+  ) {
+    return '같은 이름의 근무 유형이 이미 있습니다. 다른 이름을 입력해주세요.';
+  }
+
+  return fallbackMessage;
 }
 
 export async function saveWorkScheduleEntry(input: {
@@ -104,71 +121,89 @@ export async function saveWorkScheduleEntry(input: {
   revalidateWorkspace(value.workspaceId);
 }
 
-export async function createWorkShiftType(workspaceId: string): Promise<{
-  shift: WorkShiftOption;
-  defaultShiftTypeId: string;
-}> {
-  const parsedWorkspaceId = uuidSchema.parse(workspaceId);
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.rpc('create_work_shift_type_and_ensure_weekly_entries', {
-    p_workspace_id: parsedWorkspaceId,
-    p_week_start_date: getCurrentWeekRange().startDate,
-  });
+export async function createWorkShiftType(
+  workspaceId: string,
+): Promise<WorkShiftTypeActionResult<{ shift: WorkShiftOption; defaultShiftTypeId: string }>> {
+  try {
+    const parsedWorkspaceId = uuidSchema.parse(workspaceId);
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.rpc('create_work_shift_type_and_ensure_weekly_entries', {
+      p_workspace_id: parsedWorkspaceId,
+      p_week_start_date: getCurrentWeekRange().startDate,
+    });
 
-  if (error) {
-    const message =
-      error.code === '23505'
-        ? '같은 이름의 근무 유형이 이미 있습니다. 이름을 바꾼 뒤 다시 시도해주세요.'
-        : error.message;
-    throw new Error(`근무 유형 추가에 실패했습니다: ${message}`);
+    if (error) {
+      return {
+        ok: false,
+        message: getWorkShiftTypeErrorMessage(error, '근무 유형을 추가하지 못했습니다.'),
+      };
+    }
+
+    const createdShift = data?.[0];
+    if (!createdShift) {
+      return { ok: false, message: '근무 유형 추가 결과를 확인하지 못했습니다.' };
+    }
+
+    revalidateWorkspace(parsedWorkspaceId);
+
+    return {
+      ok: true,
+      data: {
+        shift: {
+          id: createdShift.id,
+          code: createdShift.code,
+          name: createdShift.name,
+          startTime: createdShift.start_time?.slice(0, 5) ?? null,
+          endTime: createdShift.end_time?.slice(0, 5) ?? null,
+          endsNextDay: createdShift.ends_next_day,
+          color: createdShift.color as WorkShiftColor,
+          isOff: createdShift.is_off,
+        },
+        defaultShiftTypeId: createdShift.default_shift_type_id,
+      },
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: getWorkShiftTypeErrorMessage(error, '근무 유형을 추가하지 못했습니다.'),
+    };
   }
-
-  const createdShift = data?.[0];
-  if (!createdShift) {
-    throw new Error('근무 유형 추가 결과를 확인하지 못했습니다.');
-  }
-
-  revalidateWorkspace(parsedWorkspaceId);
-
-  return {
-    shift: {
-      id: createdShift.id,
-      code: createdShift.code,
-      name: createdShift.name,
-      startTime: createdShift.start_time?.slice(0, 5) ?? null,
-      endTime: createdShift.end_time?.slice(0, 5) ?? null,
-      endsNextDay: createdShift.ends_next_day,
-      color: createdShift.color as WorkShiftColor,
-      isOff: createdShift.is_off,
-    },
-    defaultShiftTypeId: createdShift.default_shift_type_id,
-  };
 }
 
-export async function updateWorkShiftType(input: z.infer<typeof shiftTypeSchema>): Promise<void> {
-  const value = shiftTypeSchema.parse(input);
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase
-    .from('work_shift_types')
-    .update({
-      name: value.name,
-      start_time: value.startTime,
-      end_time: value.endTime,
-      ends_next_day: value.endsNextDay,
-      color: value.color,
-      is_off: value.isOff,
-    })
-    .eq('id', value.id)
-    .eq('workspace_id', value.workspaceId);
+export async function updateWorkShiftType(
+  input: z.infer<typeof shiftTypeSchema>,
+): Promise<WorkShiftTypeActionResult<undefined>> {
+  try {
+    const value = shiftTypeSchema.parse(input);
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase
+      .from('work_shift_types')
+      .update({
+        name: value.name,
+        start_time: value.startTime,
+        end_time: value.endTime,
+        ends_next_day: value.endsNextDay,
+        color: value.color,
+        is_off: value.isOff,
+      })
+      .eq('id', value.id)
+      .eq('workspace_id', value.workspaceId);
 
-  if (error) {
-    const message =
-      error.code === '23505'
-        ? '같은 이름의 근무 유형이 이미 있습니다. 다른 이름을 입력해주세요.'
-        : error.message;
-    throw new Error(`근무 유형 저장에 실패했습니다: ${message}`);
+    if (error) {
+      return {
+        ok: false,
+        message: getWorkShiftTypeErrorMessage(error, '근무 유형을 저장하지 못했습니다.'),
+      };
+    }
+
+    revalidateWorkspace(value.workspaceId);
+    return { ok: true, data: undefined };
+  } catch (error) {
+    return {
+      ok: false,
+      message: getWorkShiftTypeErrorMessage(error, '근무 유형 입력값이 올바르지 않습니다.'),
+    };
   }
-  revalidateWorkspace(value.workspaceId);
 }
 
 export async function reorderWorkShiftTypes(input: {

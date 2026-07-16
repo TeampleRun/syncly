@@ -1,5 +1,4 @@
 -- 기존 배포 환경의 근무유형 생성 RPC가 이름 중복 없이 유형을 추가하도록 보정한다.
-begin;
 
 create or replace function public.create_work_shift_type_and_ensure_weekly_entries(
   p_workspace_id uuid,
@@ -128,5 +127,3 @@ $$;
 
 revoke all on function public.create_work_shift_type_and_ensure_weekly_entries(uuid, date) from public;
 grant execute on function public.create_work_shift_type_and_ensure_weekly_entries(uuid, date) to authenticated;
-
-commit;

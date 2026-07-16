@@ -1,5 +1,4 @@
 -- UI 상태값(in-progress)을 DB enum 값(in_progress)으로 정규화해 보드 정렬 RPC의 계약을 보완한다.
-begin;
 
 create or replace function public.update_task_board(
   p_workspace_id uuid,
@@ -55,5 +54,3 @@ $$;
 
 revoke all on function public.update_task_board(uuid, jsonb) from public;
 grant execute on function public.update_task_board(uuid, jsonb) to authenticated;
-
-commit;

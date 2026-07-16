@@ -1,5 +1,4 @@
 -- 원격 DB에 누락된 태스크 RPC를 추가하고, 생성자 식별을 auth.uid() 기준으로 고정한다.
-begin;
 
 drop function if exists public.create_task(uuid, text, uuid, date);
 drop function if exists public.create_task(uuid, text, date);
@@ -122,5 +121,3 @@ $$;
 
 revoke all on function public.update_task_board(uuid, jsonb) from public;
 grant execute on function public.update_task_board(uuid, jsonb) to authenticated;
-
-commit;
