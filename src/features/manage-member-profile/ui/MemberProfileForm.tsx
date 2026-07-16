@@ -131,7 +131,10 @@ export function MemberProfileForm({
           탈퇴하기
         </button>
 
-        <Dialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
+        <Dialog
+          open={showLeaveConfirm}
+          onOpenChange={(open) => !isLeaving && setShowLeaveConfirm(open)}
+        >
           <DialogContent className="p-6 sm:max-w-[380px]">
             <DialogTitle className="font-bold">정말 탈퇴하시겠어요?</DialogTitle>
             <DialogDescription>
@@ -143,7 +146,8 @@ export function MemberProfileForm({
               <button
                 type="button"
                 onClick={() => setShowLeaveConfirm(false)}
-                className="h-10 rounded-2xl border border-slate-200 px-5 text-sm font-bold text-slate-600 hover:bg-slate-50"
+                disabled={isLeaving}
+                className="h-10 rounded-2xl border border-slate-200 px-5 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
               >
                 취소
               </button>

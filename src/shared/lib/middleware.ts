@@ -49,7 +49,9 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.search = new URLSearchParams({ redirect: request.nextUrl.pathname }).toString();
-    return NextResponse.redirect(url);
+    const redirectResponse = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
   }
 
   if (user && AUTH_PAGES.includes(request.nextUrl.pathname)) {
@@ -62,13 +64,17 @@ export async function updateSession(request: NextRequest) {
     if (profile?.real_name) {
       const url = request.nextUrl.clone();
       url.pathname = '/workspaces';
-      return NextResponse.redirect(url);
+      const redirectResponse = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+      return redirectResponse;
     }
 
     if (request.nextUrl.pathname === '/login') {
       const url = request.nextUrl.clone();
       url.pathname = '/signup';
-      return NextResponse.redirect(url);
+      const redirectResponse = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+      return redirectResponse;
     }
   }
 

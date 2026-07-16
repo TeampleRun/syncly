@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
@@ -32,7 +33,7 @@ export async function leaveWorkspace(input: LeaveWorkspaceInput): Promise<void> 
     throw new Error('팀 탈퇴에 실패했어요. 잠시 후 다시 시도해주세요.');
   }
 
-  if (deleted.length === 0) {
+  if (!deleted || deleted.length === 0) {
     const { data: member } = await supabase
       .from('workspace_members')
       .select('role')
@@ -47,4 +48,6 @@ export async function leaveWorkspace(input: LeaveWorkspaceInput): Promise<void> 
     }
     throw new Error('멤버 정보를 찾을 수 없어요');
   }
+
+  revalidatePath('/workspaces');
 }
