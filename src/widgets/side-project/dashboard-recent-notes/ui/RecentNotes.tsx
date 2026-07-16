@@ -5,26 +5,37 @@
 //  · md: 리스트(제목 + 작성일)
 //  · lg: 총 개수 + 리스트(제목 + 본문 미리보기 + 작성일)
 import { FileText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 
 import { getMeetingNotes, meetingNotesQueryKey } from '@/entities/meeting-note';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
-const header = (
-  <WidgetCardHeader title="최근 회의록" action={<WidgetCardAction>전체 보기</WidgetCardAction>} />
-);
 interface RecentNotesProps {
   workspaceId: string;
   size?: WidgetSize;
 }
 
 export default function RecentNotes({ workspaceId, size = 'md' }: RecentNotesProps) {
+  const router = useRouter();
   const { data, isError, isPending } = useQuery({
     queryKey: meetingNotesQueryKey(workspaceId),
     queryFn: () => getMeetingNotes(workspaceId),
   });
   const meetingNotes = data?.meetingNotes ?? [];
+
+  // workspaceId가 필요해 컴포넌트 내부에서 헤더를 구성한다.
+  const header = (
+    <WidgetCardHeader
+      title="최근 회의록"
+      action={
+        <WidgetCardAction onClick={() => router.push(`/workspaces/${workspaceId}/meeting-notes`)}>
+          전체 보기
+        </WidgetCardAction>
+      }
+    />
+  );
 
   if (isPending || isError || meetingNotes.length === 0) {
     return (
