@@ -2,6 +2,7 @@
 
 // 템플릿 소개 섹션 — 좌측 리스트에서 템플릿을 선택하면 우측 미리보기 패널이 전환된다
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
@@ -100,10 +101,15 @@ export default function TemplatesSection() {
                 </p>
               </div>
             </div>
-            <div className="flex min-h-0 flex-1 items-center justify-center rounded-2xl bg-[#f7f7f7] p-5">
-              <p className="text-xl font-bold tracking-[-0.5px] text-[#939393]">
-                템플릿 UI 스크린샷
-              </p>
+            <div className="relative min-h-0 flex-1 overflow-hidden rounded-2xl bg-white p-3 shadow-inner sm:p-5">
+              <Image
+                key={selected.id}
+                src={selected.previewImage}
+                alt={`${selected.title} 대시보드 미리보기`}
+                fill
+                sizes="(max-width: 1023px) calc(100vw - 48px), 840px"
+                className="object-contain p-3 sm:p-5"
+              />
             </div>
           </div>
         </motion.div>

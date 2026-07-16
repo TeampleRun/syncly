@@ -22,5 +22,5 @@ export default async function WorkspaceHomePage({ params }: WorkspaceHomePagePro
     redirect(`/workspaces/${workspaceId}/dashboard`);
   }
 
-  redirect(`/workspaces/${workspaceId}/project-management`);
+  redirect(`/workspaces/${workspaceId}/dashboard`);
 }
