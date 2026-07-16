@@ -7,7 +7,10 @@
 import { useMemo, useState, useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
 import { sendInviteEmail, setWorkspaceInviteEnabled } from '@/entities/workspace';
-import type { WorkspaceMember } from '@/entities/workspace-member';
+import {
+  useWorkspaceMembersByWorkspaceId,
+  type WorkspaceMember,
+} from '@/entities/workspace-member';
 
 export type InviteMode = 'email' | 'link';
 
@@ -32,7 +35,12 @@ export function useMemberManagement({
   inviteCode,
   inviteEnabled,
 }: UseMemberManagementParams) {
-  const [members] = useState<WorkspaceMember[]>(initialMembers);
+  // 멤버 목록은 RSC 값으로 첫 렌더를 채우되, 공유 캐시가 소유한다.
+  // 닉네임 변경 등으로 캐시가 무효화되면 목록·초대 중복 검사가 함께 최신화된다.
+  const { data: members = initialMembers } = useWorkspaceMembersByWorkspaceId(
+    workspaceId,
+    initialMembers,
+  );
   const [inviteMode, setInviteMode] = useState<InviteMode>('email');
   const [email, setEmail] = useState('');
   const [isSendingInvite, setIsSendingInvite] = useState(false);

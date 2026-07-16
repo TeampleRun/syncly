@@ -1,13 +1,17 @@
 'use client';
 
 // 서버에서 조회한 매장 운영 워크스페이스의 근무유형과 일정을 화면 구성 요소에 전달합니다.
+// members는 RSC 값(initialMembers)으로 첫 렌더를 채우고 공유 캐시가 소유한다(닉네임 변경 즉시 반영).
 import type { WorkScheduleEntry, WorkShiftOption } from '@/entities/work-schedule';
-import type { WorkspaceMember } from '@/entities/workspace-member';
+import {
+  useWorkspaceMembersByWorkspaceId,
+  type WorkspaceMember,
+} from '@/entities/workspace-member';
 import { WorkScheduleBoard } from '@/features/manage-work-schedule';
 
 interface WorkScheduleViewProps {
   workspaceId: string;
-  members: WorkspaceMember[];
+  initialMembers: WorkspaceMember[];
   shifts: WorkShiftOption[];
   schedule: WorkScheduleEntry[];
   weekStartDate: string;
@@ -15,11 +19,16 @@ interface WorkScheduleViewProps {
 
 export function WorkScheduleView({
   workspaceId,
-  members,
+  initialMembers,
   shifts,
   schedule,
   weekStartDate,
 }: WorkScheduleViewProps) {
+  const { data: members = initialMembers } = useWorkspaceMembersByWorkspaceId(
+    workspaceId,
+    initialMembers,
+  );
+
   return (
     <section>
       <div className="mb-6">

@@ -19,7 +19,7 @@ export default async function SprintBoardPage({ params, searchParams }: SprintBo
     <SprintBoardView
       workspaceId={workspaceId}
       selectedSprintId={selectedSprintId}
-      members={members}
+      initialMembers={members}
     />
   );
 }

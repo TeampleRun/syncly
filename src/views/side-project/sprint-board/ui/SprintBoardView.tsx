@@ -3,12 +3,15 @@
 // 스프린트 보드 페이지 뷰 — useQuery로 스프린트/업무/백로그를 조회해 렌더한다(GET 컨벤션 §5).
 // 선택 스프린트는 URL(?sprint=id)에서 온 selectedSprintId로 판정하고, 없으면 현재 스프린트로 폴백한다.
 // 로딩/에러/빈 상태를 여기서 분기하고, 상호작용 보드/백로그는 feature에 위임한다.
-// members(담당자 표시명 해석용)는 서버(RSC)에서 조회해 prop으로 주입받는다.
+// members(담당자 표시명 해석용)는 RSC 값(initialMembers)으로 첫 렌더를 채우고 공유 캐시가 소유한다.
 import { Plus_Jakarta_Sans } from 'next/font/google';
 
 import { resolveCurrentSprint, useSprints } from '@/entities/side-project/sprint';
 import { useBacklogTasks, useSprintTasks } from '@/entities/side-project/task';
-import type { WorkspaceMember } from '@/entities/workspace-member';
+import {
+  useWorkspaceMembersByWorkspaceId,
+  type WorkspaceMember,
+} from '@/entities/workspace-member';
 import { SprintBoard } from '@/features/manage-sprint-tasks';
 
 import { SprintToolbar } from '@/features/manage-sprints';
@@ -32,11 +35,19 @@ function CenteredMessage({ children }: { children: React.ReactNode }) {
 interface SprintBoardViewProps {
   workspaceId: string;
   selectedSprintId?: string;
-  /** 담당자 표시명 해석용 워크스페이스 멤버(RSC에서 주입) */
-  members: WorkspaceMember[];
+  /** 담당자 표시명 해석용 워크스페이스 멤버(RSC에서 주입, 공유 캐시의 초기값) */
+  initialMembers: WorkspaceMember[];
 }
 
-export function SprintBoardView({ workspaceId, selectedSprintId, members }: SprintBoardViewProps) {
+export function SprintBoardView({
+  workspaceId,
+  selectedSprintId,
+  initialMembers,
+}: SprintBoardViewProps) {
+  const { data: members = initialMembers } = useWorkspaceMembersByWorkspaceId(
+    workspaceId,
+    initialMembers,
+  );
   const sprintsQuery = useSprints(workspaceId);
   // 선택값이 없거나 유효하지 않으면 데이터에서 현재 스프린트를 판정(진행 중 우선 → 없으면 최신)
   const sprint = sprintsQuery.data

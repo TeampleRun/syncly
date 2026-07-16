@@ -4,8 +4,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { leaveWorkspace, updateMyNickname } from '@/entities/workspace-member';
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,11 @@ import {
   DialogFooter,
   DialogTitle,
 } from '@/shared/ui/dialog';
+import {
+  updateMyNickname,
+  workspaceMembersByWorkspaceQueryKey,
+  leaveWorkspace,
+} from '@/entities/workspace-member';
 
 interface MemberProfileFormProps {
   workspaceId: string;
@@ -26,40 +31,45 @@ export function MemberProfileForm({
   isOwner,
 }: MemberProfileFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [committedNickname, setCommittedNickname] = useState(initialNickname);
   const [nickname, setNickname] = useState(initialNickname);
   const [isSaved, setIsSaved] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
-  const isDirty = nickname !== committedNickname;
-  const canSubmit = nickname.trim().length > 0 && isDirty && !isSubmitting;
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!canSubmit) {
-      return;
-    }
-
-    const nextNickname = nickname.trim();
-
-    setIsSubmitting(true);
-    try {
-      await updateMyNickname({ workspaceId, nickname: nextNickname });
-      setNickname(nextNickname);
-      setCommittedNickname(nextNickname);
+  // updateMyNickname은 실패 시 throw 하므로 onSuccess/onError로 깔끔하게 분기할 수 있다.
+  const updateMutation = useMutation({
+    mutationFn: updateMyNickname,
+    onSuccess: async (_data, { nickname: savedNickname }) => {
+      // 멤버 목록·스프린트·워크스케줄 등 공유 캐시를 쓰는 화면이 변경된 닉네임을 반영하도록 무효화한다.
+      await queryClient.invalidateQueries({
+        queryKey: workspaceMembersByWorkspaceQueryKey(workspaceId),
+      });
+      setNickname(savedNickname);
+      setCommittedNickname(savedNickname);
       setIsSaved(true);
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error(error);
       toast.error(
         error instanceof Error
           ? error.message
           : '닉네임 저장에 실패했습니다. 잠시 후 다시 시도해주세요.',
       );
-    } finally {
-      setIsSubmitting(false);
+    },
+  });
+
+  const isDirty = nickname !== committedNickname;
+  const canSubmit = nickname.trim().length > 0 && isDirty && !updateMutation.isPending;
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!canSubmit) {
+      return;
     }
+
+    updateMutation.mutate({ workspaceId, nickname: nickname.trim() });
   };
 
   const handleLeave = async () => {
@@ -105,7 +115,7 @@ export function MemberProfileForm({
               disabled={!canSubmit}
               className="h-10 rounded-2xl bg-[var(--color-brand)] px-5 text-sm font-bold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isSubmitting ? '저장 중…' : '저장'}
+              {updateMutation.isPending ? '저장 중…' : '저장'}
             </button>
             {isSaved && !isDirty ? (
               <span className="text-sm font-medium text-emerald-600">저장되었습니다.</span>

@@ -4,12 +4,16 @@ import { useEffect, useRef, useState } from 'react';
 import { CalendarDays, Check, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import type { MeetingNoteFormValues, MeetingNoteParticipant } from '@/entities/meeting-note';
-import { getMockWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
-import { useMeetingNotesStore } from '../model/use-meeting-notes-store';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import type { MeetingNote, MeetingNoteFormValues } from '@/entities/meeting-note';
+import { createMeetingNote, meetingNotesQueryKey, updateMeetingNote } from '@/entities/meeting-note';
+import { useWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
 
 interface MeetingNoteFormProps {
   workspaceId: string;
+  // 있으면 수정 모드, 없으면 생성 모드로 동작한다.
+  meetingNote?: MeetingNote;
 }
 
 function getTodayIsoDate() {
@@ -74,30 +78,42 @@ function getIsoDateFromParts(yearText: string, monthText: string, dayText: strin
   return `${yearText}-${monthText.padStart(2, '0')}-${dayText.padStart(2, '0')}`;
 }
 
-function createMeetingNoteId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `meeting-note-${crypto.randomUUID()}`;
-  }
-
-  return `meeting-note-${Math.random().toString(36).slice(2, 10)}`;
+function splitLines(value: string): string[] {
+  return value
+    .split('\n')
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
-export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
+export function MeetingNoteForm({ workspaceId, meetingNote }: MeetingNoteFormProps) {
   const router = useRouter();
-  const workspaceMembers = getMockWorkspaceMembersByWorkspaceId(workspaceId);
-  const addMeetingNote = useMeetingNotesStore((state) => state.addMeetingNote);
-  const [formValues, setFormValues] = useState<MeetingNoteFormValues>(() => {
-    const initialMeetingDate = getTodayIsoDate();
-
-    return {
-      title: '',
-      meetingDate: initialMeetingDate,
-      decisions: '',
-      followUpActions: '',
-    };
+  const queryClient = useQueryClient();
+  const isEditMode = Boolean(meetingNote);
+  const { data: workspaceMembers = [] } = useWorkspaceMembersByWorkspaceId(workspaceId);
+  const saveMutation = useMutation({
+    mutationFn: (input: {
+      title: string;
+      meetingDate: string;
+      participantIds: string[];
+      decisions: string[];
+      followUpActions: string[];
+    }) =>
+      meetingNote
+        ? updateMeetingNote({ ...input, workspaceId, meetingNoteId: meetingNote.id })
+        : createMeetingNote({ ...input, workspaceId }),
   });
-  const [dateParts, setDateParts] = useState(() => getDatePartsFromIso(getTodayIsoDate()));
-  const [selectedParticipantIds, setSelectedParticipantIds] = useState<string[]>([]);
+  const [formValues, setFormValues] = useState<MeetingNoteFormValues>(() => ({
+    title: meetingNote?.title ?? '',
+    meetingDate: meetingNote?.meetingDate ?? getTodayIsoDate(),
+    decisions: meetingNote?.decisions.join('\n') ?? '',
+    followUpActions: meetingNote?.followUpActions.join('\n') ?? '',
+  }));
+  const [dateParts, setDateParts] = useState(() =>
+    getDatePartsFromIso(meetingNote?.meetingDate ?? getTodayIsoDate()),
+  );
+  const [selectedParticipantIds, setSelectedParticipantIds] = useState<string[]>(
+    () => meetingNote?.participants.map((participant) => participant.id) ?? [],
+  );
   const [isParticipantListOpen, setIsParticipantListOpen] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const dateInputRef = useRef<HTMLInputElement>(null);
@@ -113,40 +129,34 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setHasSubmitted(true);
-    if (!formValues.title.trim()) {
+    if (!formValues.title.trim() || saveMutation.isPending) {
       return;
     }
 
-    const participantPalette = ['#FE9A00', '#00C950', '#615FFF', '#2B7FFF', '#00B8DB', '#FF6B6B'];
-    // 체크한 멤버를 목록 카드에서 바로 렌더링할 수 있는 아바타 데이터로 변환합니다.
-    const participants: MeetingNoteParticipant[] = selectedParticipants.map((member, index) => ({
-      id: member.userId,
-      name: member.workspaceNickname,
-      initial: member.avatarLabel,
-      color: participantPalette[index % participantPalette.length],
-    }));
+    try {
+      const result = await saveMutation.mutateAsync({
+        title: formValues.title.trim(),
+        meetingDate: formValues.meetingDate,
+        participantIds: selectedParticipantIds,
+        decisions: splitLines(formValues.decisions),
+        followUpActions: splitLines(formValues.followUpActions),
+      });
 
-    addMeetingNote(workspaceId, {
-      id: createMeetingNoteId(),
-      workspaceId,
-      title: formValues.title.trim(),
-      meetingDate: formValues.meetingDate,
-      participants,
-      decisions: formValues.decisions
-        .split('\n')
-        .map((item) => item.trim())
-        .filter(Boolean),
-      followUpActions: formValues.followUpActions
-        .split('\n')
-        .map((item) => item.trim())
-        .filter(Boolean),
-    });
+      if (!result.ok) {
+        toast.error(result.message);
+        return;
+      }
 
-    router.push(`/workspaces/${workspaceId}/meeting-notes`);
+      // 목록 페이지·대시보드 위젯이 변경 사항을 바로 반영하도록 캐시를 무효화한다.
+      await queryClient.invalidateQueries({ queryKey: meetingNotesQueryKey(workspaceId) });
+      router.push(`/workspaces/${workspaceId}/meeting-notes`);
+    } catch {
+      toast.error('회의록 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
   };
 
   useEffect(() => {
@@ -282,7 +292,9 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
         onSubmit={handleSubmit}
         className="mt-[21px] rounded-[32px] border border-[#eceffa] bg-white px-[26.5px] pt-[26.5px] pb-[28px] shadow-[0_20px_48px_rgba(91,78,232,0.08)]"
       >
-        <h1 className="text-brand-ink text-[34px] font-extrabold tracking-[-0.04em]">새 회의록</h1>
+        <h1 className="text-brand-ink text-[34px] font-extrabold tracking-[-0.04em]">
+          {isEditMode ? '회의록 수정' : '새 회의록'}
+        </h1>
 
         <div className="mt-8 space-y-[22px]">
           <label className="block">
@@ -465,13 +477,14 @@ export function MeetingNoteForm({ workspaceId }: MeetingNoteFormProps) {
 
         <button
           type="submit"
-          className={`mt-8 inline-flex h-13 w-full items-center justify-center rounded-[18px] text-[17px] font-bold text-white shadow-[0_14px_30px_rgba(91,78,232,0.24)] transition ${
+          disabled={saveMutation.isPending}
+          className={`mt-8 inline-flex h-13 w-full items-center justify-center rounded-[18px] text-[17px] font-bold text-white shadow-[0_14px_30px_rgba(91,78,232,0.24)] transition disabled:cursor-not-allowed disabled:opacity-70 ${
             isTitleValid
               ? 'bg-brand hover:brightness-105'
               : 'bg-[#cfd3e6] shadow-none hover:brightness-100'
           }`}
         >
-          저장하기
+          {saveMutation.isPending ? '저장 중...' : isEditMode ? '수정 완료' : '저장하기'}
         </button>
       </form>
     </section>
