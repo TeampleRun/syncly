@@ -31,6 +31,12 @@ export function MeetingNoteCard({
       return;
     }
 
+    // 중첩된 메뉴/수정/삭제 버튼에서 버블링된 키 이벤트로는 카드가 토글되지 않도록,
+    // 카드 자신이 포커스된 상태의 키 입력만 처리한다.
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       onClick();
