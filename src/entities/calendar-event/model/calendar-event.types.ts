@@ -8,6 +8,7 @@ export interface CalendarEvent {
   date: string;
   time: string | null;
   color: CalendarEventColor;
+  eventType: 'meeting' | 'deadline';
 }
 
 export interface CalendarEventFormValues {

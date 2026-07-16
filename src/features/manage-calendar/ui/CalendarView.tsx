@@ -1,13 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, Pencil, Plus, X } from 'lucide-react';
 import {
   CalendarEventChip,
-  getMockCalendarEventsByWorkspaceId,
   type CalendarEvent,
   type CalendarEventColor,
   type CalendarEventFormValues,
+  formatCalendarEventTimeLabel,
+  useCalendarEventsByWorkspaceId,
+  useCreateCalendarEvent,
+  useDeleteCalendarEvent,
+  useUpdateCalendarEvent,
 } from '@/entities/calendar-event';
 import { plusJakartaSans } from '@/shared/lib/fonts';
 import {
@@ -15,7 +19,6 @@ import {
   createCalendarMonthLabel,
   getInitialCalendarDate,
 } from '../model/calendar-utils';
-import { useCalendarEventsStore } from '../model/use-calendar-events-store';
 
 interface CalendarViewProps {
   workspaceId: string;
@@ -58,45 +61,35 @@ const defaultFormValues: CalendarEventFormValues = {
   color: 'violet',
 };
 
-function createCalendarEventId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return `calendar-event-${crypto.randomUUID()}`;
-  }
-
-  return `calendar-event-${Math.random().toString(36).slice(2, 10)}`;
-}
-
 function formatSelectedDateLabel(isoDate: string) {
   const [year, month, day] = isoDate.split('-');
   return `${year}년 ${Number(month)}월 ${Number(day)}일`;
 }
 
 export function CalendarView({ workspaceId }: CalendarViewProps) {
-  const initialEvents = getMockCalendarEventsByWorkspaceId(workspaceId);
-  const initializeWorkspace = useCalendarEventsStore((state) => state.initializeWorkspace);
-  const addCalendarEvent = useCalendarEventsStore((state) => state.addCalendarEvent);
-  const removeCalendarEvent = useCalendarEventsStore((state) => state.removeCalendarEvent);
-  const storedEvents = useCalendarEventsStore(
-    (state) => state.calendarEventsByWorkspaceId[workspaceId],
-  );
-
-  useEffect(() => {
-    initializeWorkspace(workspaceId, initialEvents);
-  }, [initialEvents, initializeWorkspace, workspaceId]);
-
-  const calendarEvents = storedEvents ?? initialEvents;
+  const calendarEventsQuery = useCalendarEventsByWorkspaceId(workspaceId);
+  const createCalendarEventMutation = useCreateCalendarEvent(workspaceId);
+  const deleteCalendarEventMutation = useDeleteCalendarEvent(workspaceId);
+  const updateCalendarEventMutation = useUpdateCalendarEvent(workspaceId);
+  const calendarEvents = calendarEventsQuery.data ?? [];
   const [currentMonth, setCurrentMonth] = useState(getInitialCalendarDate);
   const [selectedDate, setSelectedDate] = useState('2025-07-30');
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [formValues, setFormValues] = useState(defaultFormValues);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
 
   const monthGrid = createCalendarMonthGrid(currentMonth);
   const monthLabel = createCalendarMonthLabel(currentMonth);
   const isTitleValid = formValues.title.trim().length > 0;
   const [year, month, day] = selectedDate.split('-');
-  const modalDateLabel = `${year}년 ${Number(month)}월 ${Number(day)}일 일정 추가`;
+  const isEditMode = editingEventId !== null;
+  const modalDateLabel = `${year}년 ${Number(month)}월 ${Number(day)}일 일정 ${isEditMode ? '수정' : '추가'}`;
   const selectedDateLabel = formatSelectedDateLabel(selectedDate);
+  const isSubmitting =
+    createCalendarEventMutation.isPending ||
+    updateCalendarEventMutation.isPending ||
+    deleteCalendarEventMutation.isPending;
 
   const eventsByDate = calendarEvents.reduce<Record<string, CalendarEvent[]>>(
     (accumulator, event) => {
@@ -109,29 +102,53 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
 
   const openAddEventModal = (isoDate: string) => {
     setSelectedDate(isoDate);
+    setEditingEventId(null);
     setFormValues(defaultFormValues);
     setHasSubmitted(false);
     setIsAddEventOpen(true);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const openEditEventModal = (calendarEvent: CalendarEvent) => {
+    setSelectedDate(calendarEvent.date);
+    setEditingEventId(calendarEvent.id);
+    setFormValues({
+      title: calendarEvent.title,
+      time: calendarEvent.time ?? '',
+      color: calendarEvent.color,
+    });
+    setHasSubmitted(false);
+    setIsAddEventOpen(true);
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setHasSubmitted(true);
 
-    if (!isTitleValid) {
+    if (!isTitleValid || isSubmitting) {
       return;
     }
 
-    addCalendarEvent(workspaceId, {
-      id: createCalendarEventId(),
-      workspaceId,
-      title: formValues.title.trim(),
-      date: selectedDate,
-      time: formValues.time.trim() || null,
-      color: formValues.color,
-    });
-
-    setIsAddEventOpen(false);
+    try {
+      if (isEditMode && editingEventId) {
+        await updateCalendarEventMutation.mutateAsync({
+          eventId: editingEventId,
+          title: formValues.title.trim(),
+          date: selectedDate,
+          time: formValues.time.trim() || null,
+          color: formValues.color,
+        });
+      } else {
+        await createCalendarEventMutation.mutateAsync({
+          title: formValues.title.trim(),
+          date: selectedDate,
+          time: formValues.time.trim() || null,
+          color: formValues.color,
+        });
+      }
+      setIsAddEventOpen(false);
+    } catch {
+      return;
+    }
   };
 
   return (
@@ -260,7 +277,22 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
               </div>
 
               <div className="mt-5 space-y-3">
-                {selectedDateEvents.length > 0 ? (
+                {calendarEventsQuery.isPending ? (
+                  <div className="rounded-[18px] border border-dashed border-[rgba(91,78,232,0.16)] bg-[#fbfbff] px-4 py-6 text-center">
+                    <p className="text-brand-ink text-[14px] font-semibold">일정을 불러오는 중이에요</p>
+                  </div>
+                ) : calendarEventsQuery.isError ? (
+                  <div className="rounded-[18px] border border-dashed border-[rgba(255,101,101,0.24)] bg-[#fff8f8] px-4 py-6 text-center">
+                    <p className="text-brand-ink text-[14px] font-semibold">일정을 불러오지 못했어요</p>
+                    <button
+                      type="button"
+                      onClick={() => void calendarEventsQuery.refetch()}
+                      className="text-brand mt-3 text-[13px] font-semibold"
+                    >
+                      다시 시도
+                    </button>
+                  </div>
+                ) : selectedDateEvents.length > 0 ? (
                   selectedDateEvents.map((calendarEvent) => (
                     <article
                       key={calendarEvent.id}
@@ -277,18 +309,30 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                               {calendarEvent.title}
                             </p>
                             <p className="text-brand-muted mt-1 text-[12px] font-medium">
-                              {calendarEvent.time ?? '시간 미정'}
+                              {formatCalendarEventTimeLabel(calendarEvent.time)}
                             </p>
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeCalendarEvent(workspaceId, calendarEvent.id)}
-                          className="text-brand-muted hover:bg-brand-soft hover:text-brand-ink inline-flex size-6 shrink-0 items-center justify-center rounded-full transition"
-                          aria-label={`${calendarEvent.title} 일정 삭제`}
-                        >
-                          <X className="size-3.5" />
-                        </button>
+                        <div className="flex shrink-0 items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => openEditEventModal(calendarEvent)}
+                            disabled={isSubmitting}
+                            className="text-brand-muted hover:bg-brand-soft hover:text-brand-ink inline-flex size-6 items-center justify-center rounded-full transition disabled:opacity-50"
+                            aria-label={`${calendarEvent.title} 일정 수정`}
+                          >
+                            <Pencil className="size-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteCalendarEventMutation.mutate(calendarEvent.id)}
+                            disabled={isSubmitting}
+                            className="text-brand-muted hover:bg-brand-soft hover:text-brand-ink inline-flex size-6 items-center justify-center rounded-full transition disabled:opacity-50"
+                            aria-label={`${calendarEvent.title} 일정 삭제`}
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </article>
                   ))
@@ -332,6 +376,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                 <input
                   type="text"
                   value={formValues.title}
+                  disabled={isSubmitting}
                   onChange={(event) =>
                     setFormValues((current) => ({ ...current, title: event.target.value }))
                   }
@@ -354,12 +399,13 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                   시간 (선택)
                 </label>
                 <input
-                  type="text"
+                  type="time"
+                  step={60}
                   value={formValues.time}
+                  disabled={isSubmitting}
                   onChange={(event) =>
                     setFormValues((current) => ({ ...current, time: event.target.value }))
                   }
-                  placeholder="예: 오후 3:00"
                   className="text-brand-ink focus:ring-brand mt-2 h-11 w-full rounded-[16px] bg-[#f1f3fb] px-4 text-[14px] transition outline-none placeholder:text-[#a8afc8] focus:ring-1"
                 />
               </div>
@@ -371,6 +417,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                     <button
                       key={color}
                       type="button"
+                      disabled={isSubmitting}
                       onClick={() => setFormValues((current) => ({ ...current, color }))}
                       className={`size-6 rounded-full ${colorButtonClassNames[color]} ${
                         formValues.color === color ? 'ring-2 ring-[#d7dcf6] ring-offset-2' : ''
@@ -385,15 +432,17 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                 <button
                   type="button"
                   onClick={() => setIsAddEventOpen(false)}
-                  className="text-brand-ink h-10 rounded-full bg-[#f1f3fb] text-[15px] font-semibold"
+                  disabled={isSubmitting}
+                  className="text-brand-ink h-10 rounded-full bg-[#f1f3fb] text-[15px] font-semibold disabled:opacity-50"
                 >
                   취소
                 </button>
                 <button
                   type="submit"
-                  className="bg-brand h-10 rounded-full text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(91,78,232,0.2)]"
+                  disabled={isSubmitting}
+                  className="bg-brand h-10 rounded-full text-[15px] font-semibold text-white shadow-[0_10px_24px_rgba(91,78,232,0.2)] disabled:opacity-50"
                 >
-                  추가
+                  {isEditMode ? '수정' : '추가'}
                 </button>
               </div>
             </form>

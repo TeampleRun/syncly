@@ -39,9 +39,7 @@ export function SettingsView({
       <SettingsTabs activeTab={activeTab} />
 
       <div className="mt-6">
-        {activeTab === 'workspace' && (
-          <WorkspaceInfoForm workspace={workspace} canEdit={isOwner} />
-        )}
+        {activeTab === 'workspace' && <WorkspaceInfoForm workspace={workspace} canEdit={isOwner} />}
         {activeTab === 'members' && (
           <MemberManagementPanel
             workspaceId={workspaceId}
@@ -52,7 +50,11 @@ export function SettingsView({
           />
         )}
         {activeTab === 'profile' && (
-          <MemberProfileForm workspaceId={workspaceId} initialNickname={currentNickname} />
+          <MemberProfileForm
+            workspaceId={workspaceId}
+            initialNickname={currentNickname}
+            isOwner={isOwner}
+          />
         )}
       </div>
     </div>

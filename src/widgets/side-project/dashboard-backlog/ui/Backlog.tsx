@@ -1,19 +1,31 @@
+'use client';
+
 // 백로그 위젯 — 타일 크기에 따라 밀도가 다른 변형을 렌더
 //  · sm: 최상위 항목 1건 + 외 N건
 //  · md/lg: 우선순위 점 + 항목 + 포인트 리스트(넘치면 스크롤)
-// 워크스페이스의 백로그(스프린트 미편입) 업무를 셀렉터로 가져온다.
-import { currentSprint } from '@/entities/side-project/sprint';
-import { getMockBacklogTasks, type Task, TASK_PRIORITY } from '@/entities/side-project/task';
+// 워크스페이스의 백로그(스프린트 미편입) 업무를 실데이터로 조회한다.
+import { TASK_PRIORITY, useBacklogTasks } from '@/entities/side-project/task';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
+import { WidgetStateMessage } from '@/shared/dashboard/ui/widget-state-message';
 
 const header = (
   <WidgetCardHeader title="백로그" action={<WidgetCardAction>보드</WidgetCardAction>} />
 );
 
-const backlogItems: Task[] = getMockBacklogTasks(currentSprint.workspaceId);
+interface BacklogProps {
+  workspaceId: string;
+  size?: WidgetSize;
+}
 
-export default function Backlog({ size = 'md' }: { size?: WidgetSize }) {
+export default function Backlog({ workspaceId, size = 'md' }: BacklogProps) {
+  const { data: backlogItems, isError, isPending } = useBacklogTasks(workspaceId);
+
+  if (isError) return <WidgetStateMessage header={header} message="백로그를 불러오지 못했습니다." />;
+  if (isPending) return <WidgetStateMessage header={header} message="백로그를 불러오는 중입니다." />;
+  if (backlogItems.length === 0)
+    return <WidgetStateMessage header={header} message="백로그가 비어 있습니다." />;
+
   if (size === 'sm') {
     const [top, ...rest] = backlogItems;
     return (

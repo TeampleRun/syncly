@@ -23,22 +23,29 @@ export const WIDGET_CATALOG = {
   'sprint-summary': {
     layout: { i: 'sprint-summary', x: 0, y: 0, w: 12, h: 4, minW: 6, minH: 4 },
     title: '스프린트 요약',
-    render: () => <SprintSummary />,
+    render: (_size, { workspaceId }) => <SprintSummary workspaceId={workspaceId} />,
   },
   'my-tasks': {
     layout: { i: 'my-tasks', x: 0, y: 4, w: 6, h: 5, minW: 2, minH: 3 },
     title: '내 업무',
-    render: (size) => <MyTasks size={size} />,
+    render: (size, { workspaceId, purpose, currentUserId }) => (
+      <MyTasks
+        workspaceId={workspaceId}
+        purpose={purpose}
+        currentUserId={currentUserId}
+        size={size}
+      />
+    ),
   },
   velocity: {
     layout: { i: 'velocity', x: 6, y: 4, w: 6, h: 5, minW: 4, minH: 4 },
     title: '벨로시티',
-    render: () => <Velocity />,
+    render: (_size, { workspaceId }) => <Velocity workspaceId={workspaceId} />,
   },
   backlog: {
     layout: { i: 'backlog', x: 0, y: 9, w: 6, h: 5, minW: 2, minH: 3 },
     title: '백로그',
-    render: (size) => <Backlog size={size} />,
+    render: (size, { workspaceId }) => <Backlog workspaceId={workspaceId} size={size} />,
   },
   'recent-notes': {
     layout: { i: 'recent-notes', x: 0, y: 14, w: 6, h: 5, minW: 2, minH: 3 },
@@ -65,7 +72,7 @@ export const WIDGET_CATALOG = {
   'today-schedule': {
     layout: { i: 'today-schedule', x: 6, y: 9, w: 6, h: 4, minW: 2, minH: 3 },
     title: '오늘 일정',
-    render: (size) => <TodaySchedule size={size} />,
+    render: (size, { workspaceId }) => <TodaySchedule workspaceId={workspaceId} size={size} />,
   },
   'overall-progress': {
     layout: { i: 'overall-progress', x: 9, y: 10, w: 3, h: 5, minW: 3, minH: 4 },
@@ -80,7 +87,7 @@ export const WIDGET_CATALOG = {
   calendar: {
     layout: { i: 'calendar', x: 6, y: 13, w: 6, h: 8, minW: 4, minH: 6 },
     title: '캘린더',
-    render: (size) => <Calendar size={size} />,
+    render: (size, { workspaceId }) => <Calendar workspaceId={workspaceId} size={size} />,
   },
 } satisfies Record<string, WidgetDefinition>;
 

@@ -1,4 +1,5 @@
 export type { Task, TaskStatus } from './model/task.types';
+export { TASK_STATUS } from './model/task.types';
 export type { TaskRow, TaskStatusDb } from './model/task.db.types';
 export { toTask, toDbTaskStatus, toUiTaskStatus } from './model/task.mapper';
 export { taskTitleSchema, taskBoardItemSchema, updateTaskBoardSchema } from './model/task.schema';

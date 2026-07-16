@@ -1,6 +1,9 @@
+'use client';
+
 // 스프린트 요약 위젯 — 스프린트 배너 + 포인트 통계 3종을 하나의 카드로 조립
-// 통계(계획/완료/남은)와 기간 표시는 currentSprint 메타에서 파생한다.
-import { currentSprint } from '@/entities/side-project/sprint';
+// 통계(계획/완료/남은)와 기간 표시는 현재 스프린트 메타에서 파생한다.
+// 현재 스프린트는 실데이터 스프린트 목록에서 resolveCurrentSprint로 판정한다.
+import { resolveCurrentSprint, useSprints } from '@/entities/side-project/sprint';
 import { StatCard, type Stat } from '@/shared/dashboard/ui/stat-card';
 
 // 'YYYY-MM-DD' → 'M/D'
@@ -9,8 +12,24 @@ const monthDay = (iso: string) => {
   return `${Number(month)}/${Number(day)}`;
 };
 
-export default function SprintSummary() {
-  const { name, startDate, endDate, daysLeft, totalPoints, completedPoints } = currentSprint;
+function StateMessage({ message }: { message: string }) {
+  return (
+    <div className="text-brand-muted flex h-full items-center justify-center text-center text-sm">
+      {message}
+    </div>
+  );
+}
+
+export default function SprintSummary({ workspaceId }: { workspaceId: string }) {
+  const { data: sprints, isError, isPending } = useSprints(workspaceId);
+
+  if (isError) return <StateMessage message="스프린트를 불러오지 못했습니다." />;
+  if (isPending) return <StateMessage message="스프린트를 불러오는 중입니다." />;
+
+  const current = resolveCurrentSprint(sprints);
+  if (!current) return <StateMessage message="진행 중인 스프린트가 없습니다." />;
+
+  const { name, startDate, endDate, daysLeft, totalPoints, completedPoints } = current;
   const period = `${monthDay(startDate)} – ${monthDay(endDate)}`;
 
   const planned: Stat = {

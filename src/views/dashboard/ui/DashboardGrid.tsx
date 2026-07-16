@@ -14,6 +14,7 @@ import { Maximize2, GripVertical, Trash2 } from 'lucide-react';
 
 import { getWidgetSize } from '@/shared/dashboard/lib/widget-size';
 import type { WidgetDefinition } from '@/shared/dashboard/model/widget.types';
+import type { WorkspacePurpose } from '@/shared/dashboard/model/template.types';
 
 // 우하단 리사이즈 핸들 커스텀(원형). react-resizable 기본 클래스로 위치를 잡고 배경 삼각형은 제거한다.
 const renderResizeHandle = (axis: ResizeHandleAxis, ref: Ref<HTMLElement>) => (
@@ -28,6 +29,10 @@ const renderResizeHandle = (axis: ResizeHandleAxis, ref: Ref<HTMLElement>) => (
 interface DashboardGridProps {
   /** 위젯 데이터 조회 스코프 */
   workspaceId: string;
+  /** 워크스페이스 용도 — 위젯이 템플릿별로 데이터 소스를 분기할 때 사용 */
+  purpose: WorkspacePurpose;
+  /** 현재 로그인 사용자 id — 본인 기준 필터 위젯에 전달 */
+  currentUserId: string;
   /** 위젯 카탈로그 (id → 렌더러) */
   widgets: WidgetDefinition[];
   layout: Layout;
@@ -38,6 +43,8 @@ interface DashboardGridProps {
 
 export default function DashboardGrid({
   workspaceId,
+  purpose,
+  currentUserId,
   widgets,
   layout,
   editMode,
@@ -107,7 +114,7 @@ export default function DashboardGrid({
                       </button>
                     </>
                   )}
-                  {widget.render(size, { workspaceId })}
+                  {widget.render(size, { workspaceId, purpose, currentUserId })}
                 </div>
               );
             })}

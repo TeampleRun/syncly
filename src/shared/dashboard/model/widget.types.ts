@@ -4,9 +4,15 @@ import type { ReactNode } from 'react';
 import type { LayoutItem } from 'react-grid-layout';
 
 import type { WidgetSize } from '../lib/widget-size';
+import type { WorkspacePurpose } from './template.types';
 
 export interface WidgetRenderContext {
+  /** 위젯 데이터 조회 스코프 */
   workspaceId: string;
+  /** 워크스페이스 용도 — 같은 위젯이라도 템플릿별로 데이터 소스가 다를 때 분기용 */
+  purpose: WorkspacePurpose;
+  /** 현재 로그인 사용자 id — "내 업무"처럼 본인 기준 필터가 필요한 위젯용 */
+  currentUserId: string;
 }
 
 export interface WidgetDefinition {

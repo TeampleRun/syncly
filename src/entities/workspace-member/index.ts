@@ -17,6 +17,7 @@ export {
 // 서버 전용 조회 함수(next/headers 의존)는 클라이언트 번들 오염을 피하려 barrel에서 제외하고
 // RSC에서 직접 경로로 import한다. (getWorkspaceById와 동일한 컨벤션)
 export { updateMyNickname, type UpdateMyNicknameInput } from './api/update-my-nickname';
+export { leaveWorkspace, type LeaveWorkspaceInput } from './api/leave-workspace';
 export {
   WORKSPACE_MEMBER_ROLE_META,
   WORKSPACE_MEMBER_STATUS_META,

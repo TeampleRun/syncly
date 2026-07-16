@@ -1,19 +1,38 @@
+'use client';
+
 // 벨로시티 위젯 — 스프린트별 계획/완료 포인트를 막대로 비교
 // 막대가 2그룹뿐이라 별도 차트 라이브러리 없이 순수 CSS(div height %)로 구현한다.
-import { mockSprints, selectVelocity, VELOCITY_MAX } from '@/entities/side-project/sprint';
+// Y축 최댓값은 실데이터 포인트에서 파생(selectVelocityMax)해 막대 잘림·납작함을 막는다.
+import {
+  selectVelocity,
+  selectVelocityMax,
+  useSprints,
+} from '@/entities/side-project/sprint';
 import { WidgetCard, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
+import { WidgetStateMessage } from '@/shared/dashboard/ui/widget-state-message';
 
-export default function Velocity() {
-  const sprintVelocity = selectVelocity(mockSprints);
+const header = <WidgetCardHeader title="벨로시티" />;
+
+export default function Velocity({ workspaceId }: { workspaceId: string }) {
+  const { data: sprints, isError, isPending } = useSprints(workspaceId);
+
+  if (isError) return <WidgetStateMessage header={header} message="벨로시티를 불러오지 못했습니다." />;
+  if (isPending) return <WidgetStateMessage header={header} message="벨로시티를 불러오는 중입니다." />;
+
+  const sprintVelocity = selectVelocity(sprints);
+  if (sprintVelocity.length === 0)
+    return <WidgetStateMessage header={header} message="스프린트 데이터가 없습니다." />;
+
+  const velocityMax = selectVelocityMax(sprintVelocity);
 
   return (
     <WidgetCard>
-      <WidgetCardHeader title="벨로시티" />
+      {header}
       <div className="flex min-h-0 flex-1 gap-3">
         {/* Y축 눈금 */}
         <div className="text-brand-muted flex flex-col justify-between pb-5 text-[9px]">
-          <span>{VELOCITY_MAX}</span>
-          <span>{VELOCITY_MAX / 2}</span>
+          <span>{velocityMax}</span>
+          <span>{velocityMax / 2}</span>
           <span>0</span>
         </div>
 
@@ -23,12 +42,12 @@ export default function Velocity() {
               <div key={point.sprint} className="flex h-full items-end gap-1.5">
                 <div
                   className="w-5 rounded-t-sm bg-[#c7d2fe]"
-                  style={{ height: `${(point.planned / VELOCITY_MAX) * 100}%` }}
+                  style={{ height: `${(point.planned / velocityMax) * 100}%` }}
                   title={`계획 ${point.planned}pt`}
                 />
                 <div
                   className="w-5 rounded-t-sm bg-[#2b7fff]"
-                  style={{ height: `${(point.completed / VELOCITY_MAX) * 100}%` }}
+                  style={{ height: `${(point.completed / velocityMax) * 100}%` }}
                   title={`완료 ${point.completed}pt`}
                 />
               </div>

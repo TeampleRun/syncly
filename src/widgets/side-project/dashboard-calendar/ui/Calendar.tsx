@@ -1,9 +1,13 @@
+'use client';
+
 // 캘린더 위젯 — 월간 달력. 오늘 날짜 강조 + 이벤트 점 표시.
 //  · sm: 오늘 날짜 + 이벤트 건수 요약
 //  · md/lg: 월간 그리드(요일 헤더 + 날짜 셀)
-import { mockCalendar } from '@/entities/side-project/schedule-event';
+import { useCalendarEventsByWorkspaceId } from '@/entities/calendar-event';
+import { buildCalendarMonthFromEvents } from '@/entities/side-project/schedule-event';
 import { cn } from '@/shared/lib/utils';
 import type { WidgetSize } from '@/shared/dashboard/lib/widget-size';
+import { WidgetStateMessage } from '@/shared/dashboard/ui/widget-state-message';
 import { WidgetCard, WidgetCardAction, WidgetCardHeader } from '@/shared/dashboard/ui/widget-card';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -18,15 +22,31 @@ function buildMonthCells(year: number, month: number): (number | null)[] {
   return cells;
 }
 
-export default function Calendar({ size = 'md' }: { size?: WidgetSize }) {
-  const { year, month, today, eventDays } = mockCalendar;
-
+export default function Calendar({
+  workspaceId,
+  size = 'md',
+}: {
+  workspaceId: string;
+  size?: WidgetSize;
+}) {
+  const calendarEventsQuery = useCalendarEventsByWorkspaceId(workspaceId);
+  const { year, month, today, eventDays } = buildCalendarMonthFromEvents(
+    calendarEventsQuery.data ?? [],
+  );
   const header = (
     <WidgetCardHeader
       title={`${month}월 캘린더`}
       action={<WidgetCardAction>전체 보기</WidgetCardAction>}
     />
   );
+
+  if (calendarEventsQuery.isPending) {
+    return <WidgetStateMessage header={header} message="캘린더를 불러오는 중..." />;
+  }
+
+  if (calendarEventsQuery.isError) {
+    return <WidgetStateMessage header={header} message="캘린더를 불러오지 못했습니다." />;
+  }
 
   if (size === 'sm') {
     return (
