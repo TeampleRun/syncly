@@ -35,12 +35,8 @@ export function MemberProfileForm({
   const [committedNickname, setCommittedNickname] = useState(initialNickname);
   const [nickname, setNickname] = useState(initialNickname);
   const [isSaved, setIsSaved] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
-
-  const isDirty = nickname !== committedNickname;
-  const canSubmit = nickname.trim().length > 0 && isDirty && !isSubmitting;
 
   // updateMyNickname은 실패 시 throw 하므로 onSuccess/onError로 깔끔하게 분기할 수 있다.
   const updateMutation = useMutation({
@@ -63,6 +59,9 @@ export function MemberProfileForm({
       );
     },
   });
+
+  const isDirty = nickname !== committedNickname;
+  const canSubmit = nickname.trim().length > 0 && isDirty && !updateMutation.isPending;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
