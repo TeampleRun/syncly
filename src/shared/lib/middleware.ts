@@ -49,13 +49,33 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     url.search = new URLSearchParams({ redirect: request.nextUrl.pathname }).toString();
-    return NextResponse.redirect(url);
+    const redirectResponse = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+    return redirectResponse;
   }
 
   if (user && AUTH_PAGES.includes(request.nextUrl.pathname)) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/workspaces';
-    return NextResponse.redirect(url);
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('real_name')
+      .eq('id', user.sub)
+      .maybeSingle();
+
+    if (profile?.real_name) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/workspaces';
+      const redirectResponse = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+      return redirectResponse;
+    }
+
+    if (request.nextUrl.pathname === '/login') {
+      const url = request.nextUrl.clone();
+      url.pathname = '/signup';
+      const redirectResponse = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+      return redirectResponse;
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
