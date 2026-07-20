@@ -1,5 +1,5 @@
 import { MeetingNotesPage } from '@/views/meeting-notes';
-import { assertWorkspaceRouteAccess } from '@/entities/workspace';
+import { assertWorkspaceRouteAccess } from '@/entities/workspace/lib/assert-workspace-route-access';
 
 interface WorkspaceMeetingNotesPageProps {
   params: Promise<{
