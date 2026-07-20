@@ -1,6 +1,6 @@
 // 워크스페이스 공지 페이지의 라우트 진입점입니다.
 import { getNoticeBoard } from '@/entities/notice/api/get-notice-board';
-import { assertWorkspaceRouteAccess } from '@/entities/workspace';
+import { assertWorkspaceRouteAccess } from '@/entities/workspace/lib/assert-workspace-route-access';
 import { NoticesView } from '@/views/store-operation/notices';
 
 interface NoticesPageProps {

@@ -1,5 +1,5 @@
 import { ProjectManagementPage } from '@/views/project-management';
-import { assertWorkspaceRouteAccess } from '@/entities/workspace';
+import { assertWorkspaceRouteAccess } from '@/entities/workspace/lib/assert-workspace-route-access';
 
 interface WorkspaceProjectManagementPageProps {
   params: Promise<{

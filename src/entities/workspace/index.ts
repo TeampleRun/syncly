@@ -9,7 +9,6 @@ export type {
   CreateWorkspaceRpcArgs,
 } from './model/workspace.db.types';
 export { toUiPurpose, toDbPurpose } from './model/purpose.mapper';
-export { assertWorkspaceRouteAccess } from './lib/assert-workspace-route-access';
 export {
   createWorkspaceSchema,
   createWorkspaceInputSchema,

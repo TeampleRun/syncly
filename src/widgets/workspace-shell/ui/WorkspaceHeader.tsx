@@ -20,6 +20,7 @@ interface WorkspaceHeaderProps {
 
 function getCurrentPageTitle(pathname: string, navigationItems: WorkspaceNavigationItem[]): string {
   if (pathname.endsWith('/notifications')) return '알림';
+  if (pathname.endsWith('/unavailable')) return '접근 제한';
 
   const currentNavigationItem = navigationItems.find((item) => pathname.endsWith(`/${item.href}`));
   return currentNavigationItem?.label ?? '대시보드';

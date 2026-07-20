@@ -1,5 +1,5 @@
 // 워크스페이스 목적에 맞지 않는 전용 모듈 URL의 직접 접근을 서버에서 차단합니다.
-import { notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { getWorkspaceById } from '../api/get-workspace-by-id';
 import type { WorkspacePurpose } from '../model/workspace.types';
 
@@ -28,6 +28,6 @@ export async function assertWorkspaceRouteAccess(
   const workspace = await getWorkspaceById(workspaceId);
 
   if (!workspace || !workspaceRoutePurposes[route].includes(workspace.purpose)) {
-    notFound();
+    redirect(`/workspaces/${workspaceId}/unavailable`);
   }
 }
