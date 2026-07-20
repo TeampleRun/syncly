@@ -228,7 +228,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                       onClick={() => setSelectedDate(cell.isoDate)}
                       className={`hover:bg-brand-soft/30 relative min-h-[98px] border-r border-b border-[rgba(91,78,232,0.1)] px-[8px] pt-[5px] pb-[8px] text-left align-top transition sm:min-h-[108px] ${
                         (index + 1) % 7 === 0 ? 'border-r-0' : ''
-                      } ${isSelected ? 'bg-[rgba(91,78,232,0.12)]' : ''}`}
+                      } ${isSelected ? 'bg-brand/12' : ''}`}
                     >
                       <div className="absolute top-[5px] left-[8px]">
                         <span
