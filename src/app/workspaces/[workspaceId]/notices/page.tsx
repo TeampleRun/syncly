@@ -1,5 +1,6 @@
 // 워크스페이스 공지 페이지의 라우트 진입점입니다.
 import { getNoticeBoard } from '@/entities/notice/api/get-notice-board';
+import { assertWorkspaceRouteAccess } from '@/entities/workspace';
 import { NoticesView } from '@/views/store-operation/notices';
 
 interface NoticesPageProps {
@@ -10,6 +11,7 @@ interface NoticesPageProps {
 
 export default async function NoticesPage({ params }: NoticesPageProps) {
   const { workspaceId } = await params;
+  await assertWorkspaceRouteAccess(workspaceId, 'notices');
   const initialData = await getNoticeBoard(workspaceId);
 
   return <NoticesView workspaceId={workspaceId} initialData={initialData} />;
