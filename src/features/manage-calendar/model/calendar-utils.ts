@@ -4,7 +4,7 @@ export interface CalendarDayCell {
   isCurrentMonth: boolean;
 }
 
-function formatIsoDate(date: Date) {
+export function formatIsoDate(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -36,5 +36,10 @@ export function createCalendarMonthGrid(currentMonth: Date): CalendarDayCell[] {
 }
 
 export function getInitialCalendarDate() {
-  return new Date(2025, 6, 1);
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
+export function getInitialSelectedCalendarDate() {
+  return formatIsoDate(new Date());
 }

@@ -18,6 +18,7 @@ import {
   createCalendarMonthGrid,
   createCalendarMonthLabel,
   getInitialCalendarDate,
+  getInitialSelectedCalendarDate,
 } from '../model/calendar-utils';
 
 interface CalendarViewProps {
@@ -73,7 +74,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
   const updateCalendarEventMutation = useUpdateCalendarEvent(workspaceId);
   const calendarEvents = calendarEventsQuery.data ?? [];
   const [currentMonth, setCurrentMonth] = useState(getInitialCalendarDate);
-  const [selectedDate, setSelectedDate] = useState('2025-07-30');
+  const [selectedDate, setSelectedDate] = useState(getInitialSelectedCalendarDate);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [formValues, setFormValues] = useState(defaultFormValues);
   const [hasSubmitted, setHasSubmitted] = useState(false);
@@ -227,7 +228,7 @@ export function CalendarView({ workspaceId }: CalendarViewProps) {
                       onClick={() => setSelectedDate(cell.isoDate)}
                       className={`hover:bg-brand-soft/30 relative min-h-[98px] border-r border-b border-[rgba(91,78,232,0.1)] px-[8px] pt-[5px] pb-[8px] text-left align-top transition sm:min-h-[108px] ${
                         (index + 1) % 7 === 0 ? 'border-r-0' : ''
-                      } ${isSelected ? 'bg-[rgba(238,240,251,0.6)]' : ''}`}
+                      } ${isSelected ? 'bg-[rgba(91,78,232,0.12)]' : ''}`}
                     >
                       <div className="absolute top-[5px] left-[8px]">
                         <span
