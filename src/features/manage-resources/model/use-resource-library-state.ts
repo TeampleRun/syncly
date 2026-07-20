@@ -229,6 +229,9 @@ export function useResourceLibraryState({
 
 // Storage 키에는 확장자만 보존해 파일 종류를 유지하고, 원본 파일명은 자료 제목으로 보관합니다.
 function getFileExtension(fileName: string): string {
-  const extension = fileName.split('.').at(-1)?.toLowerCase();
+  const extensionStart = fileName.lastIndexOf('.');
+  if (extensionStart <= 0 || extensionStart === fileName.length - 1) return '';
+
+  const extension = fileName.slice(extensionStart + 1).toLowerCase();
   return extension && /^[a-z0-9]{1,10}$/.test(extension) ? `.${extension}` : '';
 }

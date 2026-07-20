@@ -3,7 +3,13 @@
 // 자료실에 실제 파일 또는 외부 링크를 추가하는 모달입니다.
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react';
 import { CloudUpload, GitBranch, Link, X } from 'lucide-react';
-import type { ResourceFormValues, ResourceLinkProvider, ResourceType } from '@/entities/resource';
+import {
+  RESOURCE_LINK_PROVIDER_LABEL,
+  RESOURCE_LINK_PROVIDERS,
+  type ResourceFormValues,
+  type ResourceLinkProvider,
+  type ResourceType,
+} from '@/entities/resource';
 import { cn } from '@/shared/lib/utils';
 
 interface ResourceAddDialogProps {
@@ -13,17 +19,6 @@ interface ResourceAddDialogProps {
   onClose: () => void;
   onSubmit: (values: ResourceFormValues) => Promise<boolean>;
 }
-
-const linkProviders: Array<{
-  label: string;
-  value: ResourceLinkProvider;
-  icon: typeof Link;
-}> = [
-  { label: '노션', value: 'notion', icon: Link },
-  { label: '피그마', value: 'figma', icon: Link },
-  { label: '기타', value: 'link', icon: Link },
-  { label: '깃허브', value: 'github', icon: GitBranch },
-];
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -230,22 +225,22 @@ export function ResourceAddDialog({
           ) : (
             <>
               <div className="flex flex-wrap gap-2">
-                {linkProviders.map((provider) => {
-                  const Icon = provider.icon;
+                {RESOURCE_LINK_PROVIDERS.map((provider) => {
+                  const Icon = provider === 'github' ? GitBranch : Link;
 
                   return (
                     <button
-                      key={provider.value}
+                      key={provider}
                       type="button"
-                      onClick={() => setLinkProvider(provider.value)}
+                      onClick={() => setLinkProvider(provider)}
                       className={cn(
                         'flex h-9 items-center gap-1.5 rounded-2xl border border-indigo-100 px-3 text-sm font-bold text-slate-500',
-                        linkProvider === provider.value &&
+                        linkProvider === provider &&
                           'border-[var(--color-brand)] text-[var(--color-brand)]',
                       )}
                     >
                       <Icon className="h-4 w-4" aria-hidden="true" />
-                      {provider.label}
+                      {RESOURCE_LINK_PROVIDER_LABEL[provider]}
                     </button>
                   );
                 })}

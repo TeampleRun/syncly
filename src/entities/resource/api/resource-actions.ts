@@ -3,12 +3,16 @@
 // 링크·파일 자료를 워크스페이스 멤버 권한으로 저장하고 파일은 짧은 수명의 signed URL로 제공합니다.
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import {
+  RESOURCE_LINK_PROVIDERS,
+  type ResourceLinkProvider,
+} from '../model/resource.types';
 import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
 
 const RESOURCE_STORAGE_BUCKET = 'workspace-resources';
 const uuidSchema = z.guid();
-const linkProviderSchema = z.enum(['link', 'notion', 'figma', 'github']);
+const linkProviderSchema = z.enum(RESOURCE_LINK_PROVIDERS);
 const resourceContentSchema = z.object({
   title: z.string().trim().min(1, '자료 제목을 입력해주세요.').max(120),
   description: z.string().trim().max(1_000),
@@ -110,7 +114,7 @@ export async function createLinkResource(input: {
   title: string;
   description: string;
   url: string;
-  linkProvider: 'link' | 'notion' | 'figma' | 'github';
+  linkProvider: ResourceLinkProvider;
 }): Promise<ResourceActionResult<{ id: string }>> {
   try {
     const value = z

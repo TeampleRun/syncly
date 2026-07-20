@@ -3,15 +3,12 @@
 // 자료실의 파일과 링크 자료를 카드 목록으로 렌더링합니다.
 import { Archive, ChevronRight, Download, GitBranch, Link, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
-import type { ResourceItem, ResourceViewer } from '@/entities/resource';
+import {
+  RESOURCE_LINK_PROVIDER_LABEL,
+  type ResourceItem,
+  type ResourceViewer,
+} from '@/entities/resource';
 import { cn } from '@/shared/lib/utils';
-
-const LINK_PROVIDER_LABEL = {
-  notion: '노션',
-  figma: '피그마',
-  github: '깃허브',
-  link: '기타',
-} as const;
 
 interface ResourceListProps {
   resources: ResourceItem[];
@@ -74,7 +71,7 @@ export function ResourceList({
         const typeLabel =
           resource.resourceType === 'file'
             ? '파일'
-            : LINK_PROVIDER_LABEL[resource.linkProvider ?? 'link'];
+            : RESOURCE_LINK_PROVIDER_LABEL[resource.linkProvider ?? 'link'];
         // 파일은 다운로드, 링크는 외부 페이지 이동이라는 서로 다른 동작을 아이콘으로 구분합니다.
         const ActionIcon = resource.resourceType === 'file' ? Download : ChevronRight;
         const isMenuOpen = openMenuResourceId === resource.id;
@@ -110,7 +107,7 @@ export function ResourceList({
                 </span>
               </div>
               <p className="mt-1 truncate text-sm font-medium text-slate-500">
-                {resource.description || resource.url || resource.fileName}
+                {resource.description || resource.url}
               </p>
               <p className="mt-1 text-sm font-medium text-indigo-400">
                 {resource.uploadedBy} · {resource.createdAt}

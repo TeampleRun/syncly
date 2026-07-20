@@ -1,7 +1,22 @@
 // 자료실에서 파일과 외부 링크를 같은 목록으로 다루기 위한 타입입니다.
 export type ResourceType = 'file' | 'link';
 
-export type ResourceLinkProvider = 'link' | 'notion' | 'figma' | 'github';
+// 링크 자료에서 선택할 수 있는 제공자 값의 단일 기준입니다.
+export const RESOURCE_LINK_PROVIDERS = ['notion', 'figma', 'link', 'github'] as const;
+
+export type ResourceLinkProvider = (typeof RESOURCE_LINK_PROVIDERS)[number];
+
+// 링크 제공자 값을 화면 문구로 변환할 때 사용하는 단일 라벨 맵입니다.
+export const RESOURCE_LINK_PROVIDER_LABEL: Record<ResourceLinkProvider, string> = {
+  notion: '노션',
+  figma: '피그마',
+  link: '기타',
+  github: '깃허브',
+};
+
+export function isResourceLinkProvider(value: string): value is ResourceLinkProvider {
+  return RESOURCE_LINK_PROVIDERS.includes(value as ResourceLinkProvider);
+}
 
 export interface ResourceItem {
   id: string;
