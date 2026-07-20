@@ -3,7 +3,6 @@
 // 헤더 종 아이콘에서 최근 알림, 읽지 않은 개수, 읽음 처리 명령을 표시합니다.
 import { Bell, CheckCheck, ClipboardList, Megaphone } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { NotificationItem } from '@/entities/notification';
 import { useWorkspaceNotifications } from '../model/use-workspace-notifications';
@@ -28,6 +27,7 @@ function formatCreatedAt(value: string): string {
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'Asia/Seoul',
   }).format(new Date(value));
 }
 
@@ -37,7 +37,6 @@ export function NotificationPanel({
   isOpen,
   onOpenChange,
 }: NotificationPanelProps) {
-  const router = useRouter();
   const { notifications, unreadCount, isLoading, isError, markOneAsRead, markAllAsRead } =
     useWorkspaceNotifications({ workspaceId, viewerId });
 
@@ -46,17 +45,13 @@ export function NotificationPanel({
     if (!result.ok) toast.error(result.message);
   };
 
-  const openNotification = async (
-    event: React.MouseEvent<HTMLAnchorElement>,
-    notification: NotificationItem,
-  ) => {
-    event.preventDefault();
-    if (!notification.readAt) {
-      const result = await markOneAsRead(notification.id);
-      if (!result.ok) toast.error(result.message);
-    }
+  const handleNotificationClick = (notification: NotificationItem) => {
     onOpenChange(false);
-    router.push(notification.linkPath);
+    if (notification.readAt) return;
+
+    void markOneAsRead(notification.id).then((result) => {
+      if (!result.ok) toast.error(result.message);
+    });
   };
 
   return (
@@ -108,7 +103,7 @@ export function NotificationPanel({
               <Link
                 key={notification.id}
                 href={notification.linkPath}
-                onClick={(event) => void openNotification(event, notification)}
+                onClick={() => handleNotificationClick(notification)}
                 className={`flex gap-3 border-b border-slate-100 px-4 py-3 last:border-0 hover:bg-slate-50 ${
                   notification.readAt ? 'opacity-70' : 'bg-indigo-50/40'
                 }`}

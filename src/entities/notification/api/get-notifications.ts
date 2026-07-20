@@ -39,22 +39,33 @@ export async function getNotifications(workspaceId: string): Promise<Notificatio
   const supabase = await createSupabaseServerClient();
   // 현재 사용자가 수신자인 알림만 조회하기 위한 세션 사용자 ID입니다.
   const currentUserId = await getCurrentUserId();
-  const { data, error } = await supabase
-    .from('notifications')
-    .select('id, workspace_id, type, title, body, link_path, read_at, created_at')
-    .eq('workspace_id', parsedWorkspaceId)
-    .eq('recipient_id', currentUserId)
-    .order('created_at', { ascending: false })
-    .limit(10);
+  const [notificationsResult, unreadCountResult] = await Promise.all([
+    supabase
+      .from('notifications')
+      .select('id, workspace_id, type, title, body, link_path, read_at, created_at')
+      .eq('workspace_id', parsedWorkspaceId)
+      .eq('recipient_id', currentUserId)
+      .order('created_at', { ascending: false })
+      .limit(10),
+    supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('workspace_id', parsedWorkspaceId)
+      .eq('recipient_id', currentUserId)
+      .is('read_at', null),
+  ]);
 
-  if (error) {
-    console.error('[notification] 알림 조회 실패:', error);
+  if (notificationsResult.error || unreadCountResult.error) {
+    console.error(
+      '[notification] 알림 조회 실패:',
+      notificationsResult.error ?? unreadCountResult.error,
+    );
     throw new Error('알림을 불러오지 못했습니다.');
   }
 
-  const notifications = (data ?? []).map(toNotificationItem);
+  const notifications = (notificationsResult.data ?? []).map(toNotificationItem);
   return {
     notifications,
-    unreadCount: notifications.filter((notification) => !notification.readAt).length,
+    unreadCount: unreadCountResult.count ?? 0,
   };
 }

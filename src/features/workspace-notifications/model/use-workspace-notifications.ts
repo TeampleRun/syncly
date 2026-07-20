@@ -1,7 +1,7 @@
 'use client';
 
-// 알림 목록 캐시, 읽음 처리 mutation, Supabase Realtime INSERT 구독을 한 곳에서 관리합니다.
-import { useEffect } from 'react';
+// 알림 목록 캐시, 읽음 처리 mutation, Supabase Realtime 변경 구독을 한 곳에서 관리합니다.
+import { useEffect, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getNotifications,
@@ -32,14 +32,33 @@ function toNotificationItem(row: NotificationRow): NotificationItem {
 function addNotification(
   currentData: NotificationData | undefined,
   notification: NotificationItem,
-): NotificationData | undefined {
-  if (!currentData || currentData.notifications.some((item) => item.id === notification.id)) {
-    return currentData;
+): NotificationData {
+  if (!currentData) {
+    return {
+      notifications: [notification],
+      unreadCount: notification.readAt ? 0 : 1,
+    };
   }
+
+  if (currentData.notifications.some((item) => item.id === notification.id)) return currentData;
 
   return {
     notifications: [notification, ...currentData.notifications].slice(0, 10),
     unreadCount: currentData.unreadCount + (notification.readAt ? 0 : 1),
+  };
+}
+
+function updateNotification(
+  currentData: NotificationData | undefined,
+  notification: NotificationItem,
+): NotificationData | undefined {
+  if (!currentData) return currentData;
+
+  return {
+    ...currentData,
+    notifications: currentData.notifications.map((item) =>
+      item.id === notification.id ? notification : item,
+    ),
   };
 }
 
@@ -52,33 +71,21 @@ export function useWorkspaceNotifications({
 }) {
   // 동일 워크스페이스의 헤더 알림 UI를 함께 갱신하기 위한 TanStack Query 클라이언트입니다.
   const queryClient = useQueryClient();
+  // Realtime effect가 렌더마다 재구독하지 않도록 사용자별 Query 키를 안정화합니다.
+  const queryKey = useMemo(
+    () => notificationsQueryKey(workspaceId, viewerId),
+    [viewerId, workspaceId],
+  );
   const notificationQuery = useQuery({
-    queryKey: notificationsQueryKey(workspaceId),
+    queryKey,
     queryFn: () => getNotifications(workspaceId),
   });
   const markReadMutation = useMutation({
     mutationFn: (notificationIds?: string[]) =>
       markNotificationsRead({ workspaceId, notificationIds }),
-    onSuccess: (result, notificationIds) => {
+    onSuccess: (result) => {
       if (!result.ok) return;
-
-      const readAt = new Date().toISOString();
-      queryClient.setQueryData<NotificationData>(
-        notificationsQueryKey(workspaceId),
-        (currentData) => {
-          if (!currentData) return currentData;
-          const shouldMarkRead = (notification: NotificationItem) =>
-            !notification.readAt && (!notificationIds || notificationIds.includes(notification.id));
-          const notifications = currentData.notifications.map((notification) =>
-            shouldMarkRead(notification) ? { ...notification, readAt } : notification,
-          );
-
-          return {
-            notifications,
-            unreadCount: notifications.filter((notification) => !notification.readAt).length,
-          };
-        },
-      );
+      void queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -90,7 +97,7 @@ export function useWorkspaceNotifications({
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'notifications',
           filter: `workspace_id=eq.${workspaceId}`,
@@ -99,10 +106,20 @@ export function useWorkspaceNotifications({
           const row = payload.new as NotificationRow;
           if (row.recipient_id !== viewerId) return;
 
-          queryClient.setQueryData<NotificationData>(
-            notificationsQueryKey(workspaceId),
-            (currentData) => addNotification(currentData, toNotificationItem(row)),
-          );
+          const notification = toNotificationItem(row);
+          if (payload.eventType === 'INSERT') {
+            queryClient.setQueryData<NotificationData>(queryKey, (currentData) =>
+              addNotification(currentData, notification),
+            );
+          }
+
+          if (payload.eventType === 'UPDATE') {
+            queryClient.setQueryData<NotificationData>(queryKey, (currentData) =>
+              updateNotification(currentData, notification),
+            );
+          }
+
+          void queryClient.invalidateQueries({ queryKey });
         },
       )
       .subscribe();
@@ -110,7 +127,7 @@ export function useWorkspaceNotifications({
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [queryClient, viewerId, workspaceId]);
+  }, [queryClient, queryKey, viewerId, workspaceId]);
 
   return {
     notifications: notificationQuery.data?.notifications ?? [],

@@ -50,10 +50,16 @@ export async function GET(
     return NextResponse.json({ results: [] satisfies WorkspaceSearchResult[] });
   }
 
+  let currentUserId: string;
+  try {
+    // 모든 검색 원본을 현재 사용자와 선택한 워크스페이스 범위로 제한하는 기준값입니다.
+    currentUserId = await getCurrentUserId();
+  } catch {
+    return NextResponse.json({ message: '인증된 사용자만 검색할 수 있습니다.' }, { status: 401 });
+  }
+
   try {
     const supabase = await createSupabaseServerClient();
-    // 모든 검색 원본을 현재 사용자와 선택한 워크스페이스 범위로 제한하는 기준값입니다.
-    const currentUserId = await getCurrentUserId();
     const [
       { data: membership, error: membershipError },
       { data: workspace, error: workspaceError },

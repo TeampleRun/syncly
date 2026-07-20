@@ -68,8 +68,8 @@ export function WorkspaceHeader({
   const { handleLogout } = useLogout();
 
   return (
-    <header className="flex h-[72px] items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 sm:px-8">
-      <h1 className="shrink-0 text-lg font-bold text-slate-950">{title}</h1>
+    <header className="flex h-[72px] items-center justify-between gap-3 border-b border-slate-200 bg-white px-3 sm:gap-4 sm:px-8">
+      <h1 className="hidden shrink-0 text-lg font-bold text-slate-950 sm:block">{title}</h1>
 
       <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         <div ref={searchRef}>

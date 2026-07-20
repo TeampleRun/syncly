@@ -44,37 +44,63 @@ export function WorkspaceSearchPanel({
 }: WorkspaceSearchPanelProps) {
   const { query, setQuery, normalizedQuery, results, isLoading, isError } =
     useWorkspaceSearch(workspaceId);
+  const isCurrentQuery = normalizedQuery === query.trim();
+  const shouldShowResults = isCurrentQuery && !isLoading && !isError;
+
+  const searchInput = (className: string, autoFocus = false) => (
+    <input
+      type="search"
+      value={query}
+      autoFocus={autoFocus}
+      onFocus={() => onOpenChange(true)}
+      onChange={(event) => {
+        setQuery(event.target.value);
+        onOpenChange(true);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') onOpenChange(false);
+      }}
+      placeholder="검색..."
+      className={className}
+      aria-label="워크스페이스 통합 검색"
+      aria-autocomplete="list"
+      aria-expanded={isOpen}
+      aria-controls="workspace-search-results"
+      role="combobox"
+    />
+  );
 
   return (
-    <div className="relative w-48 sm:w-60">
-      <label className="flex h-10 items-center gap-2 rounded-xl bg-slate-100 px-4 text-slate-400 focus-within:ring-2 focus-within:ring-indigo-200">
+    <div className="relative">
+      <button
+        type="button"
+        aria-label="워크스페이스 검색"
+        aria-expanded={isOpen}
+        onClick={() => onOpenChange(!isOpen)}
+        className="flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 sm:hidden"
+      >
         <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
-        <input
-          type="search"
-          value={query}
-          onFocus={() => onOpenChange(true)}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            onOpenChange(true);
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') onOpenChange(false);
-          }}
-          placeholder="검색..."
-          className="min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
-          aria-label="워크스페이스 통합 검색"
-          aria-autocomplete="list"
-          aria-expanded={isOpen}
-          aria-controls="workspace-search-results"
-          role="combobox"
-        />
+      </button>
+
+      <label className="hidden h-10 w-60 items-center gap-2 rounded-xl bg-slate-100 px-4 text-slate-400 focus-within:ring-2 focus-within:ring-indigo-200 sm:flex">
+        <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
+        {searchInput(
+          'min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400',
+        )}
       </label>
 
       {isOpen && (
         <div
           id="workspace-search-results"
-          className="absolute top-12 right-0 z-50 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl"
+          className="fixed top-20 right-3 left-3 z-50 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:absolute sm:top-12 sm:right-0 sm:left-auto sm:w-[min(24rem,calc(100vw-2rem))]"
         >
+          <label className="flex h-12 items-center gap-2 border-b border-slate-100 px-4 text-slate-400 sm:hidden">
+            <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
+            {searchInput(
+              'min-w-0 flex-1 bg-transparent text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400',
+              true,
+            )}
+          </label>
           {query.trim().length < 2 && (
             <p className="px-4 py-4 text-sm text-slate-500">두 글자 이상 입력해 검색하세요.</p>
           )}
@@ -87,7 +113,7 @@ export function WorkspaceSearchPanel({
           {normalizedQuery.length >= 2 && !isLoading && !isError && results.length === 0 && (
             <p className="px-4 py-4 text-sm text-slate-500">검색 결과가 없습니다.</p>
           )}
-          {results.length > 0 && (
+          {shouldShowResults && results.length > 0 && (
             <ul className="max-h-96 overflow-y-auto py-1">
               {results.map((result) => (
                 <li key={`${result.type}-${result.id}`}>
