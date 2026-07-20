@@ -9,10 +9,16 @@ import type {
   ResourceLibraryData,
   ResourceLinkProvider,
 } from '../model/resource.types';
+import { isResourceLinkProvider } from '../model/resource.types';
 
 const workspaceIdSchema = z.guid();
 
-function getLinkProvider(url: string | null): ResourceLinkProvider | undefined {
+function getLinkProvider(
+  url: string | null,
+  storedProvider: string | null,
+): ResourceLinkProvider | undefined {
+  if (storedProvider && isResourceLinkProvider(storedProvider)) return storedProvider;
+
   if (!url) return undefined;
 
   try {
@@ -27,11 +33,6 @@ function getLinkProvider(url: string | null): ResourceLinkProvider | undefined {
   return 'link';
 }
 
-function getFileName(storagePath: string | null): string | undefined {
-  const objectName = storagePath?.split('/').at(-1);
-  return objectName?.replace(/^[0-9a-f-]{36}-/, '');
-}
-
 export async function getResourceLibrary(workspaceId: string): Promise<ResourceLibraryData> {
   const parsedWorkspaceId = workspaceIdSchema.parse(workspaceId);
   const supabase = await createSupabaseServerClient();
@@ -41,7 +42,7 @@ export async function getResourceLibrary(workspaceId: string): Promise<ResourceL
       supabase
         .from('resources')
         .select(
-          'id, workspace_id, uploaded_by, title, description, resource_type, url, storage_path, created_at',
+          'id, workspace_id, uploaded_by, title, description, resource_type, link_provider, url, storage_path, created_at',
         )
         .eq('workspace_id', parsedWorkspaceId)
         .order('created_at', { ascending: false }),
@@ -79,10 +80,9 @@ export async function getResourceLibrary(workspaceId: string): Promise<ResourceL
       title: resource.title,
       description: resource.description ?? '',
       resourceType: resource.resource_type,
-      linkProvider: getLinkProvider(resource.url),
+      linkProvider: getLinkProvider(resource.url, resource.link_provider),
       url: resource.url ?? undefined,
       storagePath: resource.storage_path ?? undefined,
-      fileName: getFileName(resource.storage_path),
       uploadedBy: resource.uploaded_by
         ? (profileNameById.get(resource.uploaded_by) ?? '알 수 없음')
         : '탈퇴한 사용자',
