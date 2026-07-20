@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { WorkspaceMember } from '@/entities/workspace-member';
 import { WorkspaceSearchPanel } from '@/features/workspace-search';
 import { NotificationPanel } from '@/features/workspace-notifications';
+import { getAvatarColor } from '@/shared/lib/avatar-color';
 import { useLogout } from '@/shared/lib/use-logout';
 import { cn } from '@/shared/lib/utils';
 import type { WorkspaceNavigationItem } from '../model/workspace-navigation';
@@ -119,7 +120,8 @@ export function WorkspaceHeader({
               setIsSearchOpen(false);
               setIsNotificationOpen(false);
             }}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-400 text-sm font-bold text-white hover:opacity-90"
+            style={{ backgroundColor: getAvatarColor(currentMember.userId) }}
+            className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white hover:opacity-90"
           >
             {currentMember.avatarLabel}
           </button>

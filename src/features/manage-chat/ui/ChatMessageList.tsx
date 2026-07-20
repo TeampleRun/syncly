@@ -3,6 +3,7 @@
 // 메시지를 발신자 기준 말풍선으로 렌더링하고 새 메시지 도착 시 하단으로 스크롤합니다.
 import { useEffect, useRef } from 'react';
 import type { ChatMessage } from '@/entities/chat';
+import { getAvatarColor } from '@/shared/lib/avatar-color';
 import { cn } from '@/shared/lib/utils';
 
 interface ChatMessageListProps {
@@ -83,7 +84,10 @@ export function ChatMessageList({ messages, viewerId, isLoading }: ChatMessageLi
               className={cn('flex items-end gap-3', isOwnMessage ? 'justify-end' : 'justify-start')}
             >
               {!isOwnMessage ? (
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-bold text-white">
+                <div
+                  style={{ backgroundColor: getAvatarColor(message.senderId) }}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                >
                   {getAvatarLabel(message.senderName)}
                 </div>
               ) : null}
@@ -99,7 +103,7 @@ export function ChatMessageList({ messages, viewerId, isLoading }: ChatMessageLi
                 </div>
                 <p
                   className={cn(
-                    'w-fit rounded-2xl px-4 py-3 text-sm leading-6 whitespace-pre-wrap',
+                    'w-fit rounded-2xl px-4 py-3 text-sm leading-6 whitespace-pre-wrap break-all',
                     isOwnMessage
                       ? 'ml-auto rounded-br-md bg-[var(--color-brand)] text-white'
                       : 'rounded-bl-md bg-slate-100 text-slate-800',
@@ -109,7 +113,10 @@ export function ChatMessageList({ messages, viewerId, isLoading }: ChatMessageLi
                 </p>
               </div>
               {isOwnMessage ? (
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-400 text-sm font-bold text-white">
+                <div
+                  style={{ backgroundColor: getAvatarColor(message.senderId) }}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                >
                   {getAvatarLabel(message.senderName)}
                 </div>
               ) : null}

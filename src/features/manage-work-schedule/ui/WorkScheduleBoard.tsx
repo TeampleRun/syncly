@@ -19,6 +19,7 @@ import {
   updateWorkShiftType,
 } from '@/entities/work-schedule/api/work-schedule-actions';
 import type { WorkspaceMember } from '@/entities/workspace-member';
+import { getAvatarColor } from '@/shared/lib/avatar-color';
 import {
   Dialog,
   DialogContent,
@@ -218,7 +219,10 @@ export function WorkScheduleBoard({
               className="grid grid-cols-[150px_repeat(7,minmax(96px,1fr))] border-b border-slate-100"
             >
               <div className="flex min-w-0 items-center gap-3 px-5 py-4">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-400 text-sm font-bold text-white">
+                <span
+                  style={{ backgroundColor: getAvatarColor(member.userId) }}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                >
                   {member.avatarLabel}
                 </span>
                 <span className="font-semibold break-keep whitespace-nowrap text-slate-900">
@@ -284,7 +288,8 @@ export function WorkScheduleBoard({
                 {workMembers.map((member) => (
                   <span
                     key={member.userId}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-xs font-bold text-white"
+                    style={{ backgroundColor: getAvatarColor(member.userId) }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white"
                   >
                     {member.avatarLabel}
                   </span>

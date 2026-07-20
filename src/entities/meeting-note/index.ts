@@ -12,7 +12,6 @@ export {
   toMeetingNoteUpdate,
   toMeetingDate,
   toMeetingAt,
-  getParticipantColor,
   MEETING_NOTE_SELECT_QUERY,
   type MeetingNoteQueryRow,
 } from './model/meeting-note.mapper';

@@ -6,6 +6,7 @@ import {
   WORKSPACE_MEMBER_STATUS_META,
   type WorkspaceMember,
 } from '@/entities/workspace-member';
+import { getAvatarColor } from '@/shared/lib/avatar-color';
 import { Badge } from '@/shared/ui/badge';
 import { cn } from '@/shared/lib/utils';
 
@@ -13,16 +14,6 @@ interface MemberListProps {
   members: WorkspaceMember[];
   currentUserId: string;
 }
-
-// 아바타 배경 색상 팔레트 — 멤버 순서에 따라 순환 배정한다.
-const AVATAR_COLORS = [
-  'bg-orange-400',
-  'bg-indigo-400',
-  'bg-emerald-400',
-  'bg-rose-400',
-  'bg-sky-400',
-  'bg-amber-400',
-];
 
 export function MemberList({ members, currentUserId }: MemberListProps) {
   return (
@@ -35,7 +26,7 @@ export function MemberList({ members, currentUserId }: MemberListProps) {
         </p>
       ) : (
         <ul className="mt-4 space-y-3">
-          {members.map((member, index) => {
+          {members.map((member) => {
             const roleMeta = WORKSPACE_MEMBER_ROLE_META[member.role];
             const statusMeta = WORKSPACE_MEMBER_STATUS_META[member.status];
             const isCurrentUser = member.userId === currentUserId;
@@ -49,10 +40,8 @@ export function MemberList({ members, currentUserId }: MemberListProps) {
                 )}
               >
                 <span
-                  className={cn(
-                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white',
-                    AVATAR_COLORS[index % AVATAR_COLORS.length],
-                  )}
+                  style={{ backgroundColor: getAvatarColor(member.userId) }}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
                   aria-hidden="true"
                 >
                   {member.avatarLabel}

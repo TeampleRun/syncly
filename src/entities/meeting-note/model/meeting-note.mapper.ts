@@ -1,3 +1,4 @@
+import { getAvatarColor } from '@/shared/lib/avatar-color';
 import type { GenericTablesInsert, GenericTablesUpdate } from '@/shared/model/supabase.types';
 
 import type { MeetingNoteRow } from './meeting-note.db.types';
@@ -19,27 +20,7 @@ export type MeetingNoteQueryRow = Pick<
 export const MEETING_NOTE_SELECT_QUERY =
   'id, workspace_id, author_id, title, meeting_at, participants, decisions, follow_up_actions';
 
-// 참석자 아바타 색상은 DB에 저장하지 않고 userId 해시로 결정론적으로 재생성한다.
-// 같은 참석자는 어느 카드에서든 항상 같은 색으로 보인다.
-const PARTICIPANT_PALETTE = [
-  '#FE9A00',
-  '#00C950',
-  '#615FFF',
-  '#2B7FFF',
-  '#00B8DB',
-  '#FF6B6B',
-] as const;
-
 const KST_TIME_ZONE = 'Asia/Seoul';
-
-export function getParticipantColor(seed: string): string {
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
-  }
-
-  return PARTICIPANT_PALETTE[hash % PARTICIPANT_PALETTE.length];
-}
 
 // DB의 meeting_at(timestamptz) → UI 표기용 KST 날짜(YYYY-MM-DD)
 export function toMeetingDate(meetingAt: string): string {
@@ -73,7 +54,7 @@ function toParticipant(userId: string, profileNameById: Map<string, string>): Me
     id: userId,
     name,
     initial: name.slice(0, 1),
-    color: getParticipantColor(userId),
+    color: getAvatarColor(userId),
   };
 }
 
