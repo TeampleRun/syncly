@@ -76,7 +76,13 @@ export function NotificationPanel({
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
             <div>
               <p className="text-sm font-bold text-slate-900">알림</p>
-              <p className="text-xs text-slate-500">최근 알림 10개</p>
+              <p className="text-xs text-slate-500">
+                {isLoading
+                  ? '알림을 불러오는 중입니다.'
+                  : notifications.length === 0
+                    ? '새 알림이 없습니다.'
+                    : `최근 알림 ${notifications.length}개`}
+              </p>
             </div>
             <button
               type="button"
@@ -131,6 +137,13 @@ export function NotificationPanel({
               </Link>
             ))}
           </div>
+          <Link
+            href={`/workspaces/${workspaceId}/notifications`}
+            onClick={() => onOpenChange(false)}
+            className="block border-t border-slate-100 px-4 py-3 text-center text-sm font-bold text-indigo-600 hover:bg-indigo-50"
+          >
+            전체 알림 보기
+          </Link>
         </div>
       )}
     </div>
