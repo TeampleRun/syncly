@@ -7,8 +7,9 @@ import { Pencil, Trash2 } from 'lucide-react';
 
 import { TASK_CATEGORY } from '@/entities/side-project/task';
 
+import { getAvatarColor } from '@/shared/lib/avatar-color';
+
 import type { BoardTask } from '../model/board-task';
-import { getAvatarColor } from '../lib/avatar-color';
 
 interface TaskCardProps {
   task: BoardTask;
@@ -59,7 +60,7 @@ export function TaskCard({
         <div className="mt-3 flex items-center gap-2">
           <span
             className="flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
-            style={{ backgroundColor: getAvatarColor(task.assignee.avatarLabel) }}
+            style={{ backgroundColor: getAvatarColor(task.assigneeId) }}
           >
             {task.assignee.avatarLabel}
           </span>

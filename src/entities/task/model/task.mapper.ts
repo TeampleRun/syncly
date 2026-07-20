@@ -1,17 +1,8 @@
+import { getAvatarColor } from '@/shared/lib/avatar-color';
 import type { GenericTablesInsert, GenericTablesUpdate } from '@/shared/model/supabase.types';
 
 import type { TaskRow, TaskStatusDb } from './task.db.types';
 import type { Task, TaskStatus } from './task.types';
-
-const AVATAR_PALETTE = [
-  '#00C950',
-  '#FE9A00',
-  '#615FFF',
-  '#00B8DB',
-  '#2B7FFF',
-  '#F6339A',
-  '#7E22CE',
-] as const;
 
 export interface TaskQueryRow extends Pick<
   TaskRow,
@@ -52,15 +43,6 @@ function formatDueDate(isoDate: string | null) {
   return `${Number(month)}/${Number(day)}`;
 }
 
-function getAvatarColor(seed: string) {
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
-  }
-
-  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
-}
-
 export function toTask(row: TaskQueryRow): Task {
   const assigneeName = row.assignee_profile?.real_name ?? '미배정';
 
@@ -71,7 +53,8 @@ export function toTask(row: TaskQueryRow): Task {
     assigneeId: row.assignee_id,
     assignee: assigneeName,
     assigneeInitial: assigneeName.slice(0, 1),
-    assigneeColor: getAvatarColor(assigneeName),
+    // 색상은 userId(assignee_id) 기준 — 미배정이면 shared 유틸이 중립색을 돌려준다.
+    assigneeColor: getAvatarColor(row.assignee_id),
     dueDate: formatDueDate(row.due_date),
     status: toUiTaskStatus(row.status),
     sortOrder: row.sort_order,

@@ -16,7 +16,7 @@ import {
 import type { WorkspaceMember } from '@/entities/workspace-member';
 import { cn } from '@/shared/lib/utils';
 
-import { getAvatarColor } from '../lib/avatar-color';
+import { getAvatarColor } from '@/shared/lib/avatar-color';
 import { EMPTY_TASK_FORM, type TaskFormValues } from '../model/task-form';
 
 const inputClass =
@@ -181,7 +181,7 @@ export function TaskFormDialog({
                 >
                   <span
                     className="flex size-5 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-                    style={{ backgroundColor: getAvatarColor(member.avatarLabel) }}
+                    style={{ backgroundColor: getAvatarColor(member.userId) }}
                   >
                     {member.avatarLabel}
                   </span>

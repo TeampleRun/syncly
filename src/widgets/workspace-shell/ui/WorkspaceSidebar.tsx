@@ -7,6 +7,7 @@ import { ChevronRight, LogOut, Menu } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { WORKSPACE_PURPOSE_META, type Workspace } from '@/entities/workspace';
 import type { WorkspaceMember } from '@/entities/workspace-member';
+import { getAvatarColor } from '@/shared/lib/avatar-color';
 import { useLogout } from '@/shared/lib/use-logout';
 import { cn } from '@/shared/lib/utils';
 import type { WorkspaceNavigationItem } from '../model/workspace-navigation';
@@ -127,7 +128,10 @@ export function WorkspaceSidebar({
         )}
       >
         <div className={cn('flex min-w-0 items-center', !isCollapsed && 'gap-3')}>
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-400 text-sm font-bold text-white">
+          <span
+            style={{ backgroundColor: getAvatarColor(currentMember.userId) }}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+          >
             {currentMember.avatarLabel}
           </span>
           <span className={cn('min-w-0', isCollapsed && 'sr-only')}>

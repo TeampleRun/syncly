@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import type { MeetingNote, MeetingNoteFormValues } from '@/entities/meeting-note';
 import { createMeetingNote, meetingNotesQueryKey, updateMeetingNote } from '@/entities/meeting-note';
 import { useWorkspaceMembersByWorkspaceId } from '@/entities/workspace-member';
+import { getAvatarColor } from '@/shared/lib/avatar-color';
 
 interface MeetingNoteFormProps {
   workspaceId: string;
@@ -425,7 +426,10 @@ export function MeetingNoteForm({ workspaceId, meetingNote }: MeetingNoteFormPro
                             className="hover:bg-brand-soft flex w-full items-center justify-between rounded-[14px] px-3 py-3 text-left transition"
                           >
                             <div className="flex items-center gap-3">
-                              <div className="bg-brand flex size-9 items-center justify-center rounded-full text-[15px] font-semibold text-white">
+                              <div
+                                style={{ backgroundColor: getAvatarColor(member.userId) }}
+                                className="flex size-9 items-center justify-center rounded-full text-[15px] font-semibold text-white"
+                              >
                                 {member.avatarLabel}
                               </div>
                               <div>

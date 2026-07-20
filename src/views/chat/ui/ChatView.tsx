@@ -4,6 +4,7 @@
 import { MessageCircleMore, UsersRound } from 'lucide-react';
 import type { ChatRoomData } from '@/entities/chat';
 import { ChatComposer, ChatMessageList, useChatRoom } from '@/features/manage-chat';
+import { getAvatarColor } from '@/shared/lib/avatar-color';
 
 interface ChatViewProps {
   workspaceId: string;
@@ -93,7 +94,10 @@ export function ChatView({ workspaceId, initialData }: ChatViewProps) {
             <div className="mt-4 space-y-3">
               {participants.slice(0, 8).map((participant) => (
                 <div key={participant.userId} className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-600">
+                  <div
+                    style={{ backgroundColor: getAvatarColor(participant.userId) }}
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white"
+                  >
                     {getAvatarLabel(participant.name)}
                   </div>
                   <p className="truncate text-sm font-medium text-slate-700">{participant.name}</p>
