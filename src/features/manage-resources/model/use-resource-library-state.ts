@@ -6,10 +6,10 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   createLinkResource,
+  createFileResource,
   deleteResource,
   getResourceDownloadUrl,
   updateResource,
-  uploadFileResource,
 } from '@/entities/resource/api/resource-actions';
 import { getResourceLibrary } from '@/entities/resource/api/get-resource-library';
 import { resourceLibraryQueryKey } from '@/entities/resource/model/resource-query';
@@ -19,6 +19,9 @@ import type {
   ResourceLibraryData,
   ResourceType,
 } from '@/entities/resource';
+import { getSupabaseBrowserClient } from '@/shared/api/supabase/client';
+
+const RESOURCE_STORAGE_BUCKET = 'workspace-resources';
 
 interface UseResourceLibraryStateParams {
   initialData: ResourceLibraryData;
@@ -45,8 +48,9 @@ export function useResourceLibraryState({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogResourceType, setDialogResourceType] = useState<ResourceType>('file');
   const [editingResourceId, setEditingResourceId] = useState<string | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
   const createLinkMutation = useMutation({ mutationFn: createLinkResource });
-  const uploadFileMutation = useMutation({ mutationFn: uploadFileResource });
+  const createFileMutation = useMutation({ mutationFn: createFileResource });
   const downloadMutation = useMutation({ mutationFn: getResourceDownloadUrl });
   const updateMutation = useMutation({ mutationFn: updateResource });
   const deleteMutation = useMutation({ mutationFn: deleteResource });
@@ -73,14 +77,38 @@ export function useResourceLibraryState({
       if (values.resourceType === 'file') {
         if (!values.file) return false;
 
-        const formData = new FormData();
-        formData.set('workspaceId', workspaceId);
-        formData.set('file', values.file);
-        formData.set('title', title);
-        formData.set('description', description);
-        const result = await uploadFileMutation.mutateAsync(formData);
+        setIsUploadingFile(true);
+        // Storage 객체 키는 한글·공백 파일명 대신 UUID와 안전한 확장자만 사용한다.
+        const storagePath = `${workspaceId}/${crypto.randomUUID()}${getFileExtension(
+          values.file.name,
+        )}`;
+        const supabase = getSupabaseBrowserClient();
+        const { error: uploadError } = await supabase.storage
+          .from(RESOURCE_STORAGE_BUCKET)
+          .upload(storagePath, values.file, {
+            contentType: values.file.type || undefined,
+            upsert: false,
+          });
+
+        if (uploadError) {
+          console.error('[resource] Storage 파일 업로드 실패:', uploadError);
+          toast.error('파일 업로드에 실패했습니다. 파일 용량과 저장소 권한을 확인해주세요.');
+          return false;
+        }
+
+        const result = await createFileMutation.mutateAsync({
+          workspaceId,
+          title,
+          description,
+          storagePath,
+        });
 
         if (!result.ok) {
+          const { error: removeError } = await supabase.storage
+            .from(RESOURCE_STORAGE_BUCKET)
+            .remove([storagePath]);
+
+          if (removeError) console.error('[resource] 메타데이터 실패 후 파일 삭제 실패:', removeError);
           toast.error(result.message);
           return false;
         }
@@ -90,6 +118,7 @@ export function useResourceLibraryState({
           title,
           description,
           url: values.url.trim(),
+          linkProvider: values.linkProvider,
         });
 
         if (!result.ok) {
@@ -101,32 +130,27 @@ export function useResourceLibraryState({
       await refetch();
       setIsDialogOpen(false);
       return true;
-    } catch {
+    } catch (error) {
+      console.error('[resource] 자료 저장 실패:', error);
       toast.error('자료 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
       return false;
+    } finally {
+      setIsUploadingFile(false);
     }
   };
 
   const openFile = async (resource: ResourceItem): Promise<void> => {
-    const downloadWindow = window.open('', '_blank');
-
     try {
       const result = await downloadMutation.mutateAsync({ workspaceId, resourceId: resource.id });
 
       if (!result.ok) {
-        downloadWindow?.close();
         toast.error(result.message);
         return;
       }
 
-      if (downloadWindow) {
-        downloadWindow.opener = null;
-        downloadWindow.location.href = result.data.url;
-      } else {
-        window.location.assign(result.data.url);
-      }
+      // Storage signed URL의 download 응답을 현재 창에서 요청해 새 탭을 만들지 않습니다.
+      window.location.assign(result.data.url);
     } catch {
-      downloadWindow?.close();
       toast.error('파일 다운로드 링크를 만들지 못했습니다. 잠시 후 다시 시도해주세요.');
     }
   };
@@ -184,7 +208,8 @@ export function useResourceLibraryState({
     isLoading: isPending,
     isSaving:
       createLinkMutation.isPending ||
-      uploadFileMutation.isPending ||
+      isUploadingFile ||
+      createFileMutation.isPending ||
       updateMutation.isPending ||
       deleteMutation.isPending,
     openDialog: (nextResourceType: ResourceType) => {
@@ -200,4 +225,10 @@ export function useResourceLibraryState({
     deleteResource: removeResource,
     viewer: data.viewer,
   };
+}
+
+// Storage 키에는 확장자만 보존해 파일 종류를 유지하고, 원본 파일명은 자료 제목으로 보관합니다.
+function getFileExtension(fileName: string): string {
+  const extension = fileName.split('.').at(-1)?.toLowerCase();
+  return extension && /^[a-z0-9]{1,10}$/.test(extension) ? `.${extension}` : '';
 }

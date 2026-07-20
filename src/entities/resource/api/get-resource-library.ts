@@ -12,7 +12,14 @@ import type {
 
 const workspaceIdSchema = z.guid();
 
-function getLinkProvider(url: string | null): ResourceLinkProvider | undefined {
+function getLinkProvider(
+  url: string | null,
+  storedProvider: string | null,
+): ResourceLinkProvider | undefined {
+  if (storedProvider && ['link', 'notion', 'figma', 'github'].includes(storedProvider)) {
+    return storedProvider as ResourceLinkProvider;
+  }
+
   if (!url) return undefined;
 
   try {
@@ -41,7 +48,7 @@ export async function getResourceLibrary(workspaceId: string): Promise<ResourceL
       supabase
         .from('resources')
         .select(
-          'id, workspace_id, uploaded_by, title, description, resource_type, url, storage_path, created_at',
+          'id, workspace_id, uploaded_by, title, description, resource_type, link_provider, url, storage_path, created_at',
         )
         .eq('workspace_id', parsedWorkspaceId)
         .order('created_at', { ascending: false }),
@@ -79,7 +86,7 @@ export async function getResourceLibrary(workspaceId: string): Promise<ResourceL
       title: resource.title,
       description: resource.description ?? '',
       resourceType: resource.resource_type,
-      linkProvider: getLinkProvider(resource.url),
+      linkProvider: getLinkProvider(resource.url, resource.link_provider),
       url: resource.url ?? undefined,
       storagePath: resource.storage_path ?? undefined,
       fileName: getFileName(resource.storage_path),

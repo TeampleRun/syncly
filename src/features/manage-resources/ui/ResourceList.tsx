@@ -1,10 +1,17 @@
 'use client';
 
 // 자료실의 파일과 링크 자료를 카드 목록으로 렌더링합니다.
-import { Archive, ChevronRight, GitBranch, Link, MoreHorizontal } from 'lucide-react';
+import { Archive, ChevronRight, Download, GitBranch, Link, MoreHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import type { ResourceItem, ResourceViewer } from '@/entities/resource';
 import { cn } from '@/shared/lib/utils';
+
+const LINK_PROVIDER_LABEL = {
+  notion: '노션',
+  figma: '피그마',
+  github: '깃허브',
+  link: '기타',
+} as const;
 
 interface ResourceListProps {
   resources: ResourceItem[];
@@ -46,11 +53,30 @@ export function ResourceList({
 }: ResourceListProps) {
   const [openMenuResourceId, setOpenMenuResourceId] = useState<string | null>(null);
 
+  if (resources.length === 0) {
+    return (
+      <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 text-center">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-[var(--color-brand)]">
+          <Archive className="h-6 w-6" aria-hidden="true" />
+        </span>
+        <h2 className="mt-4 text-base font-bold text-slate-900">아직 등록된 자료가 없습니다.</h2>
+        <p className="mt-1 text-sm text-slate-500">
+          파일을 업로드하거나 필요한 링크를 저장해보세요.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {resources.map((resource) => {
         const Icon = getResourceIcon(resource);
-        const typeLabel = resource.resourceType === 'file' ? '파일' : '링크';
+        const typeLabel =
+          resource.resourceType === 'file'
+            ? '파일'
+            : LINK_PROVIDER_LABEL[resource.linkProvider ?? 'link'];
+        // 파일은 다운로드, 링크는 외부 페이지 이동이라는 서로 다른 동작을 아이콘으로 구분합니다.
+        const ActionIcon = resource.resourceType === 'file' ? Download : ChevronRight;
         const isMenuOpen = openMenuResourceId === resource.id;
         const canManage =
           viewer?.role === 'owner' || (viewer?.userId && viewer.userId === resource.uploadedById);
@@ -105,11 +131,11 @@ export function ResourceList({
               ) : null}
               <button
                 type="button"
-                aria-label={`${resource.title} 열기`}
+                aria-label={`${resource.title} ${resource.resourceType === 'file' ? '다운로드' : '열기'}`}
                 onClick={() => openResource(resource, onOpenFile)}
                 className="flex h-10 w-10 items-center justify-center rounded-full text-indigo-400 hover:bg-indigo-50 hover:text-[var(--color-brand)]"
               >
-                <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                <ActionIcon className="h-5 w-5" aria-hidden="true" />
               </button>
 
               {isMenuOpen ? (

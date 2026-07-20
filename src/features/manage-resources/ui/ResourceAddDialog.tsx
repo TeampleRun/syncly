@@ -1,7 +1,7 @@
 'use client';
 
 // 자료실에 실제 파일 또는 외부 링크를 추가하는 모달입니다.
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react';
 import { CloudUpload, GitBranch, Link, X } from 'lucide-react';
 import type { ResourceFormValues, ResourceLinkProvider, ResourceType } from '@/entities/resource';
 import { cn } from '@/shared/lib/utils';
@@ -19,11 +19,13 @@ const linkProviders: Array<{
   value: ResourceLinkProvider;
   icon: typeof Link;
 }> = [
-  { label: '링크', value: 'link', icon: Link },
   { label: '노션', value: 'notion', icon: Link },
   { label: '피그마', value: 'figma', icon: Link },
+  { label: '기타', value: 'link', icon: Link },
   { label: '깃허브', value: 'github', icon: GitBranch },
 ];
+
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 export function ResourceAddDialog({
   isOpen,
@@ -37,6 +39,8 @@ export function ResourceAddDialog({
   const [linkProvider, setLinkProvider] = useState<ResourceLinkProvider>('link');
   const [url, setUrl] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
@@ -47,6 +51,8 @@ export function ResourceAddDialog({
     setLinkProvider('link');
     setUrl('');
     setFile(null);
+    setFileError(null);
+    setIsDraggingFile(false);
     setTitle('');
     setDescription('');
   }, [initialResourceType]);
@@ -67,6 +73,26 @@ export function ResourceAddDialog({
     });
 
     if (isSaved) resetForm();
+  };
+
+  // 파일 선택과 드래그앤드롭 입력을 같은 검증 규칙으로 처리합니다.
+  const selectFile = (nextFile: File | null) => {
+    if (!nextFile) return;
+
+    if (nextFile.size > MAX_FILE_SIZE_BYTES) {
+      setFile(null);
+      setFileError('파일은 5MB 이하만 업로드할 수 있습니다.');
+      return;
+    }
+
+    setFile(nextFile);
+    setFileError(null);
+  };
+
+  const handleFileDrop = (event: DragEvent<HTMLLabelElement>) => {
+    event.preventDefault();
+    setIsDraggingFile(false);
+    selectFile(event.dataTransfer.files.item(0));
   };
 
   const keepFocusInsideDialog = (event: React.KeyboardEvent<HTMLElement>) => {
@@ -164,21 +190,41 @@ export function ResourceAddDialog({
 
         <div className="mt-4 space-y-3">
           {resourceType === 'file' ? (
-            <label className="flex min-h-36 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-indigo-200 bg-slate-50 px-5 text-center">
+            <label
+              onDragEnter={(event) => {
+                event.preventDefault();
+                setIsDraggingFile(true);
+              }}
+              onDragOver={(event) => event.preventDefault()}
+              onDragLeave={(event) => {
+                if (event.currentTarget.contains(event.relatedTarget as Node)) return;
+                setIsDraggingFile(false);
+              }}
+              onDrop={handleFileDrop}
+              className={cn(
+                'flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 text-center transition-colors',
+                isDraggingFile
+                  ? 'border-[var(--color-brand)] bg-indigo-50'
+                  : 'border-indigo-200 bg-slate-50 hover:border-indigo-400 hover:bg-indigo-50/50',
+              )}
+            >
               <CloudUpload className="h-8 w-8 text-[var(--color-brand)]" aria-hidden="true" />
               <span className="mt-3 text-sm font-bold text-slate-800">
-                클릭해서 파일을 선택하세요
+                파일을 끌어 놓거나 클릭해서 선택하세요
               </span>
               <span className="mt-1 text-xs font-medium text-slate-400">최대 5MB</span>
               <input
                 type="file"
                 className="sr-only"
-                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+                onChange={(event) => selectFile(event.target.files?.[0] ?? null)}
               />
               {file ? (
                 <span className="mt-2 max-w-full truncate text-xs font-bold text-[var(--color-brand)]">
                   {file.name}
                 </span>
+              ) : null}
+              {fileError ? (
+                <span className="mt-2 text-xs font-bold text-rose-600">{fileError}</span>
               ) : null}
             </label>
           ) : (

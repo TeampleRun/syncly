@@ -351,6 +351,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          link_provider: string | null
           resource_type: Database["public"]["Enums"]["resource_type"]
           storage_path: string | null
           title: string
@@ -363,6 +364,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          link_provider?: string | null
           resource_type: Database["public"]["Enums"]["resource_type"]
           storage_path?: string | null
           title: string
@@ -375,6 +377,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          link_provider?: string | null
           resource_type?: Database["public"]["Enums"]["resource_type"]
           storage_path?: string | null
           title?: string
@@ -840,6 +843,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_task: {
+        Args: { p_due_date?: string; p_title: string; p_workspace_id: string }
+        Returns: string
+      }
       create_work_shift_type_and_ensure_weekly_entries: {
         Args: { p_week_start_date: string; p_workspace_id: string }
         Returns: {
@@ -906,6 +913,10 @@ export type Database = {
           p_replacement_shift_type_id: string
           p_workspace_id: string
         }
+        Returns: undefined
+      }
+      update_task_board: {
+        Args: { p_tasks: Json; p_workspace_id: string }
         Returns: undefined
       }
     }

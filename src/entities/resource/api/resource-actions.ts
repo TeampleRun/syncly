@@ -1,15 +1,14 @@
 'use server';
 
 // 링크·파일 자료를 워크스페이스 멤버 권한으로 저장하고 파일은 짧은 수명의 signed URL로 제공합니다.
-import { randomUUID } from 'node:crypto';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
 
 const RESOURCE_STORAGE_BUCKET = 'workspace-resources';
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 const uuidSchema = z.guid();
+const linkProviderSchema = z.enum(['link', 'notion', 'figma', 'github']);
 const resourceContentSchema = z.object({
   title: z.string().trim().min(1, '자료 제목을 입력해주세요.').max(120),
   description: z.string().trim().max(1_000),
@@ -48,17 +47,11 @@ function revalidateResourcePages(workspaceId: string): void {
   revalidatePath(`/workspaces/${workspaceId}/dashboard`);
 }
 
-function sanitizeFileName(fileName: string): string {
-  const normalized = fileName
-    .normalize('NFC')
-    .replace(/[\\/\0-\x1f]/g, '_')
-    .trim();
-  return normalized || 'untitled';
-}
-
 function getDownloadFileName(storagePath: string, fallbackTitle: string): string {
-  const objectName = storagePath.split('/').at(-1);
-  return objectName?.replace(/^[0-9a-f-]{36}-/, '') || fallbackTitle;
+  const extension = storagePath.split('/').at(-1)?.match(/\.[a-z0-9]{1,10}$/i)?.[0] ?? '';
+  return fallbackTitle.toLowerCase().endsWith(extension.toLowerCase())
+    ? fallbackTitle
+    : `${fallbackTitle}${extension}`;
 }
 
 async function getCurrentWorkspaceMember(workspaceId: string): Promise<{
@@ -117,10 +110,11 @@ export async function createLinkResource(input: {
   title: string;
   description: string;
   url: string;
+  linkProvider: 'link' | 'notion' | 'figma' | 'github';
 }): Promise<ResourceActionResult<{ id: string }>> {
   try {
     const value = z
-      .object({ workspaceId: uuidSchema, url: externalUrlSchema })
+      .object({ workspaceId: uuidSchema, url: externalUrlSchema, linkProvider: linkProviderSchema })
       .merge(resourceContentSchema)
       .parse(input);
     const { supabase, member } = await getCurrentWorkspaceMember(value.workspaceId);
@@ -132,6 +126,7 @@ export async function createLinkResource(input: {
         title: value.title,
         description: value.description || null,
         resource_type: 'link',
+        link_provider: value.linkProvider,
         url: value.url,
         storage_path: null,
       })
@@ -150,36 +145,26 @@ export async function createLinkResource(input: {
   }
 }
 
-export async function uploadFileResource(
-  formData: FormData,
-): Promise<ResourceActionResult<{ id: string }>> {
+// 브라우저에서 Storage 업로드를 마친 파일의 메타데이터만 DB에 저장합니다.
+export async function createFileResource(input: {
+  workspaceId: string;
+  title: string;
+  description: string;
+  storagePath: string;
+}): Promise<ResourceActionResult<{ id: string }>> {
   try {
-    const workspaceId = uuidSchema.parse(formData.get('workspaceId'));
-    const file = formData.get('file');
     const value = resourceContentSchema.parse({
-      title: formData.get('title'),
-      description: formData.get('description'),
+      title: input.title,
+      description: input.description,
     });
+    const workspaceId = uuidSchema.parse(input.workspaceId);
+    const storagePath = z.string().trim().min(1).max(512).parse(input.storagePath);
 
-    if (!(file instanceof File) || file.size === 0) {
-      throwResourceActionError('업로드할 파일을 선택해주세요.');
-    }
-
-    if (file.size > MAX_FILE_SIZE_BYTES) {
-      throwResourceActionError('파일은 5MB 이하만 업로드할 수 있습니다.');
+    if (!storagePath.startsWith(`${workspaceId}/`)) {
+      throwResourceActionError('올바르지 않은 파일 경로입니다.');
     }
 
     const { supabase, member } = await getCurrentWorkspaceMember(workspaceId);
-    const storagePath = `${workspaceId}/${randomUUID()}-${sanitizeFileName(file.name)}`;
-    const { error: uploadError } = await supabase.storage
-      .from(RESOURCE_STORAGE_BUCKET)
-      .upload(storagePath, file, { contentType: file.type || undefined, upsert: false });
-
-    if (uploadError) {
-      console.error('[resource action] 파일 업로드 실패:', uploadError);
-      throwResourceActionError('파일 업로드에 실패했습니다. 잠시 후 다시 시도해주세요.');
-    }
-
     const { data, error: resourceError } = await supabase
       .from('resources')
       .insert({
@@ -188,6 +173,7 @@ export async function uploadFileResource(
         title: value.title,
         description: value.description || null,
         resource_type: 'file',
+        link_provider: null,
         url: null,
         storage_path: storagePath,
       })
@@ -196,18 +182,13 @@ export async function uploadFileResource(
 
     if (resourceError) {
       console.error('[resource action] 파일 메타데이터 저장 실패:', resourceError);
-      const { error: removeError } = await supabase.storage
-        .from(RESOURCE_STORAGE_BUCKET)
-        .remove([storagePath]);
-
-      if (removeError) console.error('[resource action] 업로드 보상 삭제 실패:', removeError);
       throwResourceActionError('파일 정보 저장에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
 
     revalidateResourcePages(workspaceId);
     return { ok: true, data: { id: data.id } };
   } catch (error) {
-    return toActionFailure(error, '파일 저장에 실패했습니다. 입력값을 확인해주세요.');
+    return toActionFailure(error, '파일 정보 저장에 실패했습니다. 입력값을 확인해주세요.');
   }
 }
 
