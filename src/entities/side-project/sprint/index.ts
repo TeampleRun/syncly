@@ -7,7 +7,12 @@ export { sprintsQueryKey, useSprints } from './api/use-sprints';
 export { useCreateSprint } from './api/use-create-sprint';
 export { useUpdateSprint } from './api/use-update-sprint';
 export { useDeleteSprint } from './api/use-delete-sprint';
-export { resolveCurrentSprint, selectVelocity, selectVelocityMax } from './model/sprint.selectors';
+export {
+  resolveCurrentSprint,
+  resolveSelectedSprint,
+  selectVelocity,
+  selectVelocityMax,
+} from './model/sprint.selectors';
 export { toSprint } from './model/sprint.mapper';
 export type { SprintRow, SprintRpcRow } from './model/sprint.db.types';
 export { sprintInputSchema, type SprintInput } from './model/sprint.schema';

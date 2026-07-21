@@ -5,7 +5,7 @@
 import { Plus_Jakarta_Sans } from 'next/font/google';
 
 import {
-  resolveCurrentSprint,
+  resolveSelectedSprint,
   selectVelocity,
   SprintSelector,
   useSprints,
@@ -38,11 +38,9 @@ interface ProgressChartViewProps {
 
 export function ProgressChartView({ workspaceId, selectedSprintId }: ProgressChartViewProps) {
   const sprintsQuery = useSprints(workspaceId);
-  // 선택값이 없거나 유효하지 않으면 데이터에서 현재 스프린트를 판정(진행 중 우선 → 없으면 최신).
-  // 로딩 중이면 undefined.
+  // 선택값이 없거나 유효하지 않으면 현재 스프린트로 폴백. 로딩 중이면 undefined.
   const sprint = sprintsQuery.data
-    ? (sprintsQuery.data.find((item) => item.id === selectedSprintId) ??
-      resolveCurrentSprint(sprintsQuery.data))
+    ? resolveSelectedSprint(sprintsQuery.data, selectedSprintId)
     : undefined;
   const tasksQuery = useSprintTasks(sprint?.id);
 

@@ -6,7 +6,7 @@
 // members(담당자 표시명 해석용)는 RSC 값(initialMembers)으로 첫 렌더를 채우고 공유 캐시가 소유한다.
 import { Plus_Jakarta_Sans } from 'next/font/google';
 
-import { resolveCurrentSprint, SprintSelector, useSprints } from '@/entities/side-project/sprint';
+import { resolveSelectedSprint, SprintSelector, useSprints } from '@/entities/side-project/sprint';
 import { useBacklogTasks, useSprintTasks } from '@/entities/side-project/task';
 import {
   useWorkspaceMembersByWorkspaceId,
@@ -48,10 +48,9 @@ export function SprintBoardView({
     initialMembers,
   );
   const sprintsQuery = useSprints(workspaceId);
-  // 선택값이 없거나 유효하지 않으면 데이터에서 현재 스프린트를 판정(진행 중 우선 → 없으면 최신)
+  // 선택값이 없거나 유효하지 않으면 현재 스프린트로 폴백(진행 중 우선 → 없으면 최신)
   const sprint = sprintsQuery.data
-    ? (sprintsQuery.data.find((item) => item.id === selectedSprintId) ??
-      resolveCurrentSprint(sprintsQuery.data))
+    ? resolveSelectedSprint(sprintsQuery.data, selectedSprintId)
     : undefined;
   const tasksQuery = useSprintTasks(sprint?.id);
   const backlogQuery = useBacklogTasks(workspaceId);

@@ -37,3 +37,15 @@ export function resolveCurrentSprint(sprints: Sprint[]): Sprint | undefined {
   // 진행 중이 없으면 가장 최근 시작한 스프린트 (원본 불변)
   return [...sprints].sort((a, b) => b.startDate.localeCompare(a.startDate))[0];
 }
+
+/**
+ * 화면에 표시할 스프린트를 판정한다 — 선택 id(URL ?sprint=id 등)가 유효하면 그 스프린트,
+ * 없거나 유효하지 않으면 현재 스프린트로 폴백한다(진행 중 우선 → 없으면 최신).
+ * 스프린트 보드/진행률 차트가 공유하는 선택 규칙을 한 곳에 둔다.
+ */
+export function resolveSelectedSprint(
+  sprints: Sprint[],
+  selectedSprintId: string | undefined,
+): Sprint | undefined {
+  return sprints.find((sprint) => sprint.id === selectedSprintId) ?? resolveCurrentSprint(sprints);
+}
