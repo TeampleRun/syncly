@@ -4,7 +4,7 @@ export interface CalendarDayCell {
   isCurrentMonth: boolean;
 }
 
-function formatIsoDate(date: Date) {
+export function formatIsoDate(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -14,6 +14,11 @@ function formatIsoDate(date: Date) {
 
 export function createCalendarMonthLabel(currentMonth: Date) {
   return `${currentMonth.getFullYear()}년 ${currentMonth.getMonth() + 1}월`;
+}
+
+export function createCalendarMonthStart(isoDate: string) {
+  const [year, month] = isoDate.split('-').map(Number);
+  return new Date(year, month - 1, 1);
 }
 
 export function createCalendarMonthGrid(currentMonth: Date): CalendarDayCell[] {
@@ -33,8 +38,4 @@ export function createCalendarMonthGrid(currentMonth: Date): CalendarDayCell[] {
       isCurrentMonth: date.getMonth() === monthIndex,
     };
   });
-}
-
-export function getInitialCalendarDate() {
-  return new Date(2025, 6, 1);
 }
