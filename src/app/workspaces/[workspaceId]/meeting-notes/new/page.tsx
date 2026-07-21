@@ -1,4 +1,5 @@
 import { NewMeetingNotePage } from '@/views/meeting-notes';
+import { assertWorkspaceRouteAccess } from '@/entities/workspace/lib/assert-workspace-route-access';
 
 interface WorkspaceNewMeetingNotePageProps {
   params: Promise<{
@@ -10,6 +11,7 @@ export default async function WorkspaceNewMeetingNotePage({
   params,
 }: WorkspaceNewMeetingNotePageProps) {
   const { workspaceId } = await params;
+  await assertWorkspaceRouteAccess(workspaceId, 'meeting-notes');
 
   return <NewMeetingNotePage workspaceId={workspaceId} />;
 }
