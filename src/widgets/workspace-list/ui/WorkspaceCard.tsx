@@ -18,11 +18,14 @@ export default function WorkspaceCard({ workspace }: WorkspaceCardProps) {
   // 백엔드 연동 후 DB의 purpose가 유니언과 어긋날 수 있어 중립 메타로 폴백한다
   const meta = WORKSPACE_PURPOSE_META[purpose] ?? FALLBACK_PURPOSE_META;
   const PurposeIcon = meta.icon;
+  // 매장운영은 task 보드가 없어 완료/진행률 지표가 무의미하므로 표시하지 않는다
+  const showTaskProgress = purpose !== 'store-operation';
 
   return (
     <Link
       href={`/workspaces/${id}`}
-      className="border-brand/10 hover:border-brand/30 flex w-full items-start gap-4 rounded-[16px] border bg-white p-5.25 transition-colors"
+      // 진행률 유무와 무관하게 목록 카드 높이를 통일한다(진행률 있는 카드의 자연 높이 기준)
+      className="border-brand/10 hover:border-brand/30 flex min-h-[141px] w-full items-start gap-4 rounded-[16px] border bg-white p-5.25 transition-colors"
     >
       <div
         className="flex size-12 shrink-0 items-center justify-center rounded-[18px]"
@@ -47,21 +50,25 @@ export default function WorkspaceCard({ workspace }: WorkspaceCardProps) {
             <Clock className="size-3.5" aria-hidden />
             {formatRelativeTime(updated_at)}
           </span>
-          <span className="flex items-center gap-1.5">
-            <Check className="size-3.5" aria-hidden />
-            {done_task_count}/{task_count} 완료
-          </span>
+          {showTaskProgress && (
+            <span className="flex items-center gap-1.5">
+              <Check className="size-3.5" aria-hidden />
+              {done_task_count}/{task_count} 완료
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-5">
-          <span className="text-brand-muted text-xs leading-4">진행률</span>
-          <div className="bg-brand-secondary h-1.5 flex-1 overflow-hidden rounded-full">
-            <div
-              className="from-brand-start to-brand-end h-full rounded-full bg-linear-to-r"
-              style={{ width: `${progress}%` }}
-            />
+        {showTaskProgress && (
+          <div className="flex items-center gap-5">
+            <span className="text-brand-muted text-xs leading-4">진행률</span>
+            <div className="bg-brand-secondary h-1.5 flex-1 overflow-hidden rounded-full">
+              <div
+                className="from-brand-start to-brand-end h-full rounded-full bg-linear-to-r"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <span className="text-brand-muted text-xs leading-4">{progress}%</span>
           </div>
-          <span className="text-brand-muted text-xs leading-4">{progress}%</span>
-        </div>
+        )}
       </div>
     </Link>
   );
