@@ -11,3 +11,4 @@ export { resolveCurrentSprint, selectVelocity, selectVelocityMax } from './model
 export { toSprint } from './model/sprint.mapper';
 export type { SprintRow, SprintRpcRow } from './model/sprint.db.types';
 export { sprintInputSchema, type SprintInput } from './model/sprint.schema';
+export { SprintSelector } from './ui/SprintSelector';

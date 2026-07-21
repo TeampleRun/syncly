@@ -6,7 +6,7 @@
 // members(담당자 표시명 해석용)는 RSC 값(initialMembers)으로 첫 렌더를 채우고 공유 캐시가 소유한다.
 import { Plus_Jakarta_Sans } from 'next/font/google';
 
-import { resolveCurrentSprint, useSprints } from '@/entities/side-project/sprint';
+import { resolveCurrentSprint, SprintSelector, useSprints } from '@/entities/side-project/sprint';
 import { useBacklogTasks, useSprintTasks } from '@/entities/side-project/task';
 import {
   useWorkspaceMembersByWorkspaceId,
@@ -16,7 +16,6 @@ import { SprintBoard } from '@/features/manage-sprint-tasks';
 
 import { SprintToolbar } from '@/features/manage-sprints';
 
-import SprintSelector from './SprintSelector';
 import SprintSummaryHeader from './SprintSummaryHeader';
 
 const jakarta = Plus_Jakarta_Sans({
