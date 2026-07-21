@@ -15,14 +15,14 @@ import {
 } from '@/entities/calendar-event';
 import { plusJakartaSans } from '@/shared/lib/fonts';
 import {
+  createCalendarMonthStart,
   createCalendarMonthGrid,
   createCalendarMonthLabel,
-  getInitialCalendarDate,
-  getInitialSelectedCalendarDate,
 } from '../model/calendar-utils';
 
 interface CalendarViewProps {
   workspaceId: string;
+  initialSelectedDate: string;
 }
 
 const weekdayLabels = ['일', '월', '화', '수', '목', '금', '토'] as const;
@@ -67,14 +67,16 @@ function formatSelectedDateLabel(isoDate: string) {
   return `${year}년 ${Number(month)}월 ${Number(day)}일`;
 }
 
-export function CalendarView({ workspaceId }: CalendarViewProps) {
+export function CalendarView({ workspaceId, initialSelectedDate }: CalendarViewProps) {
   const calendarEventsQuery = useCalendarEventsByWorkspaceId(workspaceId);
   const createCalendarEventMutation = useCreateCalendarEvent(workspaceId);
   const deleteCalendarEventMutation = useDeleteCalendarEvent(workspaceId);
   const updateCalendarEventMutation = useUpdateCalendarEvent(workspaceId);
   const calendarEvents = calendarEventsQuery.data ?? [];
-  const [currentMonth, setCurrentMonth] = useState(getInitialCalendarDate);
-  const [selectedDate, setSelectedDate] = useState(getInitialSelectedCalendarDate);
+  const [currentMonth, setCurrentMonth] = useState(() =>
+    createCalendarMonthStart(initialSelectedDate),
+  );
+  const [selectedDate, setSelectedDate] = useState(initialSelectedDate);
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [formValues, setFormValues] = useState(defaultFormValues);
   const [hasSubmitted, setHasSubmitted] = useState(false);

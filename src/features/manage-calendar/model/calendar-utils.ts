@@ -16,6 +16,11 @@ export function createCalendarMonthLabel(currentMonth: Date) {
   return `${currentMonth.getFullYear()}년 ${currentMonth.getMonth() + 1}월`;
 }
 
+export function createCalendarMonthStart(isoDate: string) {
+  const [year, month] = isoDate.split('-').map(Number);
+  return new Date(year, month - 1, 1);
+}
+
 export function createCalendarMonthGrid(currentMonth: Date): CalendarDayCell[] {
   const year = currentMonth.getFullYear();
   const monthIndex = currentMonth.getMonth();
@@ -33,13 +38,4 @@ export function createCalendarMonthGrid(currentMonth: Date): CalendarDayCell[] {
       isCurrentMonth: date.getMonth() === monthIndex,
     };
   });
-}
-
-export function getInitialCalendarDate() {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), 1);
-}
-
-export function getInitialSelectedCalendarDate() {
-  return formatIsoDate(new Date());
 }
