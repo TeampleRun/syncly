@@ -4,7 +4,12 @@
 // 로딩/에러/빈 상태를 여기서 분기하고, 하위 차트 컴포넌트는 순수 표현만 담당한다.
 import { Plus_Jakarta_Sans } from 'next/font/google';
 
-import { resolveCurrentSprint, selectVelocity, useSprints } from '@/entities/side-project/sprint';
+import {
+  resolveSelectedSprint,
+  selectVelocity,
+  SprintSelector,
+  useSprints,
+} from '@/entities/side-project/sprint';
 import { countByStatus, useSprintTasks } from '@/entities/side-project/task';
 
 import ProgressStatRow from './ProgressStatRow';
@@ -25,10 +30,18 @@ function CenteredMessage({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ProgressChartView({ workspaceId }: { workspaceId: string }) {
+interface ProgressChartViewProps {
+  workspaceId: string;
+  /** 선택 스프린트(?sprint=id) — 없거나 유효하지 않으면 현재 스프린트로 폴백 */
+  selectedSprintId?: string;
+}
+
+export function ProgressChartView({ workspaceId, selectedSprintId }: ProgressChartViewProps) {
   const sprintsQuery = useSprints(workspaceId);
-  // 진행 중(오늘이 기간 안) 스프린트 우선 → 없으면 최신. 로딩 중이면 undefined.
-  const sprint = sprintsQuery.data ? resolveCurrentSprint(sprintsQuery.data) : undefined;
+  // 선택값이 없거나 유효하지 않으면 현재 스프린트로 폴백. 로딩 중이면 undefined.
+  const sprint = sprintsQuery.data
+    ? resolveSelectedSprint(sprintsQuery.data, selectedSprintId)
+    : undefined;
   const tasksQuery = useSprintTasks(sprint?.id);
 
   if (sprintsQuery.isPending) return <CenteredMessage>불러오는 중…</CenteredMessage>;
@@ -46,6 +59,9 @@ export function ProgressChartView({ workspaceId }: { workspaceId: string }) {
   return (
     <div className={`${jakarta.className} bg-brand-surface min-h-full`}>
       <div className="flex flex-col gap-4">
+        {/* 스프린트 선택기 — 상단/스탯/도넛은 선택 스프린트에 묶이고, 벨로시티는 전체 추이를 유지한다 */}
+        <SprintSelector sprints={sprintsQuery.data} currentSprintId={sprint.id} />
+
         <ProgressStatRow sprint={sprint} />
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

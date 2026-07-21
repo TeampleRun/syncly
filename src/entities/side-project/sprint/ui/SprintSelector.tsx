@@ -1,16 +1,18 @@
 // 스프린트 선택기 — URL 파라미터(?sprint=id)로 전환한다.
 // 클릭 = 네비게이션 → 라우트 RSC가 다시 실행되어 선택 스프린트로 재조회/재seed된다(클라 페칭 없음).
+// 스프린트 보드/진행률 차트가 공유하는 순수 표현 컴포넌트라 entity 계층에 둔다.
 import Link from 'next/link';
 
-import type { Sprint } from '@/entities/side-project/sprint';
 import { cn } from '@/shared/lib/utils';
+
+import type { Sprint } from '../model/sprint.types';
 
 interface SprintSelectorProps {
   sprints: Sprint[];
   currentSprintId: string;
 }
 
-export default function SprintSelector({ sprints, currentSprintId }: SprintSelectorProps) {
+export function SprintSelector({ sprints, currentSprintId }: SprintSelectorProps) {
   return (
     <div className="flex flex-wrap gap-2">
       {sprints.map((sprint) => {
