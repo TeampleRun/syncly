@@ -124,12 +124,9 @@ function CalendarSkeleton() {
         <Skeleton className="h-10 w-32" />
         <Skeleton className="h-10 w-28" />
       </div>
-      <div className="grid grid-cols-7 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <div className="grid grid-cols-7 gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200">
         {Array.from({ length: 42 }).map((_, index) => (
-          <div
-            key={index}
-            className="min-h-28 border-r border-b border-slate-100 p-3 last:border-r-0"
-          >
+          <div key={index} className="min-h-28 bg-white p-3">
             <Skeleton className="h-4 w-6" />
             {index % 3 === 0 ? <Skeleton className="mt-4 h-5 w-full" /> : null}
           </div>
@@ -143,8 +140,8 @@ function ChatSkeleton() {
   return (
     <>
       <PageHeading withAction={false} />
-      <div className="grid min-h-[calc(100vh-230px)] gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.32fr)]">
-        <div className="flex h-[min(720px,calc(100dvh-230px))] min-h-[480px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white">
+      <div className="grid min-h-[calc(100vh_-_230px)] gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.32fr)]">
+        <div className="flex h-[min(720px,calc(100dvh_-_230px))] min-h-[480px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white">
           <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
             <Skeleton className="h-10 w-36" />
             <Skeleton className="h-7 w-20 rounded-full" />
