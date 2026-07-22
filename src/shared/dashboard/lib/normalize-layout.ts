@@ -16,22 +16,59 @@ function isOverlapping(left: LayoutRect, right: LayoutRect) {
   );
 }
 
-function clampLayoutItem(item: LayoutItem, cols: number): LayoutItem {
-  const width = Math.max(1, Math.min(item.w, cols));
-  const height = Math.max(1, item.h);
+type LayoutConstraintMap = Partial<Record<string, Partial<LayoutItem>>>;
+
+function getBoundedSize(
+  value: number,
+  minValue: number | undefined,
+  maxValue: number | undefined,
+  fallbackMin = 1,
+) {
+  const lowerBound = Math.max(fallbackMin, minValue ?? fallbackMin);
+  const upperBound = Math.max(lowerBound, maxValue ?? value);
+
+  return Math.min(Math.max(value, lowerBound), upperBound);
+}
+
+function clampLayoutItem(
+  item: LayoutItem,
+  cols: number,
+  constraints?: Partial<LayoutItem>,
+): LayoutItem {
+  const width = getBoundedSize(item.w, constraints?.minW, Math.min(constraints?.maxW ?? cols, cols));
+  const height = getBoundedSize(item.h, constraints?.minH, constraints?.maxH);
   const x = Math.max(0, Math.min(item.x, cols - width));
   const y = Math.max(0, item.y);
 
-  return { ...item, x, y, w: width, h: height };
+  return { ...constraints, ...item, x, y, w: width, h: height };
+}
+
+export function areLayoutsEqual(left: Layout, right: Layout) {
+  return (
+    left.length === right.length &&
+    left.every((item, index) => {
+      const other = right[index];
+      return (
+        item.i === other?.i &&
+        item.x === other.x &&
+        item.y === other.y &&
+        item.w === other.w &&
+        item.h === other.h
+      );
+    })
+  );
 }
 
 /**
  * 저장된 레이아웃이 오래된 기본값/위젯 크기 변경과 충돌해도
  * 렌더 시점에 서로 겹치지 않도록 y축으로 밀어내며 정규화한다.
  */
-export function normalizeLayout(layout: Layout, cols = 12): Layout {
+export function normalizeLayout(layout: Layout, cols = 12, constraintsById: LayoutConstraintMap = {}): Layout {
   const working = layout
-    .map((item, index) => ({ ...clampLayoutItem(item, cols), _index: index }))
+    .map((item, index) => ({
+      ...clampLayoutItem(item, cols, constraintsById[item.i]),
+      _index: index,
+    }))
     .sort((left, right) => left.y - right.y || left.x - right.x || left._index - right._index);
 
   const placed: Array<LayoutItem & { _index: number }> = [];

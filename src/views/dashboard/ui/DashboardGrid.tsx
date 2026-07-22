@@ -61,7 +61,11 @@ export default function DashboardGrid({
   const visibleLayout = layout
     .filter((item) => byId.has(item.i))
     .map((item) => ({ ...byId.get(item.i)!.layout, ...item }));
-  const normalizedVisibleLayout = normalizeLayout(visibleLayout);
+  const normalizedVisibleLayout = normalizeLayout(
+    visibleLayout,
+    12,
+    Object.fromEntries(visibleLayout.map((item) => [item.i, byId.get(item.i)!.layout])),
+  );
 
   return (
     <div ref={containerRef} className="w-full">
