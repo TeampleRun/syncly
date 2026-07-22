@@ -915,6 +915,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      transfer_workspace_ownership: {
+        Args: { p_new_owner_id: string; p_workspace_id: string }
+        Returns: undefined
+      }
       update_task_board: {
         Args: { p_tasks: Json; p_workspace_id: string }
         Returns: undefined
