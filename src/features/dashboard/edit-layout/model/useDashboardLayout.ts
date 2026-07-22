@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import type { Layout, LayoutItem } from 'react-grid-layout';
 
 import { saveDashboardLayout } from '@/entities/dashboard-layout/api/save-dashboard-layout';
+import { normalizeLayout } from '@/shared/dashboard/lib/normalize-layout';
 import type { DashboardLayoutState } from '@/entities/dashboard-layout/model/dashboard-layout.types';
 
 // 저장·상태로 남기는 값은 위치(i,x,y,w,h)만 — minW/minH 등 위젯 제약은 카탈로그가 소유하며
@@ -26,7 +27,7 @@ export function useDashboardLayout({
   pageType,
   initialLayout,
 }: UseDashboardLayoutParams) {
-  const [layout, setLayout] = useState<Layout>(initialLayout.layout);
+  const [layout, setLayout] = useState<Layout>(() => normalizeLayout(initialLayout.layout));
   const [editMode, setEditMode] = useState(false);
   const didMountRef = useRef(false);
   const saveQueueRef = useRef(Promise.resolve());
@@ -51,7 +52,7 @@ export function useDashboardLayout({
   }, [layout, workspaceId, pageType]);
 
   const handleLayoutChange = useCallback((next: Layout) => {
-    const positions = next.map(toPosition);
+    const positions = normalizeLayout(next.map(toPosition));
     setLayout(positions);
   }, []);
 
@@ -59,7 +60,7 @@ export function useDashboardLayout({
     (item: LayoutItem) =>
       setLayout((prev) => {
         if (prev.some((entry) => entry.i === item.i)) return prev;
-        return [...prev, toPosition(item)];
+        return normalizeLayout([...prev, toPosition(item)]);
       }),
     [],
   );
