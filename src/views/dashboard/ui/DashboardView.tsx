@@ -20,6 +20,9 @@ import AddWidgetBar from './AddWidgetBar';
 import DashboardGrid from './DashboardGrid';
 
 const CATALOG_WIDGETS = Object.values(WIDGET_CATALOG);
+const WIDGET_CONSTRAINTS_BY_ID = Object.fromEntries(
+  CATALOG_WIDGETS.map((widget) => [widget.layout.i, widget.layout]),
+);
 
 interface DashboardViewProps {
   /** 레이아웃 영속화 키 */
@@ -42,7 +45,12 @@ export default function DashboardView({
   pageType = 'dashboard',
 }: DashboardViewProps) {
   const { layout, editMode, handleLayoutChange, addWidget, removeWidget, toggleEdit } =
-    useDashboardLayout({ workspaceId, pageType, initialLayout });
+    useDashboardLayout({
+      workspaceId,
+      pageType,
+      initialLayout,
+      constraintsById: WIDGET_CONSTRAINTS_BY_ID,
+    });
 
   // 이 템플릿이 허용하는 위젯 중, 아직 배치되지 않은 것 = 추가 가능 목록
   // TEMPLATE_WIDGETS[purpose]는 WidgetId[]라 카탈로그에 항상 존재한다.

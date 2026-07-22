@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import type { Layout, LayoutItem } from 'react-grid-layout';
 
 import { saveDashboardLayout } from '@/entities/dashboard-layout/api/save-dashboard-layout';
+import { areLayoutsEqual, normalizeLayout } from '@/shared/dashboard/lib/normalize-layout';
 import type { DashboardLayoutState } from '@/entities/dashboard-layout/model/dashboard-layout.types';
 
 // 저장·상태로 남기는 값은 위치(i,x,y,w,h)만 — minW/minH 등 위젯 제약은 카탈로그가 소유하며
@@ -19,14 +20,22 @@ interface UseDashboardLayoutParams {
   pageType: string;
   /** 서버(RSC)에서 조회한 초기 레이아웃 */
   initialLayout: DashboardLayoutState;
+  constraintsById: Partial<Record<string, Partial<LayoutItem>>>;
 }
 
 export function useDashboardLayout({
   workspaceId,
   pageType,
   initialLayout,
+  constraintsById,
 }: UseDashboardLayoutParams) {
-  const [layout, setLayout] = useState<Layout>(initialLayout.layout);
+  const initialNormalizedLayout = normalizeLayout(initialLayout.layout, 12, constraintsById);
+  const shouldPersistInitialNormalization = !areLayoutsEqual(
+    initialLayout.layout,
+    initialNormalizedLayout,
+  );
+
+  const [layout, setLayout] = useState<Layout>(initialNormalizedLayout);
   const [editMode, setEditMode] = useState(false);
   const didMountRef = useRef(false);
   const saveQueueRef = useRef(Promise.resolve());
@@ -34,7 +43,7 @@ export function useDashboardLayout({
   useEffect(() => {
     if (!didMountRef.current) {
       didMountRef.current = true;
-      return;
+      if (!shouldPersistInitialNormalization) return;
     }
 
     const timeoutId = window.setTimeout(() => {
@@ -45,23 +54,23 @@ export function useDashboardLayout({
           console.error(error);
           toast.error('대시보드 레이아웃 저장에 실패했습니다.');
         });
-    }, 400);
+    }, shouldPersistInitialNormalization ? 0 : 400);
 
     return () => window.clearTimeout(timeoutId);
-  }, [layout, workspaceId, pageType]);
+  }, [layout, workspaceId, pageType, shouldPersistInitialNormalization]);
 
   const handleLayoutChange = useCallback((next: Layout) => {
-    const positions = next.map(toPosition);
+    const positions = normalizeLayout(next.map(toPosition), 12, constraintsById);
     setLayout(positions);
-  }, []);
+  }, [constraintsById]);
 
   const addWidget = useCallback(
     (item: LayoutItem) =>
       setLayout((prev) => {
         if (prev.some((entry) => entry.i === item.i)) return prev;
-        return [...prev, toPosition(item)];
+        return normalizeLayout([...prev, toPosition(item)], 12, constraintsById);
       }),
-    [],
+    [constraintsById],
   );
 
   const removeWidget = useCallback(

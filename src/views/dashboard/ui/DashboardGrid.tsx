@@ -13,6 +13,7 @@ import type { Layout, ResizeHandleAxis } from 'react-grid-layout';
 import { Maximize2, GripVertical, Trash2 } from 'lucide-react';
 
 import { getWidgetSize } from '@/shared/dashboard/lib/widget-size';
+import { normalizeLayout } from '@/shared/dashboard/lib/normalize-layout';
 import type { WidgetDefinition } from '@/shared/dashboard/model/widget.types';
 import type { WorkspacePurpose } from '@/shared/dashboard/model/template.types';
 
@@ -60,10 +61,15 @@ export default function DashboardGrid({
   const visibleLayout = layout
     .filter((item) => byId.has(item.i))
     .map((item) => ({ ...byId.get(item.i)!.layout, ...item }));
+  const normalizedVisibleLayout = normalizeLayout(
+    visibleLayout,
+    12,
+    Object.fromEntries(visibleLayout.map((item) => [item.i, byId.get(item.i)!.layout])),
+  );
 
   return (
     <div ref={containerRef} className="w-full">
-      {visibleLayout.length === 0 ? (
+      {normalizedVisibleLayout.length === 0 ? (
         <div className="text-brand-muted flex min-h-[60vh] flex-col items-center justify-center gap-1 text-center">
           <p className="text-lg">아직 추가된 위젯이 없습니다.</p>
           <p>필요한 위젯을 추가해 워크스페이스를 구성해보세요.</p>
@@ -74,14 +80,14 @@ export default function DashboardGrid({
           <ReactGridLayout
             // 보기 모드에서는 RGL이 남겨두는 리사이즈 핸들이 hover 시 노출되지 않도록 숨긴다.
             className={editMode ? undefined : '[&_.react-resizable-handle]:hidden!'}
-            layout={visibleLayout}
+            layout={normalizedVisibleLayout}
             width={width}
             onLayoutChange={onLayoutChange}
             gridConfig={{ cols: 12, rowHeight: 40, margin: [16, 16], containerPadding: [0, 0] }}
             dragConfig={{ enabled: editMode, handle: '.rgl-drag-handle' }}
             resizeConfig={{ enabled: editMode, handleComponent: renderResizeHandle }}
           >
-            {visibleLayout.map((item) => {
+            {normalizedVisibleLayout.map((item) => {
               const id = item.i;
               const widget = byId.get(id)!;
               const size = getWidgetSize(item.w, item.h);
