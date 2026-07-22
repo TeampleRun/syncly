@@ -41,9 +41,9 @@ function SummaryCard({
 }) {
   return (
     <div className="border-brand/10 flex h-full min-h-[112px] flex-col rounded-2xl border bg-white px-6 py-5">
-      <p className="text-[15px] font-medium tracking-[-0.03em] text-[#7f86b2]">{label}</p>
+      <p className="text-sm font-medium tracking-normal text-[#7f86b2]">{label}</p>
       <p
-        className={`mt-3 text-[50px] leading-none font-extrabold tracking-[-0.06em] ${valueClassName}`}
+        className={`mt-3 text-4xl leading-none font-extrabold tracking-normal ${valueClassName}`}
       >
         {value}
       </p>

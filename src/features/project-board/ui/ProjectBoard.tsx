@@ -212,7 +212,7 @@ export function ProjectBoard({ workspaceId }: ProjectBoardProps) {
   return (
     <section className="mx-auto flex max-w-[1284px] flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-brand-ink text-[32px] leading-tight font-extrabold tracking-[-0.04em]">
+        <h2 className="workspace-page-title">
           프로젝트 관리
         </h2>
         <button

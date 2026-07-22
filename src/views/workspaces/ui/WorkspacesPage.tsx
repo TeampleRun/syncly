@@ -4,26 +4,19 @@
 // 목록 조회는 tanstack-query(useQuery) — GET 컨벤션 (docs/conventions/supabase-convention.md)
 import Link from 'next/link';
 import { Plus, RotateCcw } from 'lucide-react';
-import { Plus_Jakarta_Sans } from 'next/font/google';
 import { useMyWorkspaces } from '@/entities/workspace';
 import { WorkspaceList } from '@/widgets/workspace-list';
-
-// Figma 지정 폰트 — 한글은 시스템 폰트로 fallback된다
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
-});
 
 export default function WorkspacesPage() {
   const { data: workspaces, isPending, isError, refetch } = useMyWorkspaces();
 
   return (
-    <div className={`${jakarta.className} bg-brand-surface flex min-h-screen flex-col`}>
+    <div className="bg-brand-surface flex min-h-screen flex-col">
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6 py-6">
         <header className="flex items-center justify-between gap-4">
           <div className="flex flex-col">
-            <h1 className="text-brand-ink text-xl leading-7 font-bold">내 워크스페이스</h1>
-            <p className="text-brand-muted pt-0.5 text-sm leading-5">참여 중인 워크스페이스 목록</p>
+            <h1 className="workspace-page-title">내 워크스페이스</h1>
+            <p className="workspace-page-description">참여 중인 워크스페이스 목록</p>
           </div>
           <Link
             href="/workspaces/new"

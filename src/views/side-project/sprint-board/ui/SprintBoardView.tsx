@@ -4,8 +4,6 @@
 // 선택 스프린트는 URL(?sprint=id)에서 온 selectedSprintId로 판정하고, 없으면 현재 스프린트로 폴백한다.
 // 로딩/에러/빈 상태를 여기서 분기하고, 상호작용 보드/백로그는 feature에 위임한다.
 // members(담당자 표시명 해석용)는 RSC 값(initialMembers)으로 첫 렌더를 채우고 공유 캐시가 소유한다.
-import { Plus_Jakarta_Sans } from 'next/font/google';
-
 import { resolveSelectedSprint, SprintSelector, useSprints } from '@/entities/side-project/sprint';
 import { useBacklogTasks, useSprintTasks } from '@/entities/side-project/task';
 import {
@@ -17,11 +15,6 @@ import { SprintBoard } from '@/features/manage-sprint-tasks';
 import { SprintToolbar } from '@/features/manage-sprints';
 
 import SprintSummaryHeader from './SprintSummaryHeader';
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-});
 
 function CenteredMessage({ children }: { children: React.ReactNode }) {
   return (
@@ -62,7 +55,7 @@ export function SprintBoardView({
   // 스프린트가 하나도 없는 워크스페이스 — 빈 상태(생성 버튼은 노출)
   if (!sprint) {
     return (
-      <div className={`${jakarta.className} bg-brand-surface min-h-full`}>
+      <div className="bg-brand-surface min-h-full">
         <div className="mb-4 flex justify-end">
           <SprintToolbar workspaceId={workspaceId} />
         </div>
@@ -79,7 +72,7 @@ export function SprintBoardView({
     return <CenteredMessage>업무를 불러오지 못했습니다.</CenteredMessage>;
 
   return (
-    <div className={`${jakarta.className} bg-brand-surface min-h-full`}>
+    <div className="bg-brand-surface min-h-full">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <SprintSelector sprints={sprintsQuery.data} currentSprintId={sprint.id} />
         <SprintToolbar workspaceId={workspaceId} sprint={sprint} />

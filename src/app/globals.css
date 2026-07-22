@@ -159,3 +159,33 @@
     @apply font-sans;
   }
 }
+
+@layer components {
+  .workspace-page {
+    @apply mx-auto w-full max-w-[1180px];
+  }
+
+  .workspace-page-header {
+    @apply mb-6;
+  }
+
+  .workspace-page-title {
+    @apply text-2xl leading-8 font-bold tracking-normal text-slate-950;
+  }
+
+  .workspace-page-description {
+    @apply mt-1 text-sm leading-5 tracking-normal text-slate-500;
+  }
+
+  .workspace-section-title {
+    @apply text-lg leading-7 font-bold tracking-normal text-slate-900;
+  }
+
+  .workspace-card-title {
+    @apply text-sm leading-5 font-semibold tracking-normal text-slate-900;
+  }
+
+  .workspace-caption {
+    @apply text-xs leading-4 tracking-normal text-slate-500;
+  }
+}

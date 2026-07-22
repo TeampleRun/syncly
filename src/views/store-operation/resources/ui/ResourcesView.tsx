@@ -34,9 +34,9 @@ export function ResourcesView({ workspaceId, initialData }: ResourcesViewProps) 
   } = useResourceLibraryState({ initialData, workspaceId });
 
   return (
-    <section>
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-slate-950">자료실</h1>
+    <section className="workspace-page">
+      <div className="workspace-page-header flex items-center justify-between gap-4">
+        <h1 className="workspace-page-title">자료실</h1>
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -57,7 +57,7 @@ export function ResourcesView({ workspaceId, initialData }: ResourcesViewProps) 
         </div>
       </div>
 
-      <div className="max-w-[790px]">
+      <div className="w-full max-w-4xl">
         <ResourceList
           resources={resources}
           viewer={viewer}

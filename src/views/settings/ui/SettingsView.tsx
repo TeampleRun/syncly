@@ -8,7 +8,6 @@ import type { WorkspaceMember } from '@/entities/workspace-member';
 import { WorkspaceInfoForm } from '@/features/manage-workspace-info';
 import { MemberManagementPanel } from '@/features/manage-workspace-members';
 import { MemberProfileForm } from '@/features/manage-member-profile';
-import { plusJakartaSans } from '@/shared/lib/fonts';
 import type { SettingsTabKey } from '../model/settings-tab';
 import { SettingsTabs } from './SettingsTabs';
 
@@ -33,8 +32,8 @@ export function SettingsView({
   const isOwner = members.find((member) => member.userId === currentUserId)?.role === 'owner';
 
   return (
-    <div className={`${plusJakartaSans.className} mx-auto max-w-3xl`}>
-      <h1 className="text-2xl font-bold text-slate-950">설정</h1>
+    <div className="mx-auto w-full max-w-3xl">
+      <h1 className="workspace-page-title">설정</h1>
 
       <SettingsTabs activeTab={activeTab} />
 
