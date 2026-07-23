@@ -37,33 +37,41 @@ export function ResourceEditDialog({
 
         <div className="mt-5 space-y-3">
           {resource.resourceType === 'link' ? (
-            <input
-              aria-label="자료 링크 URL"
-              value={url}
-              onChange={(event) => setUrl(event.target.value)}
-              placeholder="https://example.com"
-              className="h-11 w-full rounded-xl bg-slate-100 px-4 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-300"
-            />
+            <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+              URL
+              <input
+                value={url}
+                onChange={(event) => setUrl(event.target.value)}
+                placeholder="https://example.com"
+                className="h-11 w-full rounded-xl bg-slate-100 px-4 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-300"
+              />
+            </label>
           ) : (
             <p className="rounded-xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-500">
               파일 교체는 지원하지 않습니다. 제목과 설명만 수정할 수 있습니다.
             </p>
           )}
-          <input
-            aria-label="자료 제목"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="자료 제목"
-            className="h-11 w-full rounded-xl bg-slate-100 px-4 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-300"
-          />
-          <textarea
-            aria-label="자료 설명"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder="설명 (선택)"
-            rows={3}
-            className="min-h-16 w-full resize-none rounded-xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-300"
-          />
+          <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+            제목
+            <input
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="자료 제목"
+              className="h-11 w-full rounded-xl bg-slate-100 px-4 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-300"
+            />
+          </label>
+          <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+            <span>
+              설명 <span className="font-normal text-slate-400">(선택)</span>
+            </span>
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="자료에 대한 설명을 입력하세요."
+              rows={3}
+              className="min-h-16 w-full resize-none rounded-xl bg-slate-100 px-4 py-3 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-300"
+            />
+          </label>
         </div>
 
         <div className="mt-5 flex justify-end gap-2">

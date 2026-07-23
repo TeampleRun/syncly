@@ -284,12 +284,12 @@ export function WorkScheduleBoard({
           return (
             <article key={weekday.key} className="rounded-2xl border border-slate-200 bg-white p-5">
               <h2 className="text-sm font-bold text-slate-700">{weekday.label} 근무자</h2>
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {workMembers.map((member) => (
                   <span
                     key={member.userId}
                     style={{ backgroundColor: getAvatarColor(member.userId) }}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
                   >
                     {member.avatarLabel}
                   </span>
