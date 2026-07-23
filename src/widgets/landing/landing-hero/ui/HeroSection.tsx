@@ -30,10 +30,10 @@ export default function HeroSection() {
         <Image
           src="/images/landing/hero-bg.svg"
           alt=""
-          width={916}
-          height={515}
+          width={1040}
+          height={585}
           priority
-          className="pointer-events-none absolute top-24 left-140 z-0 hidden h-auto w-229 max-w-[55vw] object-contain lg:block"
+          className="pointer-events-none absolute top-24 left-125 z-0 hidden h-auto w-260 max-w-[58vw] object-contain lg:block"
         />
         <motion.span
           variants={fadeUp}
