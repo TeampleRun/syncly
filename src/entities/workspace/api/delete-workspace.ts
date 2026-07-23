@@ -47,7 +47,9 @@ async function listAllStorageFileNames(
       break;
     }
 
-    names.push(...page.map((file) => file.name));
+    // id가 null인 항목은 폴더 placeholder라 remove() 대상이 아니다 — 업로드 경로가 항상 평면 구조라
+    // 지금은 나타나지 않지만, 혹시 남아있으면 cleanupWorkspaceStorage의 while 루프가 끝나지 않으므로 걸러낸다.
+    names.push(...page.filter((file) => file.id !== null).map((file) => file.name));
 
     if (page.length < STORAGE_LIST_PAGE_SIZE) {
       break;

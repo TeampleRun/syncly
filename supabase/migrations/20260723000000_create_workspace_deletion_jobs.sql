@@ -8,8 +8,8 @@
 -- 거치지 않고는 워크스페이스를 지울 수 없게 한다. finalize 내부에서도 storage.objects에 남은 파일이
 -- 있는지 조회만 해서(delete/update 없음) 있으면 거부해, begin→mark→finalize만 직접 호출해 Storage
 -- 정리를 우회하는 경로를 막는다.
-
-begin;
+-- (SQL Editor에서 수동 실행 시에는 앞뒤로 begin;/commit;을 직접 감싸서 실행할 것 — 이 파일 자체에는
+-- 마이그레이션 도구가 자체적으로 트랜잭션을 감쌀 수 있으므로 begin/commit을 넣지 않는다.)
 
 create table if not exists public.workspace_deletion_jobs (
   workspace_id uuid primary key references public.workspaces(id) on delete cascade,
@@ -333,5 +333,3 @@ with check (
 -- owner가 finalize_workspace_deletion을 거치지 않고 workspaces row를 직접 DELETE하는 걸 막는다.
 -- 이후로는 security definer인 finalize_workspace_deletion(RLS 우회)을 통해서만 삭제할 수 있다.
 drop policy if exists workspaces_delete_owner on public.workspaces;
-
-commit;
