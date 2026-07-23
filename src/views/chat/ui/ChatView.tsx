@@ -44,10 +44,10 @@ export function ChatView({ workspaceId, initialData }: ChatViewProps) {
   const connection = getConnectionLabel(connectionStatus);
 
   return (
-    <section className="mx-auto w-full min-w-0 max-w-[1180px]">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-950">채팅</h1>
-        <p className="mt-1 text-sm text-slate-500">
+    <section className="workspace-page min-w-0">
+      <div className="workspace-page-header">
+        <h1 className="workspace-page-title">채팅</h1>
+        <p className="workspace-page-description">
           워크스페이스 구성원과 실시간으로 대화할 수 있습니다.
         </p>
       </div>

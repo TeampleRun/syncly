@@ -61,10 +61,10 @@ export default function OverallProgress({
       <div className={`flex flex-1 flex-col ${isCompact ? 'pt-1' : 'pt-2'}`}>
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="text-[15px] font-medium tracking-[-0.03em] text-[#8b90ba]">완료</p>
+            <p className="text-sm font-medium tracking-normal text-[#8b90ba]">완료</p>
           </div>
           <p
-            className={`text-brand-ink font-extrabold tracking-[-0.05em] ${
+            className={`text-brand-ink font-extrabold tracking-normal ${
               isCompact ? 'text-[17px]' : 'text-[22px]'
             }`}
           >
@@ -82,7 +82,7 @@ export default function OverallProgress({
         </div>
 
         <p
-          className={`font-medium tracking-[-0.03em] text-[#8b90ba] ${
+          className={`font-medium tracking-normal text-[#8b90ba] ${
             isCompact ? 'mt-5 text-[15px]' : 'mt-6 text-[18px]'
           }`}
         >

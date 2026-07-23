@@ -293,7 +293,7 @@ export function MeetingNoteForm({ workspaceId, meetingNote }: MeetingNoteFormPro
         onSubmit={handleSubmit}
         className="mt-[21px] rounded-[32px] border border-[#eceffa] bg-white px-[26.5px] pt-[26.5px] pb-[28px] shadow-[0_20px_48px_rgba(91,78,232,0.08)]"
       >
-        <h1 className="text-brand-ink text-[34px] font-extrabold tracking-[-0.04em]">
+        <h1 className="workspace-page-title">
           {isEditMode ? '회의록 수정' : '새 회의록'}
         </h1>
 
@@ -332,7 +332,7 @@ export function MeetingNoteForm({ workspaceId, meetingNote }: MeetingNoteFormPro
                   tabIndex={-1}
                 />
                 <div
-                  className={`${dateFieldClassName} text-brand-ink gap-2 pr-[14px] text-[18px] font-medium tracking-[-0.03em]`}
+                  className={`${dateFieldClassName} text-brand-ink gap-2 pr-[14px] text-lg font-medium tracking-normal`}
                 >
                   <input
                     ref={yearInputRef}

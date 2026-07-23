@@ -23,13 +23,13 @@ function SummaryNumberCard({
       <div className="text-center">
         <strong
           className={cn(
-            'text-brand-ink text-[46px] leading-none font-extrabold tracking-[-0.06em]',
+            'text-brand-ink text-4xl leading-none font-extrabold tracking-normal',
             valueClassName,
           )}
         >
           {value}
         </strong>
-        <p className="mt-2.5 text-[15px] font-semibold tracking-[-0.04em] text-[#9ca2c5]">
+        <p className="mt-2.5 text-sm font-semibold tracking-normal text-[#9ca2c5]">
           {label}
         </p>
       </div>
@@ -50,8 +50,8 @@ function OverallProgressCard({
 
   return (
     <div className="rounded-[22px] border border-[#e7eaff] bg-white px-6 pt-9 pb-10 shadow-[0_6px_20px_rgba(91,78,232,0.03)]">
-      <h2 className="text-brand-ink text-[17px] font-bold tracking-[-0.04em]">전체 진행률</h2>
-      <p className="mt-2 text-[13px] font-medium tracking-[-0.03em] text-[#98a0c6]">
+      <h2 className="workspace-section-title">전체 진행률</h2>
+      <p className="mt-2 text-xs font-medium tracking-normal text-[#98a0c6]">
         {doneCount} / {totalCount} 업무 완료
       </p>
 
@@ -60,7 +60,7 @@ function OverallProgressCard({
           className="flex h-full items-center justify-end rounded-full bg-[linear-gradient(90deg,#534bf2_0%,#8a56ff_100%)] pr-4"
           style={{ width: `${safeProgress}%` }}
         >
-          <span className="text-[12px] font-bold tracking-[-0.02em] text-white">
+          <span className="text-xs font-bold tracking-normal text-white">
             {safeProgress}%
           </span>
         </div>
@@ -77,7 +77,7 @@ function AssigneeBarChartCard({ items }: { items: ProgressChartAssigneeItem[] })
 
   return (
     <div className="row-span-2 rounded-[22px] border border-[#e7eaff] bg-white px-6 pt-6 pb-5 shadow-[0_6px_20px_rgba(91,78,232,0.03)]">
-      <h2 className="text-brand-ink text-[17px] font-bold tracking-[-0.04em]">
+      <h2 className="workspace-section-title">
         담당자별 업무 현황
       </h2>
 
@@ -111,7 +111,7 @@ function AssigneeBarChartCard({ items }: { items: ProgressChartAssigneeItem[] })
                     height: `${gridMaxValue === 0 ? 0 : (item.count / gridMaxValue) * 214}px`,
                   }}
                 />
-                <span className="mt-3 text-[13px] font-medium tracking-[-0.03em] text-[#8f97bf]">
+                <span className="mt-3 text-xs font-medium tracking-normal text-[#8f97bf]">
                   {item.name}
                 </span>
               </div>
@@ -138,7 +138,7 @@ function StatusDistributionCard({ items }: { items: ProgressChartStatusItem[] })
 
   return (
     <div className="rounded-[22px] border border-[#e7eaff] bg-white px-6 pt-6 pb-7 shadow-[0_6px_20px_rgba(91,78,232,0.03)]">
-      <h2 className="text-brand-ink text-[17px] font-bold tracking-[-0.04em]">상태 분포</h2>
+      <h2 className="workspace-section-title">상태 분포</h2>
 
       <div className="flex flex-col items-center justify-center gap-8 pt-9 pb-1 lg:flex-row">
         <div
@@ -159,10 +159,10 @@ function StatusDistributionCard({ items }: { items: ProgressChartStatusItem[] })
                 aria-hidden="true"
               />
               <div className="flex min-w-[116px] items-center justify-between gap-5">
-                <span className="text-brand-ink text-[15px] font-semibold tracking-[-0.03em]">
+                <span className="text-brand-ink text-sm font-semibold tracking-normal">
                   {item.label}
                 </span>
-                <strong className="text-brand-ink text-[15px] font-extrabold tracking-[-0.04em]">
+                <strong className="text-brand-ink text-sm font-extrabold tracking-normal">
                   {item.count}건
                 </strong>
               </div>
@@ -194,7 +194,7 @@ export function ProgressChartView({ workspaceId }: ProgressChartViewProps) {
   return (
     <section className="w-full max-w-[1280px]">
       <header className="mb-6">
-        <h1 className="text-brand-ink text-[28px] leading-[1.15] font-extrabold tracking-[-0.05em]">
+        <h1 className="workspace-page-title">
           진행률 차트
         </h1>
       </header>

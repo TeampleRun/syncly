@@ -13,7 +13,6 @@ import {
   useDeleteCalendarEvent,
   useUpdateCalendarEvent,
 } from '@/entities/calendar-event';
-import { plusJakartaSans } from '@/shared/lib/fonts';
 import {
   createCalendarMonthStart,
   createCalendarMonthGrid,
@@ -155,7 +154,7 @@ export function CalendarView({ workspaceId, initialSelectedDate }: CalendarViewP
   };
 
   return (
-    <div className={`${plusJakartaSans.className} bg-brand-surface min-h-full`}>
+    <div className="bg-brand-surface min-h-full">
       <section className="w-full max-w-[1180px]">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
           <div className="w-full flex-1">
@@ -173,7 +172,7 @@ export function CalendarView({ workspaceId, initialSelectedDate }: CalendarViewP
                 >
                   <ChevronLeft className="size-5" />
                 </button>
-                <h1 className="text-[18px] font-bold tracking-[-0.04em] sm:text-[20px]">
+                <h1 className="text-lg leading-7 font-bold tracking-normal sm:text-xl">
                   {monthLabel}
                 </h1>
                 <button
@@ -265,7 +264,7 @@ export function CalendarView({ workspaceId, initialSelectedDate }: CalendarViewP
             <div className="rounded-[20px] border border-[rgba(91,78,232,0.1)] bg-white p-5 shadow-[0_10px_30px_rgba(91,78,232,0.06)]">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-brand-ink text-[18px] font-bold tracking-[-0.03em]">
+                  <h2 className="workspace-section-title">
                     {selectedDateLabel}
                   </h2>
                 </div>
@@ -358,7 +357,7 @@ export function CalendarView({ workspaceId, initialSelectedDate }: CalendarViewP
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-[#1a1b2e]/18 px-4">
           <div className="w-full max-w-[280px] rounded-[20px] bg-white p-4 shadow-[0_18px_40px_rgba(26,27,46,0.18)] sm:max-w-[420px] sm:p-5">
             <div className="flex items-start justify-between gap-4">
-              <h2 className="text-brand-ink text-[17px] font-bold tracking-[-0.03em] sm:text-[18px]">
+              <h2 className="workspace-section-title sm:text-lg">
                 {modalDateLabel}
               </h2>
               <button

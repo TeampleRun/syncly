@@ -2,8 +2,6 @@
 
 // 진행률 차트 페이지 뷰 — useQuery로 스프린트/업무를 조회하고 파생값을 계산해 렌더한다(GET 컨벤션 §5).
 // 로딩/에러/빈 상태를 여기서 분기하고, 하위 차트 컴포넌트는 순수 표현만 담당한다.
-import { Plus_Jakarta_Sans } from 'next/font/google';
-
 import {
   resolveSelectedSprint,
   selectVelocity,
@@ -16,11 +14,6 @@ import ProgressStatRow from './ProgressStatRow';
 import SprintProgressCard from './SprintProgressCard';
 import StatusDonutChart from './StatusDonutChart';
 import VelocityChart from './VelocityChart';
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-});
 
 function CenteredMessage({ children }: { children: React.ReactNode }) {
   return (
@@ -57,7 +50,7 @@ export function ProgressChartView({ workspaceId, selectedSprintId }: ProgressCha
   const statusCounts = countByStatus(tasksQuery.data);
 
   return (
-    <div className={`${jakarta.className} bg-brand-surface min-h-full`}>
+    <div className="bg-brand-surface min-h-full">
       <div className="flex flex-col gap-4">
         {/* 스프린트 선택기 — 상단/스탯/도넛은 선택 스프린트에 묶이고, 벨로시티는 전체 추이를 유지한다 */}
         <SprintSelector sprints={sprintsQuery.data} currentSprintId={sprint.id} />

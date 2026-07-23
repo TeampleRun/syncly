@@ -11,10 +11,10 @@ export default function EmptyWorkspaces() {
         height={88}
         className="pointer-events-none opacity-[0.56] select-none"
       />
-      <h2 className="text-brand-ink text-2xl leading-[1.4] font-bold tracking-[-0.6px]">
+      <h2 className="text-brand-ink text-2xl leading-8 font-bold tracking-normal">
         아직 워크스페이스가 없어요
       </h2>
-      <p className="text-brand-muted text-center text-lg leading-[1.4] tracking-[-0.45px]">
+      <p className="text-brand-muted text-center text-base leading-6 tracking-normal">
         팀과 함께 사용할 워크스페이스를 만들어
         <br />
         프로젝트를 효율적으로 관리해보세요.

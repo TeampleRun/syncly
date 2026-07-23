@@ -26,7 +26,7 @@ export function TaskCard({
       style={{ opacity: isDragging ? 0.55 : 1 }}
     >
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-brand-ink pr-2 text-[17px] leading-tight font-semibold tracking-[-0.02em]">
+        <h3 className="text-brand-ink pr-2 text-base leading-6 font-semibold tracking-normal">
           {task.title}
         </h3>
         <button

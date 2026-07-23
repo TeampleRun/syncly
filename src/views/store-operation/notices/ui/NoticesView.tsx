@@ -35,9 +35,9 @@ export function NoticesView({ workspaceId, initialData }: NoticesViewProps) {
   });
 
   return (
-    <section>
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-slate-950">공지</h1>
+    <section className="workspace-page">
+      <div className="workspace-page-header flex items-center justify-between gap-4">
+        <h1 className="workspace-page-title">공지</h1>
         <button
           type="button"
           onClick={openCreateComposer}

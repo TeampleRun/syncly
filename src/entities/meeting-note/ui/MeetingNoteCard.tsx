@@ -61,7 +61,7 @@ export function MeetingNoteCard({
       <article className="rounded-[24px] border border-[#ebeef7] bg-white px-[22px] py-[21px] shadow-[0_10px_30px_rgba(91,78,232,0.06)] transition hover:border-[rgba(91,78,232,0.16)]">
         <div className="flex items-start justify-between gap-6">
           <div className="min-w-0">
-            <h3 className="text-brand-ink truncate text-[18px] font-bold tracking-[-0.03em]">
+            <h3 className="text-brand-ink truncate text-base leading-6 font-bold tracking-normal">
               {meetingNote.title}
             </h3>
             <p className="text-brand-muted mt-[6px] text-[12px] font-medium">

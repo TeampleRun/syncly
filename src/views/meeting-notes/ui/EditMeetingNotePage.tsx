@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getMeetingNote } from '@/entities/meeting-note';
 import { MeetingNoteForm } from '@/features/manage-meeting-notes';
-import { plusJakartaSans } from '@/shared/lib/fonts';
 
 interface EditMeetingNotePageProps {
   workspaceId: string;
@@ -19,7 +18,7 @@ export default async function EditMeetingNotePage({
   }
 
   return (
-    <div className={`${plusJakartaSans.className} bg-brand-surface min-h-full`}>
+    <div className="bg-brand-surface min-h-full">
       <MeetingNoteForm workspaceId={workspaceId} meetingNote={meetingNote} />
     </div>
   );

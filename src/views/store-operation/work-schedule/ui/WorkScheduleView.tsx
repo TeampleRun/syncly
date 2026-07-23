@@ -30,10 +30,10 @@ export function WorkScheduleView({
   );
 
   return (
-    <section>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-950">업무 스케줄</h1>
-        <p className="mt-1 text-sm text-slate-500">셀을 클릭하면 근무 유형이 변경됩니다</p>
+    <section className="workspace-page">
+      <div className="workspace-page-header">
+        <h1 className="workspace-page-title">업무 스케줄</h1>
+        <p className="workspace-page-description">셀을 클릭하면 근무 유형이 변경됩니다</p>
       </div>
 
       <WorkScheduleBoard

@@ -40,7 +40,7 @@ export default function TemplateSelectCard({ purpose, onSelect }: TemplateSelect
           <span
             key={tag}
             style={{ backgroundColor: detail.tagBg, color: detail.tagText }}
-            className="rounded-full px-2 py-0.5 text-[13px] leading-4 font-semibold tracking-[-0.325px]"
+            className="rounded-full px-2 py-0.5 text-[13px] leading-4 font-semibold tracking-normal"
           >
             {tag}
           </span>
