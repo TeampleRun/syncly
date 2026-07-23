@@ -25,11 +25,10 @@ export {
 export { getMyWorkspaces } from './api/get-my-workspaces';
 export { useMyWorkspaces, myWorkspacesQueryKey } from './api/use-my-workspaces';
 export { createWorkspace } from './api/create-workspace';
-export {
-  updateWorkspaceInfo,
-  type UpdateWorkspaceInfoInput,
-} from './api/update-workspace-info';
+export { updateWorkspaceInfo, type UpdateWorkspaceInfoInput } from './api/update-workspace-info';
 export { joinWorkspaceByInviteCode } from './api/join-workspace-by-invite-code';
+export { transferOwnership, type TransferOwnershipInput } from './api/transfer-ownership';
+export { deleteWorkspace, type DeleteWorkspaceInput } from './api/delete-workspace';
 export { sendInviteEmail, type SendInviteEmailInput } from './api/send-invite-email';
 export {
   setWorkspaceInviteEnabled,

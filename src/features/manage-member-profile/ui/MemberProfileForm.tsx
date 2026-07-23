@@ -2,6 +2,7 @@
 
 // 프로필 탭 — 닉네임 수정 및 팀 탈퇴
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -18,17 +19,21 @@ import {
   workspaceMembersByWorkspaceQueryKey,
   leaveWorkspace,
 } from '@/entities/workspace-member';
+import { myWorkspacesQueryKey } from '@/entities/workspace';
 
 interface MemberProfileFormProps {
   workspaceId: string;
   initialNickname: string;
   isOwner: boolean;
+  // owner의 탈퇴 안내 문구 분기용 — 소유권 이전은 팀 관리 탭, 워크스페이스 삭제는 워크스페이스 관리 탭에 있다.
+  hasOtherMembers: boolean;
 }
 
 export function MemberProfileForm({
   workspaceId,
   initialNickname,
   isOwner,
+  hasOtherMembers,
 }: MemberProfileFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -76,6 +81,8 @@ export function MemberProfileForm({
     setIsLeaving(true);
     try {
       await leaveWorkspace({ workspaceId });
+      // 목록은 client-side react-query 캐시라 별도로 무효화해야 즉시 사라진다.
+      await queryClient.invalidateQueries({ queryKey: myWorkspacesQueryKey });
       router.push('/workspaces');
       // 성공 시 페이지 이동으로 언마운트되므로 isLeaving을 리셋하지 않는다(버튼 깜빡임 방지)
     } catch (error) {
@@ -126,52 +133,100 @@ export function MemberProfileForm({
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-base font-bold text-slate-950">팀 탈퇴</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          {isOwner
-            ? '워크스페이스 소유자는 팀을 탈퇴할 수 없어요. 소유권을 이전한 후 탈퇴해주세요.'
-            : '탈퇴하면 이 워크스페이스에서 나가게 되며, 데이터를 복구할 수 없어요.'}
-        </p>
 
-        <button
-          type="button"
-          disabled={isOwner}
-          onClick={() => setShowLeaveConfirm(true)}
-          className="mt-4 h-10 rounded-2xl border border-slate-200 px-5 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          탈퇴하기
-        </button>
+        {!isOwner && (
+          <>
+            <p className="mt-1 text-sm text-slate-500">
+              탈퇴하면 이 워크스페이스에서 나가게 되며, 데이터를 복구할 수 없어요.
+            </p>
 
-        <Dialog
-          open={showLeaveConfirm}
-          onOpenChange={(open) => !isLeaving && setShowLeaveConfirm(open)}
-        >
-          <DialogContent className="p-6 sm:max-w-[380px]">
-            <DialogTitle className="font-bold">정말 탈퇴하시겠어요?</DialogTitle>
-            <DialogDescription>
-              탈퇴하면 이 워크스페이스에서 나가게 되며,
-              <br />
-              데이터를 복구할 수 없어요.
-            </DialogDescription>
-            <DialogFooter className="mx-0 mb-0 border-t-0 bg-transparent p-0 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowLeaveConfirm(false)}
-                disabled={isLeaving}
-                className="h-10 rounded-2xl border border-slate-200 px-5 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={handleLeave}
-                disabled={isLeaving}
-                className="flex h-10 items-center justify-center rounded-2xl bg-red-500 px-5 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-50"
-              >
-                {isLeaving ? <Loader2 size={18} className="animate-spin" /> : '탈퇴하기'}
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+            <button
+              type="button"
+              onClick={() => setShowLeaveConfirm(true)}
+              className="mt-4 h-10 rounded-2xl border border-slate-200 px-5 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-red-500"
+            >
+              탈퇴하기
+            </button>
+
+            <Dialog
+              open={showLeaveConfirm}
+              onOpenChange={(open) => !isLeaving && setShowLeaveConfirm(open)}
+            >
+              <DialogContent className="p-6 sm:max-w-[380px]">
+                <DialogTitle className="font-bold">정말 탈퇴하시겠어요?</DialogTitle>
+                <DialogDescription>
+                  탈퇴하면 이 워크스페이스에서 나가게 되며,
+                  <br />
+                  데이터를 복구할 수 없어요.
+                </DialogDescription>
+                <DialogFooter className="mx-0 mb-0 border-t-0 bg-transparent p-0 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowLeaveConfirm(false)}
+                    disabled={isLeaving}
+                    className="h-10 rounded-2xl border border-slate-200 px-5 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    취소
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleLeave}
+                    disabled={isLeaving}
+                    aria-busy={isLeaving}
+                    className="flex h-10 items-center justify-center rounded-2xl bg-red-500 px-5 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-50"
+                  >
+                    {isLeaving ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                        <span className="sr-only">탈퇴 중</span>
+                      </>
+                    ) : (
+                      '탈퇴하기'
+                    )}
+                  </button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </>
+        )}
+
+        {isOwner && (
+          <>
+            <p className="mt-1 text-sm text-slate-500">
+              {hasOtherMembers ? (
+                <>
+                  워크스페이스 소유자는 팀을 탈퇴할 수 없어요.{' '}
+                  <Link
+                    href="?tab=members"
+                    className="font-bold text-[var(--color-brand)] hover:underline"
+                  >
+                    팀 관리 탭
+                  </Link>
+                  에서 소유권을 이전해주세요.
+                </>
+              ) : (
+                <>
+                  소유자는 팀을 탈퇴할 수 없어요. 더 이상 워크스페이스를 사용하지 않는다면{' '}
+                  <Link
+                    href="?tab=workspace"
+                    className="font-bold text-[var(--color-brand)] hover:underline"
+                  >
+                    워크스페이스 관리 탭
+                  </Link>
+                  에서 삭제할 수 있어요.
+                </>
+              )}
+            </p>
+
+            <button
+              type="button"
+              disabled
+              className="mt-4 h-10 rounded-2xl border border-slate-200 px-5 text-sm font-bold text-slate-600 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              탈퇴하기
+            </button>
+          </>
+        )}
       </section>
     </div>
   );

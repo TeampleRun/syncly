@@ -7,9 +7,9 @@ export interface SettingsTab {
 }
 
 export const SETTINGS_TABS: SettingsTab[] = [
-  { key: 'workspace', label: '워크스페이스 정보' },
-  { key: 'members', label: '팀원 관리' },
-  { key: 'profile', label: '프로필' },
+  { key: 'workspace', label: '워크스페이스 관리' },
+  { key: 'members', label: '팀 관리' },
+  { key: 'profile', label: '프로필 설정' },
 ];
 
 export const DEFAULT_SETTINGS_TAB: SettingsTabKey = 'workspace';
