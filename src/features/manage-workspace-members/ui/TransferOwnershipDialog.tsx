@@ -27,14 +27,20 @@ export function TransferOwnershipDialog({
   open,
   onOpenChange,
 }: TransferOwnershipDialogProps) {
-  const [selectedUserId, setSelectedUserId] = useState(otherMembers[0]?.userId ?? '');
+  const [selectedUserId, setSelectedUserId] = useState('');
   const [isTransferring, setIsTransferring] = useState(false);
 
+  // otherMembers는 비동기로 갱신되거나 다이얼로그를 다시 열 때 바뀔 수 있어, 선택값이 더 이상
+  // 목록에 없으면 렌더 시점에 첫 멤버로 대체한다(state에 직접 반영하진 않아 effect가 필요 없다).
+  const effectiveSelectedUserId = otherMembers.some((member) => member.userId === selectedUserId)
+    ? selectedUserId
+    : (otherMembers[0]?.userId ?? '');
+
   const handleTransfer = async () => {
-    if (!selectedUserId) return;
+    if (!effectiveSelectedUserId) return;
     setIsTransferring(true);
     try {
-      await transferOwnership({ workspaceId, newOwnerUserId: selectedUserId });
+      await transferOwnership({ workspaceId, newOwnerUserId: effectiveSelectedUserId });
       // router.refresh()는 사이드바 role 표시까지 확실히 갱신하지 못해 하드 리로드로 대체한다.
       window.location.reload();
     } catch (error) {
@@ -65,7 +71,7 @@ export function TransferOwnershipDialog({
                 type="radio"
                 name="new-owner"
                 value={member.userId}
-                checked={selectedUserId === member.userId}
+                checked={effectiveSelectedUserId === member.userId}
                 onChange={() => setSelectedUserId(member.userId)}
                 className="h-4 w-4"
               />
@@ -86,10 +92,18 @@ export function TransferOwnershipDialog({
           <button
             type="button"
             onClick={handleTransfer}
-            disabled={isTransferring || !selectedUserId}
+            disabled={isTransferring || !effectiveSelectedUserId}
+            aria-busy={isTransferring}
             className="flex h-10 items-center justify-center rounded-2xl bg-[var(--color-brand)] px-5 text-sm font-bold text-white hover:bg-indigo-500 disabled:opacity-50"
           >
-            {isTransferring ? <Loader2 size={18} className="animate-spin" /> : '이전하기'}
+            {isTransferring ? (
+              <>
+                <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                <span className="sr-only">이전 중</span>
+              </>
+            ) : (
+              '이전하기'
+            )}
           </button>
         </DialogFooter>
       </DialogContent>

@@ -172,9 +172,17 @@ export function MemberProfileForm({
                     type="button"
                     onClick={handleLeave}
                     disabled={isLeaving}
+                    aria-busy={isLeaving}
                     className="flex h-10 items-center justify-center rounded-2xl bg-red-500 px-5 text-sm font-bold text-white hover:bg-red-600 disabled:opacity-50"
                   >
-                    {isLeaving ? <Loader2 size={18} className="animate-spin" /> : '탈퇴하기'}
+                    {isLeaving ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                        <span className="sr-only">탈퇴 중</span>
+                      </>
+                    ) : (
+                      '탈퇴하기'
+                    )}
                   </button>
                 </DialogFooter>
               </DialogContent>

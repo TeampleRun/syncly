@@ -695,6 +695,38 @@ export type Database = {
           },
         ]
       }
+      workspace_deletion_jobs: {
+        Row: {
+          created_at: string
+          deletion_token: string
+          initiated_by: string
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          deletion_token?: string
+          initiated_by: string
+          status?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          deletion_token?: string
+          initiated_by?: string
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_deletion_jobs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_members: {
         Row: {
           created_at: string
@@ -843,6 +875,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      begin_workspace_deletion: {
+        Args: { p_workspace_id: string }
+        Returns: string
+      }
       create_task: {
         Args: { p_due_date?: string; p_title: string; p_workspace_id: string }
         Returns: string
@@ -868,6 +904,10 @@ export type Database = {
           p_purpose: Database["public"]["Enums"]["workspace_purpose"]
         }
         Returns: string
+      }
+      finalize_workspace_deletion: {
+        Args: { p_deletion_token: string; p_workspace_id: string }
+        Returns: undefined
       }
       get_invite_preview: {
         Args: { p_code: string }
@@ -906,6 +946,10 @@ export type Database = {
       join_workspace_by_invite_code: {
         Args: { p_code: string }
         Returns: string
+      }
+      mark_workspace_deletion_in_progress: {
+        Args: { p_deletion_token: string; p_workspace_id: string }
+        Returns: undefined
       }
       replace_and_delete_work_shift_type: {
         Args: {

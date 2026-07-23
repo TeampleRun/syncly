@@ -1,14 +1,19 @@
 'use server';
 
-// 워크스페이스 삭제 서버액션 — owner면 멤버 수와 무관하게 실행 가능 (RLS: workspaces_delete_owner)
-// Storage 파일은 FK 캐스케이드 대상이 아니라 workspaces row 삭제 전에 먼저 지워야 한다(이후엔 RLS가 막음).
+// 워크스페이스 삭제 서버액션 — owner면 멤버 수와 무관하게 실행 가능
+// begin_workspace_deletion(선점) → mark_workspace_deletion_in_progress(reserved→deleting 전환, 이 시점부터
+// 자동 만료 없음 + 신규 업로드 확실히 차단) → Storage 목록 조회·배치 삭제(목록이 빌 때까지 반복) →
+// finalize_workspace_deletion(실제 DB 삭제) 순서로 진행한다. deleting 전환 이후에만 목록을 조회하므로 그
+// 사이에 새 파일이 올라와 누락되는 일이 없다. workspace row와 owner 멤버십은 finalize 전까지 그대로
+// 남아있어 일반 유저 세션으로도 Storage RLS를 그대로 통과하므로 admin 클라이언트가 필요 없다.
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { getCurrentUserId } from '@/shared/api/supabase/current-user';
 import { createSupabaseServerClient } from '@/shared/api/supabase/server';
 
 const WORKSPACE_RESOURCES_BUCKET = 'workspace-resources';
 const STORAGE_LIST_PAGE_SIZE = 1000;
+
+const DELETE_FAILED_MESSAGE = '워크스페이스 삭제에 실패했어요. 잠시 후 다시 시도해주세요.';
 
 const deleteWorkspaceInputSchema = z.object({
   workspaceId: z.guid(),
@@ -16,9 +21,11 @@ const deleteWorkspaceInputSchema = z.object({
 
 export type DeleteWorkspaceInput = z.infer<typeof deleteWorkspaceInputSchema>;
 
+type ServerSupabaseClient = Awaited<ReturnType<typeof createSupabaseServerClient>>;
+
 // .list()는 한 번에 최대 1000개만 반환하므로, offset을 늘려가며 전체 파일 목록을 모은다.
 async function listAllStorageFileNames(
-  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  supabase: ServerSupabaseClient,
   workspaceId: string,
 ): Promise<string[]> {
   const names: string[] = [];
@@ -51,6 +58,39 @@ async function listAllStorageFileNames(
   return names;
 }
 
+async function removeStorageFiles(
+  supabase: ServerSupabaseClient,
+  workspaceId: string,
+  fileNames: string[],
+): Promise<void> {
+  const paths = fileNames.map((name) => `${workspaceId}/${name}`);
+
+  // remove()도 한 번에 최대 1000개까지만 처리되므로, list()와 동일한 크기로 나눠서 삭제한다.
+  for (let index = 0; index < paths.length; index += STORAGE_LIST_PAGE_SIZE) {
+    const batch = paths.slice(index, index + STORAGE_LIST_PAGE_SIZE);
+    const { error } = await supabase.storage.from(WORKSPACE_RESOURCES_BUCKET).remove(batch);
+
+    if (error) {
+      throw error;
+    }
+  }
+}
+
+// deleting 전환 이후 신규 업로드는 막혀있지만, 혹시 남는 파일이 있을 수 있으니 목록이 빌 때까지
+// 조회·삭제를 반복해 고아 파일 가능성을 줄인다.
+async function cleanupWorkspaceStorage(
+  supabase: ServerSupabaseClient,
+  workspaceId: string,
+): Promise<void> {
+  while (true) {
+    const fileNames = await listAllStorageFileNames(supabase, workspaceId);
+    if (fileNames.length === 0) {
+      break;
+    }
+    await removeStorageFiles(supabase, workspaceId, fileNames);
+  }
+}
+
 export async function deleteWorkspace(input: DeleteWorkspaceInput): Promise<void> {
   const parsed = deleteWorkspaceInputSchema.safeParse(input);
   if (!parsed.success) {
@@ -58,60 +98,44 @@ export async function deleteWorkspace(input: DeleteWorkspaceInput): Promise<void
   }
 
   const { workspaceId } = parsed.data;
-  const userId = await getCurrentUserId();
   const supabase = await createSupabaseServerClient();
 
-  // Storage RLS는 "본인이 올린 파일"까지 허용해 일반 멤버가 직접 호출해도 자기 파일이 지워질 수 있어,
-  // 삭제 시도 전에 소유자인지부터 확인한다.
-  const { data: workspace, error: fetchError } = await supabase
-    .from('workspaces')
-    .select('owner_id')
-    .eq('id', workspaceId)
-    .maybeSingle();
+  const { data: token, error: beginError } = await supabase.rpc('begin_workspace_deletion', {
+    p_workspace_id: workspaceId,
+  });
 
-  if (fetchError || !workspace) {
-    throw new Error('워크스페이스를 찾을 수 없어요.');
+  if (beginError || !token) {
+    console.error('[deleteWorkspace] 삭제 선점 실패:', beginError);
+    throw new Error(beginError?.message || '워크스페이스를 삭제할 권한이 없거나 이미 삭제됐어요.');
   }
 
-  if (workspace.owner_id !== userId) {
-    throw new Error('워크스페이스 소유자만 삭제할 수 있어요.');
+  const { error: markError } = await supabase.rpc('mark_workspace_deletion_in_progress', {
+    p_workspace_id: workspaceId,
+    p_deletion_token: token,
+  });
+
+  if (markError) {
+    console.error('[deleteWorkspace] 삭제 진행 전환 실패:', markError);
+    throw new Error(markError.message || DELETE_FAILED_MESSAGE);
   }
 
-  let fileNames: string[];
+  // 여기서부터는 deleting 상태라 자동 만료되지 않는다 — 실패해도 같은 owner가 재시도하면
+  // begin_workspace_deletion이 같은 token을 돌려주고, 이미 지워진 파일은 목록에서 빠지므로 멱등적으로 이어진다.
   try {
-    fileNames = await listAllStorageFileNames(supabase, workspaceId);
-  } catch (listError) {
-    console.error('[deleteWorkspace] Storage 목록 조회 실패:', listError);
-    throw new Error('워크스페이스 삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
+    await cleanupWorkspaceStorage(supabase, workspaceId);
+  } catch (storageError) {
+    console.error('[deleteWorkspace] Storage 정리 실패:', storageError);
+    throw new Error(DELETE_FAILED_MESSAGE);
   }
 
-  // remove()도 한 번에 최대 1000개까지만 처리되므로, list()와 동일한 크기로 나눠서 삭제한다.
-  const paths = fileNames.map((name) => `${workspaceId}/${name}`);
-  for (let index = 0; index < paths.length; index += STORAGE_LIST_PAGE_SIZE) {
-    const batch = paths.slice(index, index + STORAGE_LIST_PAGE_SIZE);
-    const { error: removeError } = await supabase.storage
-      .from(WORKSPACE_RESOURCES_BUCKET)
-      .remove(batch);
+  const { error: finalizeError } = await supabase.rpc('finalize_workspace_deletion', {
+    p_workspace_id: workspaceId,
+    p_deletion_token: token,
+  });
 
-    if (removeError) {
-      console.error('[deleteWorkspace] Storage 파일 삭제 실패:', removeError);
-      throw new Error('워크스페이스 삭제에 실패했어요. 잠시 후 다시 시도해주세요.');
-    }
-  }
-
-  // RLS가 막으면 error 없이 0건 삭제로 조용히 끝날 수 있어(예: 삭제 도중 다른 곳에서 소유권이
-  // 넘어간 경우), select로 실제 삭제된 row가 있는지까지 확인한다.
-  const { data: deleted, error } = await supabase
-    .from('workspaces')
-    .delete()
-    .eq('id', workspaceId)
-    .eq('owner_id', userId)
-    .select('id')
-    .maybeSingle();
-
-  if (error || !deleted) {
-    console.error('[deleteWorkspace] delete 실패:', error);
-    throw new Error('워크스페이스를 삭제할 권한이 없거나 이미 삭제됐어요.');
+  if (finalizeError) {
+    console.error('[deleteWorkspace] 삭제 완료 실패:', finalizeError);
+    throw new Error(finalizeError.message || DELETE_FAILED_MESSAGE);
   }
 
   revalidatePath('/workspaces');
